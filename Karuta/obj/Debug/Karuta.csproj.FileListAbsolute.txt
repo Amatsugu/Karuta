@@ -1,0 +1,6 @@
+C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe.config
+C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache
+C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe
+C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.pdb
+C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
+C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb

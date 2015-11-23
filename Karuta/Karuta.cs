@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Speech.Synthesis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace com.LuminousVector.Karuta
 {
@@ -11,6 +13,7 @@ namespace com.LuminousVector.Karuta
 		private static bool _isRunning = false;
 		private static string _input;
 		private static string _user;
+		private static SpeechSynthesizer _voice;
 		private static Dictionary<string,Command> commands = new Dictionary<string,Command>();
 		static Karuta()
 		{
@@ -18,13 +21,19 @@ namespace com.LuminousVector.Karuta
 			Console.BackgroundColor = ConsoleColor.DarkMagenta;
 			Console.ForegroundColor = ConsoleColor.White;
 			Console.Clear();
-			SayQuietly("Hello");
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
+			SayQuietly("Preparing Karuta...");
+			_voice = new SpeechSynthesizer();
+			_voice.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Teen);
 			_user = "user";
 			RegisterCommand(new Command("stop", Close));
 			RegisterCommand(new Command("clear", Console.Clear));
 			RegisterCommand(new UserCommand());
 			RegisterCommand(new MakeCommand());
-			SayQuietly("Karuta is ready.");
+			sw.Stop();
+			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
+			SayQuietly("Karuta is ready. Finished in " + elapsedT + "ms");
 		}
 
 		public static void RegisterCommand(Command command)
@@ -58,12 +67,15 @@ namespace com.LuminousVector.Karuta
 
 		public static void Close()
 		{
+			_voice.Dispose();
 			Console.WriteLine("GoodBye");
 			_isRunning = false;
 		}
 
 		public static void Say(string message)
 		{
+			_voice.SpeakAsyncCancelAll();
+			_voice.SpeakAsync(message);
 			Console.WriteLine("Karuta: " + message);
 		}
 

@@ -39,9 +39,9 @@ namespace com.LuminousVector.Karuta
 		}
 	}
 
-	public class UserSetCommand : Command
+	public class UserCommand : Command
 	{
-		public UserSetCommand() : base("user-set", "user-set [username]") { }
+		public UserCommand() : base("user", "user -s [username]") { }
 
 		public override void Run(string[] args)
 		{
@@ -55,5 +55,10 @@ namespace com.LuminousVector.Karuta
 				Karuta.SetUser(args[1]);
 			}
 		}
+	}
+	
+	public class MakeCommand : Command
+	{
+		public MakeCommand() : base("make", "Use help make for usage instructions") { }
 	}
 }

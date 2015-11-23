@@ -8,7 +8,6 @@ namespace com.LuminousVector.Karuta
 		//[STAThread]
 		static void Main()
 		{
-			
 			Karuta.Run();
 		}
 	}

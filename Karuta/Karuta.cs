@@ -18,12 +18,13 @@ namespace com.LuminousVector.Karuta
 			Console.BackgroundColor = ConsoleColor.DarkMagenta;
 			Console.ForegroundColor = ConsoleColor.White;
 			Console.Clear();
-			Say("Hello");
+			SayQuietly("Hello");
 			_user = "user";
 			RegisterCommand(new Command("stop", Close));
 			RegisterCommand(new Command("clear", Console.Clear));
-			RegisterCommand(new UserSetCommand());
-			Say("Karuta is ready.");
+			RegisterCommand(new UserCommand());
+			RegisterCommand(new MakeCommand());
+			SayQuietly("Karuta is ready.");
 		}
 
 		public static void RegisterCommand(Command command)
@@ -33,7 +34,7 @@ namespace com.LuminousVector.Karuta
 
 		public static void Run()
 		{
-			Console.WriteLine("Karuta is running...");
+			SayQuietly("Karuta is running...");
 			_isRunning = true;
 			while (_isRunning)
 			{
@@ -64,6 +65,11 @@ namespace com.LuminousVector.Karuta
 		public static void Say(string message)
 		{
 			Console.WriteLine("Karuta: " + message);
+		}
+
+		public static void SayQuietly(string message)
+		{
+			Console.WriteLine(message);
 		}
 
 		public static void InvokeCommand(string command, string[] args)

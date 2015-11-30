@@ -43,6 +43,7 @@ namespace com.LuminousVector.Karuta
 			RegisterCommand(new Command("clear", "Clear the screen.", Console.Clear));
 			RegisterCommand(new UserCommand());
 			RegisterCommand(new HelpCommand());
+			RegisterCommand(new DrawCommand());
 			sw.Stop();
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
 			SayQuietly("Karuta is ready. Finished in " + elapsedT + "ms");

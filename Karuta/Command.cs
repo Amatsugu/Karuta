@@ -73,7 +73,7 @@ namespace com.LuminousVector.Karuta
 		{
 			for(int i = 0; i < args.Length; i++)
 			{
-				if (args[i] == "-" + option)
+				if (args[i].Contains('-') && args[i].Contains(option))
 				{
 					if (args.Length - 1 >= i + 1)
 						return i + 1;
@@ -88,7 +88,7 @@ namespace com.LuminousVector.Karuta
 	//User control command
 	public class UserCommand : Command
 	{
-		public UserCommand() : base("user", "Modify the current user.", "user -s [username]") { }
+		public UserCommand() : base("user", "Modify the current user.", "user -s [username:string]") { }
 
 		public override void Run(string[] args)
 		{
@@ -169,4 +169,71 @@ namespace com.LuminousVector.Karuta
 			}
 		}
 	}
+
+	public class DrawCommand : Command
+	{
+		public DrawCommand() : base("draw", "draws ASCII shapes onto the screen", "draw -s [size:int] <shape>") { }
+
+		public override void Run(string[] args)
+		{
+			if(args.Length > 1)
+			{
+				string opt = GetOptions(args);
+				if(opt.Length == 1)
+				{
+					int index = GetIndexOfOption(args, 's');
+					if (index != -1)
+					{
+						int size;
+						if(int.TryParse(args[index], out size))
+						{
+							if(index == args.Length -1)
+							{
+								DrawShape(args[1]);
+							}else if(index == 2)
+							{
+								DrawShape(args[index + 1]);
+							}else
+							{
+								Karuta.SayQuietly("You must specify a shape to draw.");
+								Karuta.SayQuietly("/tAbailable shapes are: square, triangle, circle");
+								Karuta.SayQuietly(usageMessage);
+							}
+						}else
+						{
+							Karuta.SayQuietly("Unable to parse size: '" + args[index] + "'");
+							Karuta.SayQuietly(usageMessage);
+						}
+					}
+					else
+					{
+						Karuta.SayQuietly("Invalid options(s): '" + (opt.Contains('s') ? opt.Remove(opt.IndexOf('s'), 1) : opt) + "'");
+						Karuta.SayQuietly(usageMessage);
+					}
+				}
+				else
+				{
+					if (opt.Length != 0)
+					{
+						Karuta.SayQuietly("Invalid option(s): '" + opt.Remove(opt.IndexOf('s'), 1) + "'");
+						Karuta.SayQuietly(usageMessage);
+					}else
+					{
+						Karuta.SayQuietly("A size must be specified");
+						Karuta.SayQuietly(usageMessage);
+					}
+				}
+			}else
+			{
+				Karuta.SayQuietly("You must specify the shape to draw and the size");
+				Karuta.SayQuietly(usageMessage);
+			}
+		}
+
+		private void DrawShape(string shape)
+		{
+
+		}
+	}
+
 }

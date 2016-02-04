@@ -4,3 +4,12 @@ C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe
 C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.pdb
 C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
 C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe.config
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\protobuf-net.dll
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\protobuf-net.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\protobuf-net.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache

@@ -4,6 +4,7 @@ using System.Net;
 using System.Xml;
 //using System.Text;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -278,14 +279,42 @@ namespace com.LuminousVector.Karuta
 	public class PlexCommand : Command
 	{
 		public PlexCommand() : base("plex", "Acess music via the plex media server", "plex <action>") { }
+		public string serverURL = "http://karuta.luminousvector.com:32400";
+
+		private string _authToken;
 
 		public override void Run(string[] args)
 		{
-			string serverURL = "http://karuta.luminousvector.com:32400";
 			WebRequest request;
+			if (args.Length == 3)
+			{
+				string req = GetValueOfOption(args, 'r');
+				if (req == null)
+				{
+					Karuta.SayQuietly("A request parameter must be provided");
+					return;
+				}
+				try
+				{
+					request = WebRequest.Create(serverURL + req);
+					Stream response = request.GetResponse().GetResponseStream();
+					StreamReader resposeReader = new StreamReader(response);
+					Karuta.SayQuietly(resposeReader.ReadToEnd());
+				} catch (Exception e)
+				{
+					Karuta.SayQuietly(e.Message);
+				}
+				return;
+			}
 			try
 			{
-				request = WebRequest.Create(serverURL + "/library/metadata/2526");
+				request = WebRequest.Create(serverURL + "/status/sessions");
+				WebHeaderCollection header = new WebHeaderCollection();
+				if (_authToken == null)
+					_authToken = GetAuthToken();
+				Karuta.SayQuietly(_authToken);
+				header.Add("X-Plex-Token", _authToken);
+				request.Headers = header;
 				Stream response = request.GetResponse().GetResponseStream();
 				StreamReader resposeReader = new StreamReader(response);
 				Karuta.SayQuietly(resposeReader.ReadToEnd());
@@ -304,6 +333,51 @@ namespace com.LuminousVector.Karuta
 			{
 				Karuta.SayQuietly(e.Message);
 			}
+		}
+
+		private CookieCollection _cookies;
+		
+		private void GetCookies()
+		{
+			_cookies = new CookieCollection();
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://plex.tv");
+			request.CookieContainer = new CookieContainer();
+			request.CookieContainer.Add(_cookies);
+			//Get the response from the server and save the cookies from the first request..
+			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+			_cookies = response.Cookies;
+		}
+
+
+		private string GetAuthToken()
+		{
+			if (_cookies == null)
+				GetCookies();
+			string pass = Karuta.GetInput("Please enter your Plex password", true);
+			string postData = String.Format("user[login]={0}&user[password]={1}", Karuta.user, pass);
+			HttpWebRequest getRequest = (HttpWebRequest)WebRequest.Create("https://my.plexapp.com/users/sign_in.xml");
+			getRequest.CookieContainer = new CookieContainer();
+			getRequest.CookieContainer.Add(_cookies); //recover cookies First request
+			getRequest.Method = WebRequestMethods.Http.Post;
+			getRequest.UserAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
+			getRequest.AllowWriteStreamBuffering = true;
+			getRequest.ProtocolVersion = HttpVersion.Version11;
+			getRequest.AllowAutoRedirect = true;
+			getRequest.ContentType = "application/x-www-form-urlencoded";
+
+			byte[] byteArray = Encoding.ASCII.GetBytes(postData);
+			getRequest.ContentLength = byteArray.Length;
+			Stream newStream = getRequest.GetRequestStream(); //open connection
+			newStream.Write(byteArray, 0, byteArray.Length); // Send the data.
+			newStream.Close();
+			HttpWebResponse response = (HttpWebResponse)getRequest.GetResponse();
+			//Retrieve your cookie that id's your session
+			//response.Cookies
+			StreamReader reader = new StreamReader(response.GetResponseStream());
+			string output = reader.ReadToEnd();
+			reader.Close();
+			reader.Dispose();
+			return output;
 		}
 	}
 

@@ -113,6 +113,37 @@ namespace com.LuminousVector.Karuta
 			Console.WriteLine(message);
 		}
 
+		//Get an text input from Karuta's console
+		public static string GetInput(string message, bool hide)
+		{
+			Console.Write(message + ": ");
+			if(hide == false)
+				return Console.ReadLine();
+			string input = "";
+			ConsoleKeyInfo key;
+			do
+			{
+				key = Console.ReadKey(true);
+
+				if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
+				{
+					input += key.KeyChar;
+					Console.Write("*");
+				}
+				else
+				{
+					if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+					{
+						input = input.Substring(0, (input.Length - 1));
+						Console.Write("\b \b");
+					}
+				}
+			}
+			while (key.Key != ConsoleKey.Enter);
+			Console.WriteLine();
+			return input;
+		}
+
 		//Invoke a command
 		public static void InvokeCommand(string command, string[] args)
 		{

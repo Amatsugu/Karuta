@@ -61,6 +61,8 @@ namespace com.LuminousVector.DataStore
 
 		public void SetValue(string id, string value)
 		{
+			if (stringStore == null)
+				stringStore = new Dictionary<string, string>();
 			if (stringStore.ContainsKey(id))
 				stringStore[id] = value;
 			else
@@ -69,6 +71,8 @@ namespace com.LuminousVector.DataStore
 
 		public void SetValue(string id, int value)
 		{
+			if (intStore == null)
+				intStore = new Dictionary<string, int>();
 			if (intStore.ContainsKey(id))
 				intStore[id] = value;
 			else
@@ -77,6 +81,8 @@ namespace com.LuminousVector.DataStore
 
 		public void SetValue(string id, bool value)
 		{
+			if (boolStore == null)
+				boolStore = new Dictionary<string, bool>();
 			if (boolStore.ContainsKey(id))
 				boolStore[id] = value;
 			else
@@ -85,6 +91,8 @@ namespace com.LuminousVector.DataStore
 
 		public void SetValue(string id, float value)
 		{
+			if (floatStore == null)
+				floatStore = new Dictionary<string, float>();
 			if (floatStore.ContainsKey(id))
 				floatStore[id] = value;
 			else

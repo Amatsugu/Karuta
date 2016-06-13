@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Collections.Generic;
 using System.Speech.Synthesis;
 using System.Diagnostics;
@@ -14,6 +15,7 @@ namespace com.LuminousVector.Karuta
 		public static EventManager eventManager;
 		public static Dictionary<string, Command> commands { get { return _commands; } }
 		public static Registry registry;
+		public static Logger logger;
 		public static string user
 		{
 			set
@@ -28,9 +30,15 @@ namespace com.LuminousVector.Karuta
 		private static bool _isRunning = false;
 		private static string _input;
 		private static SpeechSynthesizer _voice;
-		private static Dictionary<string,Command> _commands = new Dictionary<string,Command>();
+		private static Dictionary<string,Command> _commands;
+		private static List<Thread> _threads;
 		static Karuta()
 		{
+			//Init Vars
+			_commands = new Dictionary<string, Command>();
+			_threads = new List<Thread>();
+			logger = new Logger();
+			//_threads.Add(Thread.CurrentThread);
 			//Prepare Console
 			Console.Title = "Karuta";
 			Console.BackgroundColor = ConsoleColor.DarkMagenta;
@@ -38,14 +46,14 @@ namespace com.LuminousVector.Karuta
 			Console.Clear();
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
-			SayQuietly("Preparing Karuta...");
+			Write("Preparing Karuta...");
 			//Init Event Manager
 			eventManager = new EventManager();
 			eventManager.Init();
 			//Init Registry
-			if(File.Exists("karuta.data"))
+			if(File.Exists(@"C:/Karuta/karuta.data"))
 			{
-				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes("karuta.data"));
+				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes(@"C:/Karuta/karuta.data"));
 			}else
 			{
 				registry = new Registry();
@@ -62,9 +70,12 @@ namespace com.LuminousVector.Karuta
 			RegisterCommand(new HelpCommand());
 			RegisterCommand(new DrawCommand());
 			RegisterCommand(new PlexCommand());
+			RegisterCommand(new LightingCommand());
+			RegisterCommand(new RedditCrawler());
+			RegisterCommand(new Logs());
 			sw.Stop();
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
-			SayQuietly("Karuta is ready. Finished in " + elapsedT + "ms");
+			Write("Karuta is ready. Finished in " + elapsedT + "ms");
 		}
 
 		public static void RegisterCommand(Command command)
@@ -74,7 +85,7 @@ namespace com.LuminousVector.Karuta
 
 		public static void Run()
 		{
-			SayQuietly("Karuta is running...");
+			Write("Karuta is running...");
 			_isRunning = true;
 			while (_isRunning)
 			{
@@ -93,10 +104,15 @@ namespace com.LuminousVector.Karuta
 		//Stop the program and dispose dispoables
 		public static void Close()
 		{
-			File.WriteAllBytes("karuta.data", DataSerializer.serializeData<Registry>(registry));
-			_voice.Dispose();
-			Console.WriteLine("GoodBye");
 			_isRunning = false;
+			foreach(Command c in commands.Values)
+			{
+				c.Close();
+			}
+			_voice.Dispose();
+			logger.Dump();
+			File.WriteAllBytes(@"C:/Karuta/karuta.data", DataSerializer.serializeData(registry));
+			Console.WriteLine("GoodBye");
 		}
 
 		//Say message with voice and name label
@@ -108,7 +124,7 @@ namespace com.LuminousVector.Karuta
 		}
 
 		//Say a message without name label or voice
-		public static void SayQuietly(string message)
+		public static void Write(string message)
 		{
 			Console.WriteLine(message);
 		}
@@ -142,6 +158,23 @@ namespace com.LuminousVector.Karuta
 			while (key.Key != ConsoleKey.Enter);
 			Console.WriteLine();
 			return input;
+		}
+
+		//Create a ChildThread
+		public static Thread CreateThread(string name, ThreadStart thread)
+		{
+			Thread newThread = new Thread(thread);
+			newThread.Name = "Karuta." + name;
+			_threads.Add(newThread);
+			newThread.Start();
+			return newThread;
+		}
+
+		//Close Thread
+		public static void RemoveThread(Thread thread)
+		{
+			if (_threads.Contains(thread))
+				_threads.Remove(thread);
 		}
 
 		//Invoke a command

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace com.LuminousVector.Karuta
@@ -8,7 +9,13 @@ namespace com.LuminousVector.Karuta
 		//[STAThread]
 		static void Main()
 		{
+			Thread.CurrentThread.Name = "Karuta.Main";
 			Karuta.Run();
+		}
+
+		static void OnProcessExit()
+		{
+			Karuta.Close();
 		}
 	}
 }

@@ -2,7 +2,8 @@ using System;
 using System.IO;
 using System.Net;
 using System.Xml;
-//using System.Text;
+using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -59,6 +60,11 @@ namespace com.LuminousVector.Karuta
 		public virtual void Run(string[] args)
 		{
 			_action.Invoke();
+		}
+
+		public virtual void Close()
+		{
+
 		}
 
 		public string GetOptions(string[] args)
@@ -174,15 +180,15 @@ namespace com.LuminousVector.Karuta
 			}
 			if(args.Length < 3)
 			{
-				Karuta.SayQuietly("Not enough parameters");
-				Karuta.SayQuietly(usageMessage);
+				Karuta.Write("Not enough parameters");
+				Karuta.Write(usageMessage);
 				return;
 			}
 			string user = GetValueOfOption(args, 's');
 			if(user == null)
 			{
-				Karuta.SayQuietly("Username must be specified");
-				Karuta.SayQuietly(usageMessage);
+				Karuta.Write("Username must be specified");
+				Karuta.Write(usageMessage);
 				return;
 			}
 			Karuta.Say("Setting username to: " + user);
@@ -199,12 +205,12 @@ namespace com.LuminousVector.Karuta
 		{
 			if(args.Length == 1)
 			{
-				Karuta.SayQuietly("The available commands are:");
+				Karuta.Write("The available commands are:");
 				foreach(Command c in Karuta.commands.Values)
 				{
-					Karuta.SayQuietly("\t" + c.name + "\t" + c.helpMessage);
+					Karuta.Write("\t" + c.name + "\t" + c.helpMessage);
 					if (c.usageMessage != null)
-						Karuta.SayQuietly("\t\tUsage: " + c.usageMessage);
+						Karuta.Write("\t\tUsage: " + c.usageMessage);
 				}
 			}else
 			{
@@ -213,12 +219,12 @@ namespace com.LuminousVector.Karuta
 					if(Karuta.commands.ContainsKey(args[i]))
 					{
 						Command c = Karuta.commands[args[i]];
-						Karuta.SayQuietly("\t" + c.name + "\t" + c.helpMessage);
+						Karuta.Write("\t" + c.name + "\t" + c.helpMessage);
 						if (c.usageMessage != null)
-							Karuta.SayQuietly("\t\tUsage: " + c.usageMessage);
+							Karuta.Write("\t\tUsage: " + c.usageMessage);
 					}else
 					{
-						Karuta.SayQuietly("No such command '" + args[i] + "'");
+						Karuta.Write("No such command '" + args[i] + "'");
 					}
 				}
 			}
@@ -240,13 +246,13 @@ namespace com.LuminousVector.Karuta
 		{
 			if(args.Length < 4)
 			{
-				Karuta.SayQuietly("too few arguments");
+				Karuta.Write("too few arguments");
 				return;
 			}
 			string size = GetValueOfOption(args, 's');
 			if (size == null)
 			{
-				Karuta.SayQuietly("no size provided");
+				Karuta.Write("no size provided");
 				return;
 			}
 			int optionPos = GetIndexOfOption(args, 's');
@@ -258,15 +264,15 @@ namespace com.LuminousVector.Karuta
 				shape = args[optionPos - 2];
 			if(shape == null)
 			{
-				Karuta.SayQuietly("Error");
+				Karuta.Write("Error");
 				return;
 			}
 			if (validShapes.Contains(shape))
 				DrawShape(shape);
 			else
 			{
-				Karuta.SayQuietly("Invalid Shape");
-				Karuta.SayQuietly(usageMessage);
+				Karuta.Write("Invalid Shape");
+				Karuta.Write(usageMessage);
 			}
 		}
 
@@ -282,6 +288,7 @@ namespace com.LuminousVector.Karuta
 		public string serverURL = "http://karuta.luminousvector.com:32400";
 
 		private string _authToken;
+		//private StreamReader responseReader;
 
 		public override void Run(string[] args)
 		{
@@ -291,18 +298,18 @@ namespace com.LuminousVector.Karuta
 				string req = GetValueOfOption(args, 'r');
 				if (req == null)
 				{
-					Karuta.SayQuietly("A request parameter must be provided");
+					Karuta.Write("A request parameter must be provided");
 					return;
 				}
 				try
 				{
 					request = WebRequest.Create(serverURL + req);
 					Stream response = request.GetResponse().GetResponseStream();
-					StreamReader resposeReader = new StreamReader(response);
-					Karuta.SayQuietly(resposeReader.ReadToEnd());
+					using (StreamReader responseReader = new StreamReader(response))
+						Karuta.Write(responseReader.ReadToEnd());
 				} catch (Exception e)
 				{
-					Karuta.SayQuietly(e.Message);
+					Karuta.Write(e.Message);
 				}
 				return;
 			}
@@ -312,27 +319,37 @@ namespace com.LuminousVector.Karuta
 				WebHeaderCollection header = new WebHeaderCollection();
 				if (_authToken == null)
 					_authToken = GetAuthToken();
-				Karuta.SayQuietly(_authToken);
+				Karuta.Write("Auth: " + _authToken);
 				header.Add("X-Plex-Token", _authToken);
 				request.Headers = header;
-				Stream response = request.GetResponse().GetResponseStream();
-				StreamReader resposeReader = new StreamReader(response);
-				Karuta.SayQuietly(resposeReader.ReadToEnd());
-				using (XmlReader reader = XmlReader.Create(new StringReader(resposeReader.ReadToEnd())))
+				using (Stream response = request.GetResponse().GetResponseStream())
 				{
-					reader.ReadToFollowing("Track");
-					reader.MoveToAttribute("title");
-					string title = reader.Value;
-					reader.MoveToAttribute("originalTitle");
-					string artist = reader.Value;
-					Karuta.SayQuietly("Now Playing:");
-					Karuta.SayQuietly("\t" + artist + " - " + title);
+					using (StreamReader responseReader = new StreamReader(response))
+					{
+						Karuta.Write(responseReader.ReadToEnd());
+						using (XmlReader reader = XmlReader.Create(new StringReader(responseReader.ReadToEnd())))
+						{
+							reader.ReadToFollowing("Track");
+							reader.MoveToAttribute("title");
+							string title = reader.Value;
+							reader.MoveToAttribute("originalTitle");
+							string artist = reader.Value;
+							Karuta.Write("Now Playing:");
+							Karuta.Write("\t" + artist + " - " + title);
+						}
+					}
 				}
 			}
 			catch (Exception e)
 			{
-				Karuta.SayQuietly(e.Message);
+				Karuta.Write(e.Message);
 			}
+			Close();
+		}
+
+		public override void Close()
+		{
+			_cookies = null;
 		}
 
 		private CookieCollection _cookies;
@@ -346,6 +363,7 @@ namespace com.LuminousVector.Karuta
 			//Get the response from the server and save the cookies from the first request..
 			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 			_cookies = response.Cookies;
+			response.Close();
 		}
 
 
@@ -377,6 +395,7 @@ namespace com.LuminousVector.Karuta
 			string output = reader.ReadToEnd();
 			reader.Close();
 			reader.Dispose();
+			response.Close();
 			return output;
 		}
 	}

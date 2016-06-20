@@ -6,85 +6,104 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
+using com.LuminousVector.Karuta.Commands;
 
 namespace com.LuminousVector.Karuta
 {
 	public class LightingCommand : Command
 	{
-		public LightingCommand() : base("lights", "Controls lighting via phillips Lighting", "lights <on/off>") { }
+		public LightingCommand() : base("lights") { }
 		public string url = "http://192.168.1.140/api";
 		private string user;
 
-		public override void Run(string[] args)
+		protected override void Init()
 		{
-			user = Karuta.registry.GetString("lightUser");
-			if(args.Length == 1)
-			{
-				if(user != null && user != "")
-				{
-					Karuta.Write("lights have already been set up");
-					return;
-				}
-				string userData = SendCommand(url, "{\"devicetype\":\"karuta\"}", "POST");
-				if (userData.Contains("error"))
-					Karuta.Write("Press the link button and try again.");
-				else
-				{
-					//Karuta.registry.SetValue("lightUser", GetRespose(userData));
-					user = GetRespose(userData);
-					Karuta.Write("Lights have been setup");
-				}
-			}
-			else if (args.Length == 2)
-			{
-				if (user == null || user == "")
-					Run(new string[] { "lights" });
-				string state = ((args[1] == "on") ? "true" : "false");
-				SendCommand(url + "/" + user + "/lights/1/state", "{\"on\":" + state + "}", "PUT");
-				SendCommand(url + "/" + user + "/lights/3/state", "{\"on\":" + state + "}", "PUT");
-			}
-			else if (args.Length == 3)
-			{
-				if (GetIndexOfOption(args, 'b') != -1)
-				{
-					string value = GetValueOfOption(args, 'b');
-					if (value == null)
-					{
-						Karuta.Write("Specify a brightness level");
-					}
-					else
-					{
-						int brightness;
-						if (int.TryParse(value, out brightness))
-						{
-							brightness = (Math.Abs(brightness) > 254) ? 254 : Math.Abs(brightness);
-							SendCommand(url + "/" + user + "/lights/1/state", "{\"bri\":" + brightness + "}", "PUT");
-							SendCommand(url + "/" + user + "/lights/3/state", "{\"bri\":" + brightness + "}", "PUT");
-						}
-					}
-				}else if (GetIndexOfOption(args, 's') != -1)
-				{
-					string value = GetValueOfOption(args, 's');
-					if (value == null)
-					{
-						Karuta.Write("Specify a saturation level");
-					}
-					else
-					{
-						int hue;
-						if (int.TryParse(value, out hue))
-						{
-							hue = (Math.Abs(hue) > 254) ? 254 : Math.Abs(hue);
-							SendCommand(url + "/" + user + "/lights/1/state", "{\"sat\":" + hue + "}", "PUT");
-							SendCommand(url + "/" + user + "/lights/3/state", "{\"sat\":" + hue + "}", "PUT");
-						}
-					}
-				}
+			base.Init();
+			_helpMessage = "Controls lighting via phillips Lighting";
+			_default = Setup;
+			//user = Karuta.registry.GetString("lightuser");
+			RegisterKeyword("on", On);
+			RegisterKeyword("off", Off);
 
+			RegisterOption('h', Hue);
+			RegisterOption('s', Saturation);
+			RegisterOption('b', Brightness);
+		}
+
+		//Hue
+		void Hue(string h)
+		{
+
+		}
+
+		//Saturation
+		void Saturation(string s)
+		{
+			int hue;
+			if (int.TryParse(s, out hue))
+			{
+				hue = (Math.Abs(hue) > 254) ? 254 : Math.Abs(hue);
+				SenRequest(url + "/" + user + "/lights/1/state", "{\"sat\":" + hue + "}", "PUT");
+				SenRequest(url + "/" + user + "/lights/3/state", "{\"sat\":" + hue + "}", "PUT");
 			}
 		}
 
-		private string SendCommand(string url, string data, string method)
+		//Brightness
+		void Brightness(string b)
+		{
+			int brightness;
+			if (int.TryParse(b, out brightness))
+			{
+				brightness = (Math.Abs(brightness) > 254) ? 254 : Math.Abs(brightness);
+				SenRequest(url + "/" + user + "/lights/1/state", "{\"bri\":" + brightness + "}", "PUT");
+				SenRequest(url + "/" + user + "/lights/3/state", "{\"bri\":" + brightness + "}", "PUT");
+			}
+		}
+
+		//Setup
+		void Setup()
+		{
+
+			if (user != null && user != "")
+			{
+				return;
+			}
+			string userData = SenRequest(url, "{\"devicetype\":\"karuta\"}", "POST");
+			if (userData.Contains("error"))
+				Karuta.Write("Press the link button and try again.");
+			else
+			{
+				Karuta.registry.SetValue("lightUser", GetRespose(userData));
+				user = GetRespose(userData);
+				Karuta.Write("Lights have been setup");
+			}
+		}
+
+		//Turns Lights on
+		void On()
+		{
+			if (user == null)
+			{
+				Setup();
+				return;
+			}
+			SenRequest(url + "/" + user + "/lights/1/state", "{\"on\":true}", "PUT");
+			SenRequest(url + "/" + user + "/lights/3/state", "{\"on\":true}", "PUT");
+		}
+
+		//Turns Lights off
+		void Off()
+		{
+			if (user == null)
+			{
+				Setup();
+				return;
+			}
+			SenRequest(url + "/" + user + "/lights/1/state", "{\"on\":false}", "PUT");
+			SenRequest(url + "/" + user + "/lights/3/state", "{\"on\":false}", "PUT");
+		}
+
+		private string SenRequest(string url, string data, string method)
 		{
 			try
 			{

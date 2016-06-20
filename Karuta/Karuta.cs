@@ -7,6 +7,7 @@ using System.Diagnostics;
 using com.LuminousVector.Events;
 using com.LuminousVector.DataStore;
 using com.LuminousVector.Serialization;
+using com.LuminousVector.Karuta.Commands;
 
 namespace com.LuminousVector.Karuta
 {
@@ -32,18 +33,24 @@ namespace com.LuminousVector.Karuta
 		private static SpeechSynthesizer _voice;
 		private static Dictionary<string,Command> _commands;
 		private static List<Thread> _threads;
+
 		static Karuta()
 		{
 			//Init Vars
 			_commands = new Dictionary<string, Command>();
 			_threads = new List<Thread>();
 			logger = new Logger();
-			//_threads.Add(Thread.CurrentThread);
 			//Prepare Console
-			Console.Title = "Karuta";
-			Console.BackgroundColor = ConsoleColor.DarkMagenta;
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.Clear();
+			try
+			{
+				Console.Title = "Karuta";
+				Console.BackgroundColor = ConsoleColor.DarkMagenta;
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.Clear();
+			}catch(Exception e)
+			{
+				Write(e.StackTrace);
+			}
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
 			Write("Preparing Karuta...");
@@ -64,15 +71,13 @@ namespace com.LuminousVector.Karuta
 			_voice = new SpeechSynthesizer();
 			_voice.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Teen);
 			//Register Commands
-			RegisterCommand(new Command("stop", "Stop Karuta", Close));
-			RegisterCommand(new Command("clear", "Clear the screen.", Console.Clear));
-			RegisterCommand(new UserCommand());
+			RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
+			RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
 			RegisterCommand(new HelpCommand());
-			RegisterCommand(new DrawCommand());
-			RegisterCommand(new PlexCommand());
-			RegisterCommand(new LightingCommand());
-			RegisterCommand(new RedditCrawler());
+			RegisterCommand(new UserCommand());
 			RegisterCommand(new Logs());
+			RegisterCommand(new CrawlerCommand());
+			RegisterCommand(new LightingCommand());
 			sw.Stop();
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
 			Write("Karuta is ready. Finished in " + elapsedT + "ms");
@@ -91,13 +96,17 @@ namespace com.LuminousVector.Karuta
 			{
 				Console.Write(user + ": ");
 				_input = Console.ReadLine();
-				string[] args = _input.Split(' ');
+				List<string> args = new List<string>();
+				args.AddRange(_input.Split(' '));
 				Command cmd;
 				commands.TryGetValue(args[0], out cmd);
 				if (cmd == null)
 					Say(args[0]);
 				else
-					cmd.Run(args);
+				{
+					args.RemoveAt(0);
+					cmd.Pharse(args);
+				}
 			}
 		}
 
@@ -107,7 +116,11 @@ namespace com.LuminousVector.Karuta
 			_isRunning = false;
 			foreach(Command c in commands.Values)
 			{
-				c.Close();
+				c.Stop();
+			}
+			foreach(Thread t in _threads)
+			{
+				t.Abort();
 			}
 			_voice.Dispose();
 			logger.Dump();
@@ -124,7 +137,7 @@ namespace com.LuminousVector.Karuta
 		}
 
 		//Say a message without name label or voice
-		public static void Write(string message)
+		public static void Write(Object message)
 		{
 			Console.WriteLine(message);
 		}
@@ -174,18 +187,21 @@ namespace com.LuminousVector.Karuta
 		public static void RemoveThread(Thread thread)
 		{
 			if (_threads.Contains(thread))
+			{
 				_threads.Remove(thread);
+				thread.Abort();
+			}
 		}
 
 		//Invoke a command
-		public static void InvokeCommand(string command, string[] args)
+		public static void InvokeCommand(string command, List<string> args)
 		{
 			if(commands.ContainsKey(command))
 			{
 				throw new NoSuchCommandException();
 			}else
 			{
-				commands[command].Run(args);
+				commands[command].Pharse(args);
 			}
 		}
 

@@ -5,40 +5,54 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using com.LuminousVector.Karuta.Commands;
 
 namespace com.LuminousVector.Karuta
 {
 	public class Logs : Command
 	{
-		public Logs() : base("logs", "shows the logs", "") { }
+		public Logs() : base("logs") { }
 
-		public override void Run(string[] args)
+		private string file = null;
+
+		protected override void Init()
 		{
-			if(args.Length == 1)
+			base.Init();
+			_helpMessage = "shows the logs.";
+			_default = ShowLogs;
+			RegisterKeyword("dump", DumpLogs);
+			RegisterOption('f', SetFile);
+		}
+
+		void ShowLogs()
+		{
+			file = null;
+			if (Karuta.logger.logs.Count == 0)
 			{
-				if(Karuta.logger.logs.Count == 0)
-				{
-					Karuta.Write("There are currently no logs...");
-					return;
-				}
-				Karuta.Write("---LOG START---");
-				string[] logs = Karuta.logger.logs.ToArray();
-				foreach (string s in logs)
-					Karuta.Write(s);
-				Karuta.Write("---LOG END---");
-			}else
-			{
-				if(args[1] == "dump")
-				{
-					if (GetIndexOfOption(args, 'f') != -1)
-					{
-						string file = GetValueOfOption(args, 'f');
-						Karuta.logger.Dump(file);
-					}
-					else
-						Karuta.logger.Dump();
-				}
+				Karuta.Write("There are currently no logs...");
+				return;
 			}
+			Karuta.Write("---LOG START---");
+			string[] logs = Karuta.logger.logs.ToArray();
+			foreach (string s in logs)
+				Karuta.Write(s);
+			Karuta.Write("---LOG END---");
+		}
+
+		void DumpLogs()
+		{
+			if (file != null)
+			{
+				Karuta.logger.Dump(file);
+			}
+			else
+				Karuta.logger.Dump();
+			file = null;
+		}
+
+		void SetFile(string file)
+		{
+			this.file = file;
 		}
 	}
 
@@ -80,6 +94,8 @@ namespace com.LuminousVector.Karuta
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
+			if (logs.Count >= 1000)
+				Dump();
 			return this;
 		}
 
@@ -92,6 +108,8 @@ namespace com.LuminousVector.Karuta
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
+			if (logs.Count >= 1000)
+				Dump();
 			return this;
 		}
 
@@ -104,6 +122,8 @@ namespace com.LuminousVector.Karuta
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
+			if (logs.Count >= 1000)
+				Dump();
 			return this;
 		}
 

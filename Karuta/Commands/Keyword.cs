@@ -20,7 +20,7 @@ namespace com.LuminousVector.Karuta.Commands
 
 		public void Execute()
 		{
-			_action.Invoke();
+			_action();
 		}
 
 		public static bool operator ==(Keyword a, string b)

@@ -17,7 +17,7 @@ namespace com.LuminousVector.Karuta.Commands
 			base.Init();
 			_default = Help;
 			_helpMessage = "shows this screen.";
-			RegisterOption('c', (Action < string > )Help);
+			RegisterOption('c', c => this.c = c);
 		}
 
 		void Help()
@@ -47,11 +47,6 @@ namespace com.LuminousVector.Karuta.Commands
 					//	Karuta.Write("\t\tUsage: " + c.usageMessage);
 				}
 			}
-		}
-
-		void Help(string command)
-		{
-			c = command;
 		}
 	}
 }

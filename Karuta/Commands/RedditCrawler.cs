@@ -414,12 +414,14 @@ namespace com.LuminousVector.Karuta
 									}else if(p.Url.DnsSafeHost == "imgur.com") //Imgur in-direct link/album
 									{
 										string imgurID = Path.GetFileNameWithoutExtension(p.Url.AbsolutePath);
-										if (p.Url.AbsolutePath.Contains("/a/")) //Save Imgur Album
+										if (p.Url.AbsolutePath.Contains("/a/") || p.Url.AbsolutePath.Contains("/gallery/")) //Save Imgur Album
 										{
 											try
 											{
 												imgurID = p.Url.AbsolutePath;
 												imgurID = imgurID.Replace("/a/", "");
+												imgurID = imgurID.Replace("/gallery/", "");
+												imgurID = imgurID.Replace("/new", "");
 												imgurID = imgurID.Replace("/", "");
 												if (imgurID.Length < 3)
 													continue;

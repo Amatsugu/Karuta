@@ -14,13 +14,11 @@ namespace com.LuminousVector.Karuta.Commands
 		{
 			base.Init();
 			_helpMessage = "Allows you to change the username.";
-			RegisterOption('s', ChangeUser);
-		}
-
-		void ChangeUser(string user)
-		{
-			Karuta.Say("Setting username to: " + user);
-			Karuta.user = user;
+			RegisterOption('s', s =>
+			{
+				Karuta.Say("Setting username to:" + s);
+				Karuta.user = s;
+			});
 		}
 	}
 }

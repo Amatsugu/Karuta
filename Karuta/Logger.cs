@@ -21,7 +21,7 @@ namespace com.LuminousVector.Karuta
 			_helpMessage = "shows the logs.";
 			_default = ShowLogs;
 			RegisterKeyword("dump", DumpLogs);
-			RegisterOption('f', SetFile);
+			RegisterOption('f', f => file = f);
 		}
 
 		void ShowLogs()
@@ -48,11 +48,6 @@ namespace com.LuminousVector.Karuta
 			else
 				Karuta.logger.Dump();
 			file = null;
-		}
-
-		void SetFile(string file)
-		{
-			this.file = file;
 		}
 	}
 

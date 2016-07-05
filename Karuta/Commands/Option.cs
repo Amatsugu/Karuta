@@ -9,10 +9,21 @@ namespace com.LuminousVector.Karuta.Commands
 	public class Option
 	{
 		public char key { get; }
+		public string usage { get; }
 		public bool isParamLess { get; } = false;
 
 		private Action<string> _action;
 		private Action _noParAction;
+
+		public Option(char key, Action<string> action, string usage) : this(key, action)
+		{
+			this.usage = usage;
+		}
+
+		public Option(char key, Action action, string usage) : this(key, action)
+		{
+			this.usage = usage;
+		}
 
 		public Option(char key, Action<string> action)
 		{

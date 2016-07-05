@@ -45,11 +45,8 @@ namespace com.LuminousVector.Karuta.Tests
 
 	class TestCommand : Command
 	{
-		public TestCommand(string name, Action defaultAction) : base(name, defaultAction, "test command") { }
-
-		protected override void Init()
-		{
-			base.Init();
+		public TestCommand(string name, Action defaultAction) : base(name, defaultAction, "test command")
+		{ 
 			RegisterOption('r', CommandTests.OptionR);
 			RegisterOption('a', CommandTests.OptionA);
 		}

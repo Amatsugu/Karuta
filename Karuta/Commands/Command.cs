@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,8 @@ namespace com.LuminousVector.Karuta.Commands
 	{
 		public string name { get; }
 		public string helpMessage { get { return _helpMessage; } }
+		public ReadOnlyCollection<Option> options { get { return _options.AsReadOnly(); } }
+		public ReadOnlyCollection<Keyword> keywords { get { return _keywords.AsReadOnly(); } }
 
 		protected Action _default { get; set; }
 		protected string _helpMessage;
@@ -17,41 +20,47 @@ namespace com.LuminousVector.Karuta.Commands
 		private List<Option> _options;
 		private List<Keyword> _keywords;
 
-		public Command(string name)
-		{
-			this.name = name;
-			Init();
-		}
+		public Command(string name, string helpMessage) : this(name, null, helpMessage) { }
 
 		public Command(string name, Action defaultAction, string helpMessage)
 		{
 			this.name = name;
 			_default = defaultAction;
 			_helpMessage = helpMessage;
-			Init();
-		}
-
-		protected virtual void Init()
-		{
 			_options = new List<Option>();
 			_keywords = new List<Keyword>();
 		}
 
 		protected ICommand RegisterKeyword(string keyword, Action action)
 		{
-			_keywords.Add(new Keyword(keyword, action));
+			return RegisterKeyword(keyword, action, "");
+		}
+
+		protected ICommand RegisterKeyword(string keyword, Action action, string usage)
+		{
+			_keywords.Add(new Keyword(keyword, action, usage));
 			return this;
 		}
 
 		protected ICommand RegisterOption(char key, Action action)
 		{
-			_options.Add(new Option(key, action));
+			return RegisterOption(key, action, "");
+		}
+
+		protected ICommand RegisterOption(char key, Action action, string usage)
+		{
+			_options.Add(new Option(key, action, usage));
 			return this;
 		}
 
 		protected ICommand RegisterOption(char key, Action<string> action)
 		{
-			_options.Add(new Option(key, action));
+			return RegisterOption(key, action, "");
+		}
+
+		protected ICommand RegisterOption(char key, Action<string> action, string usage)
+		{
+			_options.Add(new Option(key, action, usage));
 			return this;
 		}
 
@@ -104,22 +113,21 @@ namespace com.LuminousVector.Karuta.Commands
 					args.Remove(a);
 				removalQ.Clear();
 
-				foreach (Option opt in _options)
+				int index = 0;
+				foreach (char key in optKeys)
 				{
-					foreach(char key in optKeys)
-					{
+					foreach (Option opt in _options)
+					{	
 						if(opt == key)
 						{
 							if (opt.isParamLess)
 								opt.Execute();
 							else
 							{
-								if (args.Count == 0)
+								if (args.Count <= index)
 									Karuta.Write("No value provided for option: " + opt.key);
 								else
-									opt.Execute(args[0]);
-								if(args.Count != 0)
-									args.RemoveAt(0);
+									opt.Execute(args[index++]);
 							}
 
 						}

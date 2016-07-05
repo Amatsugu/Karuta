@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
-using System.Speech.Synthesis;
+//using System.Speech.Synthesis;
 using System.Diagnostics;
 using com.LuminousVector.Events;
 using com.LuminousVector.DataStore;
@@ -28,9 +28,24 @@ namespace com.LuminousVector.Karuta
 				return registry.GetString("user");
 			}
 		}
+		public static string dataDir
+		{
+			get
+			{
+				return _regDir;
+			}
+			set
+			{
+				_regDir = value;
+				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
+				logger.SetupLogDir();
+			}
+		}
+
+		private static string _regDir = "/Karuta";
 		private static bool _isRunning = false;
 		private static string _input;
-		private static SpeechSynthesizer _voice;
+		//private static SpeechSynthesizer _voice;
 		private static Dictionary<string,Command> _commands;
 		private static List<Thread> _threads;
 
@@ -58,9 +73,9 @@ namespace com.LuminousVector.Karuta
 			eventManager = new EventManager();
 			eventManager.Init();
 			//Init Registry
-			if(File.Exists(@"C:/Karuta/karuta.data"))
+			if(File.Exists(dataDir + "/karuta.data"))
 			{
-				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes(@"C:/Karuta/karuta.data"));
+				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes(dataDir + "/karuta.data"));
 			}else
 			{
 				registry = new Registry();
@@ -68,9 +83,17 @@ namespace com.LuminousVector.Karuta
 				registry.SetValue("user", "user");
 			}
 			//Prepare Voice
-			_voice = new SpeechSynthesizer();
-			_voice.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Teen);
+			//_voice = new SpeechSynthesizer();
+			//_voice.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Teen);
 			//Register Commands
+			RegisterCommands();
+			sw.Stop();
+			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
+			Write("Karuta is ready. Finished in " + elapsedT + "ms");
+		}
+
+		public static void RegisterCommands()
+		{
 			RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
 			RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
 			RegisterCommand(new HelpCommand());
@@ -78,9 +101,7 @@ namespace com.LuminousVector.Karuta
 			RegisterCommand(new Logs());
 			RegisterCommand(new CrawlerCommand());
 			RegisterCommand(new LightingCommand());
-			sw.Stop();
-			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
-			Write("Karuta is ready. Finished in " + elapsedT + "ms");
+			//RegisterCommand(new RegistryCommand());
 		}
 
 		public static void RegisterCommand(Command command)
@@ -122,17 +143,17 @@ namespace com.LuminousVector.Karuta
 			{
 				t.Abort();
 			}
-			_voice.Dispose();
+			//_voice.Dispose();
 			logger.Dump();
-			File.WriteAllBytes(@"C:/Karuta/karuta.data", DataSerializer.serializeData(registry));
+			File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
 			Console.WriteLine("GoodBye");
 		}
 
 		//Say message with voice and name label
 		public static void Say(string message)
 		{
-			_voice.SpeakAsyncCancelAll();
-			_voice.SpeakAsync(message);
+			//_voice.SpeakAsyncCancelAll();
+			//_voice.SpeakAsync(message);
 			Console.WriteLine("Karuta: " + message);
 		}
 
@@ -143,7 +164,7 @@ namespace com.LuminousVector.Karuta
 		}
 
 		//Get an text input from Karuta's console
-		public static string GetInput(string message, bool hide)
+		public static string GetInput(string message, bool hide = false)
 		{
 			Console.Write(message + ": ");
 			if(hide == false)

@@ -8,12 +8,8 @@ namespace com.LuminousVector.Karuta.Commands
 {
 	class UserCommand : Command
 	{
-		public UserCommand() : base("user") { }
-
-		protected override void Init()
+		public UserCommand() : base("user", "Allows you to change the username.")
 		{
-			base.Init();
-			_helpMessage = "Allows you to change the username.";
 			RegisterOption('s', s =>
 			{
 				Karuta.Say("Setting username to:" + s);

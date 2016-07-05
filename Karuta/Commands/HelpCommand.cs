@@ -8,28 +8,29 @@ namespace com.LuminousVector.Karuta.Commands
 {
 	public class HelpCommand : Command
 	{
-		public HelpCommand() : base("help") { }
-
-		private string c = null;
-
-		protected override void Init()
+		public HelpCommand() : base("help", "show this screen")
 		{
-			base.Init();
 			_default = Help;
-			_helpMessage = "shows this screen.";
 			RegisterOption('c', c => this.c = c);
 		}
 
+		private string c = null;
+
 		void Help()
 		{
+			Karuta.Write(c);
 			if (c != null)
 			{
 				if (Karuta.commands.ContainsKey(c))
 				{
 					Command c = Karuta.commands[this.c];
 					Karuta.Write("\t" + c.name + "\t" + c.helpMessage);
-					//if (c.usageMessage != null)
-					//	Karuta.Write("\t\tUsage: " + c.usageMessage);*/
+					Karuta.Write("\tOptions:");
+					foreach (Option o in c.options)
+						Karuta.Write("\t\t -" + o.key + "\t" + o.usage);
+					Karuta.Write("\tKeywords:");
+					foreach (Keyword k in c.keywords)
+						Karuta.Write("\t\t " + k.keyword + "\t" + k.usage);
 				}
 				else
 				{

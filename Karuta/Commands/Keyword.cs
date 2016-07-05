@@ -9,8 +9,14 @@ namespace com.LuminousVector.Karuta.Commands
 	public class Keyword
 	{
 		public string keyword { get; }
+		public string usage { get; }
 
 		private Action _action;
+
+		public Keyword(string keyword, Action action, string usage) : this(keyword, action)
+		{
+			this.usage = usage;
+		}
 
 		public Keyword(string keyword, Action action)
 		{

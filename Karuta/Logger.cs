@@ -11,14 +11,10 @@ namespace com.LuminousVector.Karuta
 {
 	public class Logs : Command
 	{
-		public Logs() : base("logs") { }
-
 		private string file = null;
 
-		protected override void Init()
+		public Logs() : base("logs", "shows the logs.")
 		{
-			base.Init();
-			_helpMessage = "shows the logs.";
 			_default = ShowLogs;
 			RegisterKeyword("dump", DumpLogs);
 			RegisterOption('f', f => file = f);
@@ -61,8 +57,13 @@ namespace com.LuminousVector.Karuta
 		public Logger()
 		{
 			log = new List<string>();
-			if (!Directory.Exists(@"C:/Karuta/Logs/"))
-				Directory.CreateDirectory(@"C:/Karuta/Logs/");
+			SetupLogDir();
+		}
+
+		public void SetupLogDir()
+		{
+			if (!Directory.Exists(Karuta.dataDir + "/Logs/"))
+				Directory.CreateDirectory(Karuta.dataDir + "/Logs/");
 		}
 
 		public Logger Log(string message, string src)
@@ -128,14 +129,13 @@ namespace com.LuminousVector.Karuta
 			string file = startTime.ToShortDateString() + " " + startTime.ToShortTimeString() +" -- " + endTime.ToShortDateString() + " " + endTime.ToShortTimeString() + " log.txt";
 			file = Regex.Replace(file, "/", "-");
 			file = Regex.Replace(file, ":", ".");
-			return Dump(@"C:/Karuta/Logs/" + file);
+			return Dump(Karuta.dataDir + "/Logs/" + file);
 		}
 
 		public Logger Dump(string file)
 		{
 			if (log.Count == 0)
 				return this;
-			//Karuta.Write(file);
 			File.WriteAllLines(file, log.ToArray());
 			log.Clear();
 			startTime = default(DateTime);

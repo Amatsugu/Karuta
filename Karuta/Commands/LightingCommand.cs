@@ -12,14 +12,11 @@ namespace com.LuminousVector.Karuta
 {
 	public class LightingCommand : Command
 	{
-		public LightingCommand() : base("lights") { }
 		public string url = "http://192.168.1.140/api";
 		private string user;
 
-		protected override void Init()
+		public LightingCommand() : base("lights", "Controls lighting via phillips Lighting")
 		{
-			base.Init();
-			_helpMessage = "Controls lighting via phillips Lighting";
 			_default = Setup;
 			//user = Karuta.registry.GetString("lightuser");
 			RegisterKeyword("on", On);
@@ -29,6 +26,7 @@ namespace com.LuminousVector.Karuta
 			RegisterOption('s', Saturation);
 			RegisterOption('b', Brightness);
 		}
+
 
 		//Hue
 		void Hue(string h)

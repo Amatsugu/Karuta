@@ -120,7 +120,7 @@
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\Keyword.cs" />
     <Compile Include="Commands\Option.cs" />
-    <Compile Include="Commands\RegistryCommand.cs" />
+    <Compile Include="Commands\TestCommand.cs" />
     <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="DataSerializer.cs" />
     <Compile Include="Commands\LightingCommand.cs" />

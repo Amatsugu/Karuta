@@ -52,9 +52,7 @@ namespace com.LuminousVector.Karuta
 		public bool isRunning = false;
 		public bool needsReBuild = false;
 		public bool loop = true;
-		public bool isIdle = false;
 		public List<string> subreddits = new List<string>();
-		public Thread thread;
 		public string[] allowedFiles = new string[] { ".png", ".jpg", ".jpeg", ".gif"};
 		public string baseDir = @"K:/RedditCrawl";
 		public int updateRate = 60 * 60 * 1000; //1 hour
@@ -64,7 +62,9 @@ namespace com.LuminousVector.Karuta
 		public byte[] data;
 		public string getFrom;
 		int imgCount = 0;
-		
+		private Timer _crawlLoop;
+
+
 
 
 		public enum SearchMode
@@ -282,8 +282,7 @@ namespace com.LuminousVector.Karuta
 				isRunning = true;
 				loop = false;
 				_client = new WebClient();
-				if (thread == null)
-					thread = Karuta.CreateThread("RedditCrawl", new ThreadStart(Crawl));
+				Crawl();
 				Karuta.Write("Getting " + postsToGet + " images from " + subreddits.Count + " subreddits.");
 			}
 			else
@@ -312,8 +311,7 @@ namespace com.LuminousVector.Karuta
 				isRunning = true;
 				loop = true;
 				_client = new WebClient();
-				if (thread == null || thread?.ThreadState == ThreadState.Aborted)
-					thread = Karuta.CreateThread("RedditCrawl", new ThreadStart(Crawl));
+				Crawl();
 				Karuta.Write("Crawlings across " + postsToGet + " images from " + subreddits.Count + " subreddits.");
 			}
 			else
@@ -335,6 +333,7 @@ namespace com.LuminousVector.Karuta
 			Karuta.Write("Verbose: " + verbose);
 			Karuta.Write("Get From: " + ((getFrom == null) ? "all" : getFrom));
 			Karuta.Write("Save Dir: " + baseDir);
+			Karuta.Write("Update Rate: " + updateRate + "ms");
 		}
 
 		//Stop all processes
@@ -343,10 +342,7 @@ namespace com.LuminousVector.Karuta
 			Karuta.logger.Log("Crawl terminated by " + Karuta.user, name);
 			isRunning = false;
 			_client.Dispose();
-			if (!isIdle)
-				thread.Join();
-			Karuta.RemoveThread(thread);
-			thread = null;
+			_crawlLoop.Dispose();
 		}
 
 		//Start find and download the images
@@ -370,9 +366,9 @@ namespace com.LuminousVector.Karuta
 			ImageEndpoint imgEndpoint = new ImageEndpoint(_imgurClient);
 			AlbumEndpoint albumEndpoint = new AlbumEndpoint(_imgurClient);
 			subs = new List<Subreddit>();
-			while (isRunning)
+			_crawlLoop?.Dispose();
+			_crawlLoop = new Timer(info => 
 			{
-				isIdle = false;
 				try
 				{
 					imgCount = 0;
@@ -390,7 +386,7 @@ namespace com.LuminousVector.Karuta
 							catch (Exception e)
 							{
 								Karuta.logger.LogWarning("Failed to connect to subreddit: " + getFrom + ", " + e.Message, name, verbose);
-								continue;
+								_crawlLoop.Dispose();
 							}
 						}
 						else
@@ -422,7 +418,7 @@ namespace com.LuminousVector.Karuta
 						Karuta.logger.Log("Finished Building, starting crawl", name, verbose);
 					}
 					if (!isRunning)
-						break;
+						_crawlLoop.Dispose();
 					foreach (Subreddit sub in subs)
 					{
 						if (!isRunning)
@@ -593,8 +589,8 @@ namespace com.LuminousVector.Karuta
 					Karuta.Write("Crawl Ended");
 					isRunning = false;
 				}
-				if(!isRunning)
-					break;
+				if (!isRunning)
+					_crawlLoop.Dispose();
 				
 				if (!loop)
 				{
@@ -606,17 +602,8 @@ namespace com.LuminousVector.Karuta
 				{
 					Karuta.logger.Log("Dowloaded " + imgCount + " images...", name, verbose);
 					Karuta.logger.Log("Sleeping for " + updateRate + "ms", name, verbose);
-					isIdle = true;
-					Thread.Sleep(updateRate);
 				}
-				isIdle = false;
-			}
-			getFrom = null;
-			Karuta.logger.Log("Crawl has ended", name, verbose);
-			isRunning = false;
-			_client.Dispose();
-			Karuta.RemoveThread(thread);
-			thread = null;
+			}, null, 0, updateRate);
 		}
 
 		void SaveImage(Post p, string file, Uri url)
@@ -665,10 +652,7 @@ namespace com.LuminousVector.Karuta
 				return;
 			isRunning = false;
 			_client.Dispose();
-			if (!isIdle)
-				thread.Join();
-			Karuta.RemoveThread(thread);
-			thread = null;
+			_crawlLoop.Dispose();
 		}
 	}
 }

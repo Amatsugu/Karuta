@@ -101,7 +101,7 @@ namespace com.LuminousVector.Karuta
 			RegisterCommand(new Logs());
 			RegisterCommand(new CrawlerCommand());
 			RegisterCommand(new LightingCommand());
-			//RegisterCommand(new RegistryCommand());
+			RegisterCommand(new TestCommand());
 		}
 
 		public static void RegisterCommand(Command command)

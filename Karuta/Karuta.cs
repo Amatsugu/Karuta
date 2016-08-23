@@ -102,6 +102,10 @@ namespace com.LuminousVector.Karuta
 			RegisterCommand(new CrawlerCommand());
 			RegisterCommand(new LightingCommand());
 			RegisterCommand(new TestCommand());
+			RegisterCommand(new Command("save", () =>
+			{
+				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
+			}, "Save the registry"));
 		}
 
 		public static void RegisterCommand(Command command)

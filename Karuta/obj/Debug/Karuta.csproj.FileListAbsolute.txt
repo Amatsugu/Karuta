@@ -23,3 +23,14 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csproj.GenerateR
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.TrustInfo.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe.manifest
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.application
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.ColorConverters.dll
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.dll
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.NET.dll
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Extensions.dll
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Primitives.dll
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.ColorConverters.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.NET.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Extensions.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Primitives.xml

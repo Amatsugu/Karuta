@@ -13,7 +13,7 @@ namespace com.LuminousVector.Karuta
 			Karuta.Run();
 		}
 
-		static void OnProcessExit()
+		static void OnProcessExit(object sender, EventArgs e)
 		{
 			Karuta.Close();
 		}

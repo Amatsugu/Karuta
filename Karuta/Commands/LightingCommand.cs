@@ -1,125 +1,205 @@
-using System;
+using System.Threading;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Net;
-using Newtonsoft.Json;
+using com.LuminousVector.Karuta.Util;
 using com.LuminousVector.Karuta.Commands;
+using Q42.HueApi;
+using System;
 
 namespace com.LuminousVector.Karuta
 {
 	public class LightingCommand : Command
 	{
-		public string url = "http://192.168.1.140/api";
-		private string user;
+		private string _url = "192.168.1.140";
+		private LocalHueClient _client;
+		private string _user;
+		private Dictionary<string, Color> _lightColors = new Dictionary<string, Util.Color>();
+		private Timer _colorKeeper;
 
 		public LightingCommand() : base("lights", "Controls lighting via phillips Lighting")
 		{
 			_default = Setup;
-			//user = Karuta.registry.GetString("lightuser");
+			_user = Karuta.registry.GetString("lightuser");
+			if(_user != "")
+			{
+				_client = new LocalHueClient(_url);
+				_client.Initialize(_user);
+			}
+			LoadLightColors();
 			RegisterKeyword("on", On);
 			RegisterKeyword("off", Off);
+			RegisterKeyword("getColors", Color);
+			RegisterKeyword("keepColors", KeepColor);
+			RegisterKeyword("stop", StopColorKeeper);
+			RegisterKeyword("saveColors", SaveColor);
 
 			RegisterOption('h', Hue);
 			RegisterOption('s', Saturation);
 			RegisterOption('b', Brightness);
 		}
 
+		private void StopColorKeeper()
+		{
+			_colorKeeper?.Dispose();
+		}
+
+		//Keep Colors
+		private void KeepColor()
+		{
+			if(_colorKeeper != null)
+			{
+				Karuta.Write("Color Keeper is already running!");
+				return;
+			}
+			if(_lightColors?.Count == 0)
+			{
+				Karuta.Write("No colors saved.");
+				return;
+			}
+			bool lightsSet = false;
+			_colorKeeper = new Timer(async info =>
+			{
+				//Karuta.Write("Checking Lights...");
+				List<Light> lights = new List<Light>();
+				lights.AddRange(await _client.GetLightsAsync());
+				bool reachable = false;
+				foreach(Light l in lights)
+				{
+					if (l.State.IsReachable == true)
+						reachable = true;
+				}
+				if(reachable)
+				{
+					if (!lightsSet)
+					{
+						foreach (string l in _lightColors.Keys)
+						{
+							//Karuta.Write("Lights reachable!");
+							LightCommand cmd = new LightCommand();
+							Color c = _lightColors[l];
+							cmd.Hue = c.h;
+							cmd.Saturation = c.s;
+							//cmd.Brightness = (byte)c.b;
+							//Karuta.Write("Setting Colors: " + l);
+							await _client.SendCommandAsync(cmd, new string[] { l });
+							lightsSet = true;
+						}
+					}
+				}else
+				{
+					lightsSet = false;
+				}
+			}, null, 0, 2000);
+			
+		}
+
+		//Save current Colors
+		private async void SaveColor()
+		{
+			if (_client == null)
+				Setup();
+			List<Light> lights = new List<Light>();
+			lights.AddRange(await _client.GetLightsAsync());
+			foreach(Light l in lights)
+			{
+				State state = l.State;
+				if (state.IsReachable == true)
+				{
+					_lightColors.Add(l.Id, new Color((int)state.Hue, (int)state.Saturation, state.Brightness));
+				}
+			}
+			string data = "";
+			foreach(string s in _lightColors.Keys)
+			{
+				if (data != "")
+					data += "|";
+				data += s + "`" + _lightColors[s].ToString();
+			}
+			Karuta.registry.SetValue("lightColors", data);
+			Karuta.Write("Colors Saved!");
+		}
+
+		//Load light colors
+		void LoadLightColors()
+		{
+			string data = Karuta.registry.GetString("lightColors");
+			if (data == "")
+				return;
+			string[] lights = data.Split('|');
+			foreach(string l in lights)
+			{
+				string[] lSplit = l.Split('`');
+				_lightColors.Add(lSplit[0], new Color(lSplit[1]));
+			}
+		}
+
+
+		//Color
+		async void Color()
+		{
+			if (_client == null)
+				Setup();
+			LightCommand cmd = new LightCommand();
+			List<Light> lights = new List<Light>();
+			lights.AddRange(await _client.GetLightsAsync());
+			foreach(Light l in lights)
+			{
+				State state = l.State;
+				if (state.IsReachable == false || state.IsReachable == null)
+					continue;
+				Karuta.Write("\nLight: " + l.Name +" H:" + state.Hue + " S:" + state.Saturation + " B:" + state.Brightness);
+			}
+
+		}
 
 		//Hue
-		void Hue(string h)
+		async void Hue(string h)
 		{
-
+			if (_client == null)
+				Setup();
 		}
 
 		//Saturation
-		void Saturation(string s)
+		async void Saturation(string s)
 		{
-			int hue;
-			if (int.TryParse(s, out hue))
-			{
-				hue = (Math.Abs(hue) > 254) ? 254 : Math.Abs(hue);
-				SenRequest(url + "/" + user + "/lights/1/state", "{\"sat\":" + hue + "}", "PUT");
-				SenRequest(url + "/" + user + "/lights/3/state", "{\"sat\":" + hue + "}", "PUT");
-			}
+			if (_client == null)
+				Setup();
 		}
 
 		//Brightness
-		void Brightness(string b)
+		async void Brightness(string b)
 		{
-			int brightness;
-			if (int.TryParse(b, out brightness))
-			{
-				brightness = (Math.Abs(brightness) > 254) ? 254 : Math.Abs(brightness);
-				SenRequest(url + "/" + user + "/lights/1/state", "{\"bri\":" + brightness + "}", "PUT");
-				SenRequest(url + "/" + user + "/lights/3/state", "{\"bri\":" + brightness + "}", "PUT");
-			}
+			if (_client == null)
+				Setup();
 		}
 
 		//Setup
-		void Setup()
+		async void Setup()
 		{
-
-			if (user != null && user != "")
-			{
-				return;
-			}
-			string userData = SenRequest(url, "{\"devicetype\":\"karuta\"}", "POST");
-			if (userData.Contains("error"))
-				Karuta.Write("Press the link button and try again.");
-			else
-			{
-				Karuta.registry.SetValue("lightUser", GetRespose(userData));
-				user = GetRespose(userData);
-				Karuta.Write("Lights have been setup");
-			}
+			_client = new LocalHueClient(_url);
+			if(_user == "")
+				_user = await _client.RegisterAsync("Karuta.lighting", "Karuta");
+			_client.Initialize(_user);
+			List<Light> light = new List<Light>();
 		}
 
 		//Turns Lights on
-		void On()
+		async void On()
 		{
-			if (user == null)
-			{
+			if (_client == null)
 				Setup();
-				return;
-			}
-			SenRequest(url + "/" + user + "/lights/1/state", "{\"on\":true}", "PUT");
-			SenRequest(url + "/" + user + "/lights/3/state", "{\"on\":true}", "PUT");
+			LightCommand cmd = new LightCommand();
+			cmd.On = true;
+			await _client.SendCommandAsync(cmd);
 		}
 
 		//Turns Lights off
-		void Off()
+		async void Off()
 		{
-			if (user == null)
-			{
+			if (_client == null)
 				Setup();
-				return;
-			}
-			SenRequest(url + "/" + user + "/lights/1/state", "{\"on\":false}", "PUT");
-			SenRequest(url + "/" + user + "/lights/3/state", "{\"on\":false}", "PUT");
-		}
-
-		private string SenRequest(string url, string data, string method)
-		{
-			try
-			{
-				return Utils.HttpRequest(url, data, method);
-			}
-			catch (Exception e)
-			{
-				Karuta.Write(e.Message);
-				return null;
-			}
-		}
-
-		private string GetRespose(string output)
-		{
-			int i1 = 25, i2 = 0;
-			while(output[i1 + i2] != '"')
-				i2++;
-			return output.Substring(i1, i2);
+			LightCommand cmd = new LightCommand();
+			cmd.On = false;
+			await _client.SendCommandAsync(cmd);
 		}
 	}
 }

@@ -6,8 +6,6 @@ using System.Net;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using RedditSharp;
 using RedditSharp.Things;
 using Imgur.API.Authentication.Impl;
@@ -31,13 +29,20 @@ namespace com.LuminousVector.Karuta
 			RegisterOption('f', crawler.SetGetFrom, "Sets a single subreddit to be crawled from");
 			RegisterOption('d', crawler.SetSaveDir, "Sets the save location for images");
 			RegisterOption('t', crawler.SetUpdateRate, "Sets the interval at which the bot will cycle in minutes");
+			RegisterOption('i', crawler.AlbumDownload, "Downloads and album from imgur");
 
 			RegisterKeyword("get", crawler.Get, "Get images from subreddit(s) without looping");
 			RegisterKeyword("list", crawler.ListSubs, "Shows the list of all subreddits to be searched");
 			RegisterKeyword("status", crawler.Status, "Shows the current status of the bot");
 			RegisterKeyword("start", crawler.Start, "Start a crawl of all subreddits on the list at a set interval");
 			RegisterKeyword("stop", crawler.Stop, "Stop all processes");
-			RegisterKeyword("imgur", crawler.ImgurSetup, "Link Imgur API");
+			RegisterKeyword("imgur", () =>
+			{
+				Karuta.Write("Reset Imgur");
+				Karuta.registry.SetValue("imgur_id", "");
+				Karuta.registry.SetValue("imgur_secret", "");
+				crawler.ImgurSetup();
+			}, "Link Imgur API");
 		}
 
 		public override void Stop()
@@ -63,6 +68,9 @@ namespace com.LuminousVector.Karuta
 		public string getFrom;
 		int imgCount = 0;
 		private Timer _crawlLoop;
+		private ImageEndpoint imgEndpoint;
+		private AlbumEndpoint albumEndpoint;
+		private DateTime minTime = new DateTime(1970, 1, 1);
 
 
 
@@ -122,7 +130,7 @@ namespace com.LuminousVector.Karuta
 			}
 			catch (Exception e)
 			{
-				Karuta.Write("Failed to Connect");
+				Karuta.Write("Failed to Start" + e.Message);
 				Karuta.Write(e.StackTrace);
 			}
 		}
@@ -141,6 +149,8 @@ namespace com.LuminousVector.Karuta
 			try
 			{
 				_imgurClient = new ImgurClient(imgID, imgSec);
+				imgEndpoint = new ImageEndpoint(_imgurClient);
+				albumEndpoint = new AlbumEndpoint(_imgurClient);
 			}
 			catch (Exception e)
 			{
@@ -148,8 +158,27 @@ namespace com.LuminousVector.Karuta
 				Karuta.Write(e.Message);
 				_imgurClient = null;
 			}
+
 			Karuta.registry.SetValue("imgur_id", imgID);
 			Karuta.registry.SetValue("imgur_secret", imgSec);
+		}
+
+		//Download an album directly
+		public void AlbumDownload(string url)
+		{
+			if (_reddit == null || _imgurClient == null)
+				Setup();
+			Post p = new Post();
+			p.SubredditName = "Imgur";
+			p.NSFW = false;
+			string curDir = baseDir + "/ImgurDownload";
+			int epoch = 0;
+			TimeSpan t = DateTime.UtcNow - minTime;
+			epoch = (int)t.TotalSeconds;
+			isRunning = true;
+			_client = new WebClient();
+			DownloadImgurAlbum(new Uri(url), epoch, "Imgur", p, curDir);
+			isRunning = false;
 		}
 
 		//Set verbose
@@ -360,19 +389,18 @@ namespace com.LuminousVector.Karuta
 			Listing<Post> posts = default(Listing<Post>);
 			List<Subreddit> subs;
 			TimeSpan t;
-			DateTime minTime = new DateTime(1970, 1, 1);
+			
 			int epoch;
 			bool postGet = false;
-			ImageEndpoint imgEndpoint = new ImageEndpoint(_imgurClient);
-			AlbumEndpoint albumEndpoint = new AlbumEndpoint(_imgurClient);
+			
 			subs = new List<Subreddit>();
 			_crawlLoop?.Dispose();
-			_crawlLoop = new Timer(info => 
+			_crawlLoop = new Timer(async info =>
 			{
 				try
 				{
 					imgCount = 0;
-					if(needsReBuild)
+					if (needsReBuild)
 					{
 						subs.Clear();
 						Karuta.logger.Log("Rebuilding subreddit list", name, verbose);
@@ -451,13 +479,14 @@ namespace com.LuminousVector.Karuta
 										break;
 								}
 								subCollected = true;
-							}catch(Exception e)
+							}
+							catch (Exception e)
 							{
 								Karuta.logger.LogWarning("Failed to connect to reddit: " + e.Message + ", retrying...", name, verbose);
 							}
 						}
 						postGet = false;
-						while(!postGet)
+						while (!postGet)
 						{
 							if (!isRunning)
 								break;
@@ -501,61 +530,26 @@ namespace com.LuminousVector.Karuta
 										}
 										//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
 										SaveImage(p, file, p.Url);
-									}else if(p.Url.DnsSafeHost == "imgur.com") //Imgur in-direct link/album
+									}
+									else if (p.Url.DnsSafeHost == "imgur.com") //Imgur in-direct link/album
 									{
 										string imgurID = Path.GetFileNameWithoutExtension(p.Url.AbsolutePath);
 										if (p.Url.AbsolutePath.Contains("/a/") || p.Url.AbsolutePath.Contains("/gallery/")) //Save Imgur Album
 										{
-											try
-											{
-												imgurID = p.Url.AbsolutePath;
-												imgurID = imgurID.Replace("/a/", "");
-												imgurID = imgurID.Replace("/gallery/", "");
-												imgurID = imgurID.Replace("/new", "");
-												imgurID = imgurID.Replace("/", "");
-												if (imgurID.Length < 3)
-													continue;
-												//Karuta.logger.Log("Saving Album: " + log, "/r/" + sub.Name, _verbose);
-												//Karuta.logger.Log("Album ID: " + imgurID, "/r/" + sub.Name, _verbose);
-												var task = albumEndpoint.GetAlbumImagesAsync(imgurID);
-												Task.WaitAll(task);
-												var album = task.Result;
-												int i = 1;
-												foreach (var image in album)
-												{
-													if (!isRunning)
-														break;
-													string thisFile = "[" + epoch + "] [" + i + "] " + file;
-													thisFile = curDir + ((p.NSFW) ? "/NSFW" : "") + "/" + thisFile;
-													//Karuta.logger.Log(thisFile, name, verbose);
-													ext = Path.GetExtension(image.Link);
-													if (File.Exists(thisFile + ((ext == ".gif") ? ext : ".png")))
-													{
-														//Karuta.logger.LogWarning("Skipping \"" + p.Title + "\", file already exsits", "/r/" + sub.Name, verbose);
-														i++;
-														continue;
-													}
-													SaveImage(p, thisFile, new Uri(image.Link));
-													i++;
-												}
-											}catch(Exception e)
-											{
-												Karuta.logger.LogWarning("Unable to Download " + p.Title + ", " + e.Message, "/r/" + p.SubredditName, verbose);
-												Karuta.logger.LogError(e.StackTrace, name, verbose);
-											}
+											DownloadImgurAlbum(p.Url, epoch, file, p, curDir);
 										}
 										else
 										{
-											if(imgurID != "new")//Save Imgur in-drect link
+											if (imgurID != "new")//Save Imgur in-drect link
 											{
 												file = "[" + epoch + "] " + file;
 												file = curDir + ((p.NSFW) ? "/NSFW" : "") + "/" + file;
-												
+
 												try
 												{
-													var task = imgEndpoint.GetImageAsync(imgurID);
-													Task.WaitAll(task);
-													var image = task.Result;
+													var image = await imgEndpoint.GetImageAsync(imgurID);
+													//Task.WaitAll(task);
+													//var image = task.Result;
 													ext = Path.GetExtension(image.Link);
 													if (File.Exists(file + ((ext == ".gif") ? ext : ".png")))
 													{
@@ -564,7 +558,8 @@ namespace com.LuminousVector.Karuta
 													}
 													//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
 													SaveImage(p, file, new Uri(image.Link));
-												}catch(Exception e)
+												}
+												catch (Exception e)
 												{
 													Karuta.logger.LogWarning("Unable to Download " + p.Title + ", " + e.Message, "/r/" + p.SubredditName, verbose);
 													Karuta.logger.LogError(e.StackTrace, name, verbose);
@@ -582,7 +577,8 @@ namespace com.LuminousVector.Karuta
 							}
 						}
 					}
-				}catch(Exception e)
+				}
+				catch (Exception e)
 				{
 					Karuta.logger.LogError("Crawl failed... " + e.Message + ", shutting down", name, verbose);
 					Karuta.logger.LogError(e.StackTrace, name, verbose);
@@ -591,7 +587,7 @@ namespace com.LuminousVector.Karuta
 				}
 				if (!isRunning)
 					_crawlLoop.Dispose();
-				
+
 				if (!loop)
 				{
 					Karuta.logger.Log("Finished Dowloading " + imgCount + " images... shutting down", name, verbose);
@@ -606,6 +602,45 @@ namespace com.LuminousVector.Karuta
 			}, null, 0, updateRate);
 		}
 
+		async void DownloadImgurAlbum(Uri url, int epoch, string fileName, Post p, string curDir)
+		{
+			try
+			{
+				string imgurID = url.AbsolutePath;
+				imgurID = imgurID.Split('/')[2];
+				if (imgurID.Length < 3)
+					return;
+				//Karuta.logger.Log("Saving Album: " + log, "/r/" + sub.Name, _verbose);
+				//Karuta.logger.Log("Album ID: " + imgurID, "/r/" + sub.Name, _verbose);
+				var album = await albumEndpoint.GetAlbumImagesAsync(imgurID);
+				//Task.WaitAll(task);
+				//var album = task.Result;
+				int i = 1;
+				foreach (var image in album)
+				{
+					if (!isRunning)
+						break;
+					string thisFile = "[" + epoch + "] [" + i + "] " + fileName;
+					thisFile = curDir + ((p.NSFW) ? "/NSFW" : "") + "/" + thisFile;
+					//Karuta.logger.Log(thisFile, name, verbose);
+					string ext = Path.GetExtension(image.Link);
+					if (File.Exists(thisFile + ((ext == ".gif") ? ext : ".png")))
+					{
+						//Karuta.logger.LogWarning("Skipping \"" + p.Title + "\", file already exsits", "/r/" + sub.Name, verbose);
+						i++;
+						continue;
+					}
+					SaveImage(p, thisFile, new Uri(image.Link));
+					i++;
+				}
+			}
+			catch (Exception e)
+			{
+				Karuta.logger.LogWarning("Unable to Download " + p.Title + ", " + e.Message, "/r/" + p.SubredditName, verbose);
+				Karuta.logger.LogError(e.StackTrace, name, verbose);
+			}
+		}
+
 		void SaveImage(Post p, string file, Uri url)
 		{
 			try
@@ -617,6 +652,10 @@ namespace com.LuminousVector.Karuta
 					{
 						try
 						{
+							if(!Directory.GetParent(file).Exists)
+							{
+								Directory.GetParent(file).Create();
+							}
 							if (Path.GetExtension(url.AbsolutePath) == ".gif")
 							{
 								image.Save(file + ".gif", ImageFormat.Gif);
@@ -632,7 +671,7 @@ namespace com.LuminousVector.Karuta
 						catch (Exception e)
 						{
 							Karuta.logger.LogError("Failed to save \"" + p.Title + "\", " + e.Message, "/r/" + p.SubredditName, verbose);
-							//Karuta.logger.LogError(e.StackTrace, name, verbose);
+							Karuta.logger.LogError(e.StackTrace, name, verbose);
 						}
 					}
 				}

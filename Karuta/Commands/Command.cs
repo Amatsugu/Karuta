@@ -64,7 +64,7 @@ namespace com.LuminousVector.Karuta.Commands
 			return this;
 		}
 
-		public ICommand Pharse(List<string> args)
+		public virtual ICommand Pharse(List<string> args)
 		{
 			//Find keyword to execute
 			Keyword selectedKeyword = null;

@@ -17,6 +17,7 @@ namespace com.LuminousVector.Karuta
 	public class CrawlerCommand : Command
 	{
 		private RedditCrawler crawler;
+		private bool _autoStart = true;
 
 		public CrawlerCommand() : base("crawl", "Connects to reddit and downloads images from specified subreddits")
 		{
@@ -43,6 +44,9 @@ namespace com.LuminousVector.Karuta
 				Karuta.registry.SetValue("imgur_secret", "");
 				crawler.ImgurSetup();
 			}, "Link Imgur API");
+
+			if (_autoStart)
+				crawler.Start();
 		}
 
 		public override void Stop()

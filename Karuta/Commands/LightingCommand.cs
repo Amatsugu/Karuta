@@ -14,6 +14,8 @@ namespace com.LuminousVector.Karuta
 		private string _user;
 		private Dictionary<string, Color> _lightColors = new Dictionary<string, Util.Color>();
 		private Timer _colorKeeper;
+		private Color _defaultColor = new Color(14910, 144, 254);
+		private bool _autoStart = false;
 
 		public LightingCommand() : base("lights", "Controls lighting via phillips Lighting")
 		{
@@ -35,16 +37,27 @@ namespace com.LuminousVector.Karuta
 			RegisterOption('h', Hue);
 			RegisterOption('s', Saturation);
 			RegisterOption('b', Brightness);
+
+			if (_autoStart)
+				KeepColor();
 		}
 
 		private void StopColorKeeper()
 		{
 			_colorKeeper?.Dispose();
+			_colorKeeper = null;
 		}
 
 		//Keep Colors
 		private void KeepColor()
 		{
+			if (_client == null)
+				Setup();
+			if(!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 			if(_colorKeeper != null)
 			{
 				Karuta.Write("Color Keeper is already running!");
@@ -55,40 +68,21 @@ namespace com.LuminousVector.Karuta
 				Karuta.Write("No colors saved.");
 				return;
 			}
-			bool lightsSet = false;
 			_colorKeeper = new Timer(async info =>
 			{
-				//Karuta.Write("Checking Lights...");
-				List<Light> lights = new List<Light>();
-				lights.AddRange(await _client.GetLightsAsync());
-				bool reachable = false;
-				foreach(Light l in lights)
+				foreach(Light l in await _client.GetLightsAsync())
 				{
-					if (l.State.IsReachable == true)
-						reachable = true;
-				}
-				if(reachable)
-				{
-					if (!lightsSet)
+					State state = l.State;
+					if (state.Saturation == _defaultColor.s && state.Hue == _defaultColor.h && state.Brightness == (byte)_defaultColor.b)
 					{
-						foreach (string l in _lightColors.Keys)
-						{
-							//Karuta.Write("Lights reachable!");
-							LightCommand cmd = new LightCommand();
-							Color c = _lightColors[l];
-							cmd.Hue = c.h;
-							cmd.Saturation = c.s;
-							//cmd.Brightness = (byte)c.b;
-							//Karuta.Write("Setting Colors: " + l);
-							await _client.SendCommandAsync(cmd, new string[] { l });
-							lightsSet = true;
-						}
+						Color curColor = _lightColors[l.Id];
+						LightCommand cmd = new LightCommand();
+						cmd.Hue = curColor.h;
+						cmd.Saturation = curColor.s;
+						await _client.SendCommandAsync(cmd, new string[] { l.Id });
 					}
-				}else
-				{
-					lightsSet = false;
 				}
-			}, null, 0, 2000);
+			}, null, 0, 1000);
 			
 		}
 
@@ -97,6 +91,11 @@ namespace com.LuminousVector.Karuta
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 			List<Light> lights = new List<Light>();
 			lights.AddRange(await _client.GetLightsAsync());
 			foreach(Light l in lights)
@@ -138,6 +137,11 @@ namespace com.LuminousVector.Karuta
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 			LightCommand cmd = new LightCommand();
 			List<Light> lights = new List<Light>();
 			lights.AddRange(await _client.GetLightsAsync());
@@ -152,33 +156,63 @@ namespace com.LuminousVector.Karuta
 		}
 
 		//Hue
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		async void Hue(string h)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 		}
 
 		//Saturation
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		async void Saturation(string s)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 		}
 
 		//Brightness
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		async void Brightness(string b)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 		}
 
 		//Setup
 		async void Setup()
 		{
 			_client = new LocalHueClient(_url);
-			if(_user == "")
-				_user = await _client.RegisterAsync("Karuta.lighting", "Karuta");
-			_client.Initialize(_user);
+			try
+			{
+				if(_user == "" || _user == null)
+					_user = await _client.RegisterAsync("Karuta.lighting", "Karuta");
+				else
+					_client.Initialize(_user);
+			}catch(Exception e)
+			{
+				Karuta.Write(e.Message);
+				Karuta.Write(e.StackTrace);
+			}
+			Karuta.registry.SetValue("lightuser", _user);
 			List<Light> light = new List<Light>();
 		}
 
@@ -187,6 +221,11 @@ namespace com.LuminousVector.Karuta
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 			LightCommand cmd = new LightCommand();
 			cmd.On = true;
 			await _client.SendCommandAsync(cmd);
@@ -197,6 +236,11 @@ namespace com.LuminousVector.Karuta
 		{
 			if (_client == null)
 				Setup();
+			if (!_client.IsInitialized)
+			{
+				Karuta.Write("Not connected to lights.");
+				return;
+			}
 			LightCommand cmd = new LightCommand();
 			cmd.On = false;
 			await _client.SendCommandAsync(cmd);

@@ -17,6 +17,7 @@ namespace com.LuminousVector.Karuta
 		public static Dictionary<string, Command> commands { get { return _commands; } }
 		public static Registry registry;
 		public static Logger logger;
+		public static Random random;
 		public static string user
 		{
 			set
@@ -55,6 +56,7 @@ namespace com.LuminousVector.Karuta
 			_commands = new Dictionary<string, Command>();
 			_threads = new List<Thread>();
 			logger = new Logger();
+			random = new Random();
 			//Prepare Console
 			try
 			{
@@ -101,6 +103,7 @@ namespace com.LuminousVector.Karuta
 			RegisterCommand(new Logs());
 			RegisterCommand(new CrawlerCommand());
 			RegisterCommand(new LightingCommand());
+			RegisterCommand(new DiscordBot());
 			RegisterCommand(new TestCommand());
 			RegisterCommand(new Command("save", () =>
 			{
@@ -130,7 +133,14 @@ namespace com.LuminousVector.Karuta
 				else
 				{
 					args.RemoveAt(0);
-					cmd.Pharse(args);
+					try
+					{
+						cmd.Pharse(args);
+					}catch(Exception e)
+					{
+						Write("An error occured while executing the command: " + e.Message);
+						Write(e.StackTrace);
+					}
 				}
 			}
 		}
@@ -221,12 +231,19 @@ namespace com.LuminousVector.Karuta
 		//Invoke a command
 		public static void InvokeCommand(string command, List<string> args)
 		{
-			if(commands.ContainsKey(command))
+			if(!commands.ContainsKey(command))
 			{
-				throw new NoSuchCommandException();
+				//throw new NoSuchCommandException();
 			}else
 			{
-				commands[command].Pharse(args);
+				try
+				{
+					commands[command].Pharse(args);
+				}catch(Exception e)
+				{
+					Write("An error occured while executing the command: " + e.Message);
+					Write(e.StackTrace);
+				}
 			}
 		}
 

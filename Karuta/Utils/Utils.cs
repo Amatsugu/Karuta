@@ -43,5 +43,15 @@ namespace com.LuminousVector.Karuta
 			response.Close();
 			return output;
 		}
+
+		public static string Random(string[] array)
+		{
+			return array[Karuta.random.Next(0, array.Length)];
+		}
+
+		public static string Random(List<string> array)
+		{
+			return array[Karuta.random.Next(0, array.Count)];
+		}
 	}
 }

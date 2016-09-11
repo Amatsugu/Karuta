@@ -21,7 +21,9 @@ namespace com.LuminousVector.Karuta
 		{
 			_default = Setup;
 			_user = Karuta.registry.GetString("lightuser");
-			if(_user != "")
+			bool? auto = Karuta.registry.GetBool("lightAutostart");
+			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
+			if (_user != "")
 			{
 				_client = new LocalHueClient(_url);
 				_client.Initialize(_user);
@@ -33,13 +35,22 @@ namespace com.LuminousVector.Karuta
 			RegisterKeyword("keepColors", KeepColor);
 			RegisterKeyword("stop", StopColorKeeper);
 			RegisterKeyword("saveColors", SaveColor);
+			RegisterKeyword("autostart", () =>
+			{
+				_autoStart = !_autoStart;
+				Karuta.registry.SetValue("lightAutostart", _autoStart);
+				Karuta.Write("Autostart " + ((_autoStart) ? "enabled" : "disabled"));
+			}, "enable/disable autostart");
 
 			RegisterOption('h', Hue);
 			RegisterOption('s', Saturation);
 			RegisterOption('b', Brightness);
 
-			if (_autoStart)
-				KeepColor();
+			init = () =>
+			{
+				if (_autoStart)
+					KeepColor();
+			};
 		}
 
 		private void StopColorKeeper()
@@ -68,7 +79,7 @@ namespace com.LuminousVector.Karuta
 				Karuta.Write("No colors saved.");
 				return;
 			}
-			_colorKeeper = new Timer(async info =>
+			_colorKeeper = Karuta.StartTimer("Lights Color Keeper", async info =>
 			{
 				foreach(Light l in await _client.GetLightsAsync())
 				{
@@ -82,7 +93,7 @@ namespace com.LuminousVector.Karuta
 						await _client.SendCommandAsync(cmd, new string[] { l.Id });
 					}
 				}
-			}, null, 0, 1000);
+			}, 0, 1000);
 			
 		}
 

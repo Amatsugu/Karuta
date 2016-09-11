@@ -13,6 +13,7 @@ namespace com.LuminousVector.Karuta.Commands
 		public string helpMessage { get { return _helpMessage; } }
 		public ReadOnlyCollection<Option> options { get { return _options.AsReadOnly(); } }
 		public ReadOnlyCollection<Keyword> keywords { get { return _keywords.AsReadOnly(); } }
+		public Action init;
 
 		protected Action _default { get; set; }
 		protected string _helpMessage;

@@ -111,6 +111,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="Commands\DiscordBotCommands.cs" />
     <None Include="Karuta.Sign.snk" />
     <None Include="Karuta_TemporaryKey.pfx" />
     <None Include="packages.config" />
@@ -123,12 +124,13 @@
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\Keyword.cs" />
     <Compile Include="Commands\Option.cs" />
+    <Compile Include="Commands\ProcessMonitor.cs" />
     <Compile Include="Commands\TestCommand.cs" />
     <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="DataSerializer.cs" />
     <Compile Include="Commands\LightingCommand.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="NoSuchCommandException.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Commands\Command.old.cs" />
     <Compile Include="Events\EventManager.cs" />
     <Compile Include="Program.cs" />
@@ -143,15 +145,15 @@
     <Compile Include="Registry.cs" />
     <Compile Include="Utils\Color.cs" />
     <Compile Include="Utils\Utils.cs" />
-    <Compile Include="Word.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Discord.Net, Version=0.9.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Discord.Net.0.9.4\lib\net45\Discord.Net.dll</HintPath>
+    <Reference Include="Discord.Net, Version=0.9.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Discord.Net.0.9.5\lib\net45\Discord.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>.\HtmlAgilityPack.dll</HintPath>
+    <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.9.5\lib\Net45\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Imgur.API, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Imgur.API.4.0.1\lib\net45\Imgur.API.dll</HintPath>
@@ -173,16 +175,25 @@
       <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.Enlightenment.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\protobuf-net.dll</HintPath>
+    <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\packages\protobuf-net.2.1.0\lib\net451\protobuf-net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Q42.HueApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Q42.HueApi\src\Q42.HueApi\bin\Release\Q42.HueApi.dll</HintPath>
+      <HintPath>..\packages\Q42.HueApi.3.0.0\lib\portable-net45+win+wpa81+wp80+MonoAndroid10+MonoTouch10\Q42.HueApi.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="RedditSharp">
-      <HintPath>.\RedditSharp.dll</HintPath>
+    <Reference Include="Q42.HueApi.ColorConverters, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Q42.HueApi.ColorConverters.3.0.0\lib\portable45-net45+win8+wp8+wpa81\Q42.HueApi.ColorConverters.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Q42.HueApi.NET, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Q42.HueApi.Net.2.0.0\lib\net45\Q42.HueApi.NET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RedditSharp, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RedditSharp.1.1.2\lib\net45\RedditSharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.105.2.3\lib\net46\RestSharp.dll</HintPath>

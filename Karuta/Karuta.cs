@@ -2,12 +2,12 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
-//using System.Speech.Synthesis;
 using System.Diagnostics;
 using com.LuminousVector.Events;
 using com.LuminousVector.DataStore;
 using com.LuminousVector.Serialization;
 using com.LuminousVector.Karuta.Commands;
+using com.LuminousVector.Karuta.Commands.DiscordBot;
 
 namespace com.LuminousVector.Karuta
 {
@@ -46,15 +46,17 @@ namespace com.LuminousVector.Karuta
 		private static string _regDir = "/Karuta";
 		private static bool _isRunning = false;
 		private static string _input;
-		//private static SpeechSynthesizer _voice;
-		private static Dictionary<string,Command> _commands;
-		private static List<Thread> _threads;
+		private static Dictionary<string, Command> _commands;
+		private static Dictionary<string, Thread> _threads;
+		private static Dictionary<string, Timer> _timers;
 
+		//Initialize
 		static Karuta()
 		{
 			//Init Vars
 			_commands = new Dictionary<string, Command>();
-			_threads = new List<Thread>();
+			_threads = new Dictionary<string, Thread>();
+			_timers = new Dictionary<string, Timer>();
 			logger = new Logger();
 			random = new Random();
 			//Prepare Console
@@ -84,16 +86,26 @@ namespace com.LuminousVector.Karuta
 				registry.Init();
 				registry.SetValue("user", "user");
 			}
-			//Prepare Voice
-			//_voice = new SpeechSynthesizer();
-			//_voice.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Teen);
-			//Register Commands
-			RegisterCommands();
+
+			try
+			{
+				//Register Commands
+				RegisterCommands();
+				//Initalize commands
+				foreach (Command c in commands.Values)
+					c.init?.Invoke();
+			}catch(Exception e)
+			{
+				Write("An error occured while initializing commands: " + e.Message);
+				Write(e.StackTrace);
+			}
 			sw.Stop();
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
+
 			Write("Karuta is ready. Finished in " + elapsedT + "ms");
 		}
 
+		//Register all Commands
 		public static void RegisterCommands()
 		{
 			RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
@@ -109,13 +121,18 @@ namespace com.LuminousVector.Karuta
 			{
 				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
 			}, "Save the registry"));
+			RegisterCommand(new ProcessMonitor(_threads, _timers));
 		}
 
+		//Register a new command
 		public static void RegisterCommand(Command command)
 		{
+			if (commands.ContainsKey(command.name))
+				throw new DuplicateCommandExeception(command.name);
 			commands.Add(command.name, command);
 		}
 
+		//Start the main process loop
 		public static void Run()
 		{
 			Write("Karuta is running...");
@@ -153,7 +170,7 @@ namespace com.LuminousVector.Karuta
 			{
 				c.Stop();
 			}
-			foreach(Thread t in _threads)
+			foreach(Thread t in _threads.Values)
 			{
 				t.Abort();
 			}
@@ -163,15 +180,13 @@ namespace com.LuminousVector.Karuta
 			Console.WriteLine("GoodBye");
 		}
 
-		//Say message with voice and name label
+		//Say message with a name label
 		public static void Say(string message)
 		{
-			//_voice.SpeakAsyncCancelAll();
-			//_voice.SpeakAsync(message);
 			Console.WriteLine("Karuta: " + message);
 		}
 
-		//Say a message without name label or voice
+		//Say a message without name label
 		public static void Write(Object message)
 		{
 			Console.WriteLine(message);
@@ -213,19 +228,49 @@ namespace com.LuminousVector.Karuta
 		{
 			Thread newThread = new Thread(thread);
 			newThread.Name = "Karuta." + name;
-			_threads.Add(newThread);
+			_threads.Add(newThread.Name, newThread);
 			newThread.Start();
 			return newThread;
 		}
 
-		//Close Thread
-		public static void RemoveThread(Thread thread)
+		//Force Join a Thread
+		public static void ForceJoinThread(string name)
 		{
-			if (_threads.Contains(thread))
+			string tName = "Karuta." + name;
+			if (_threads.ContainsKey(tName))
 			{
-				_threads.Remove(thread);
-				thread.Abort();
+				_threads[tName].Join();
 			}
+		}
+
+		//Close Thread
+		public static void CloseThread(Thread thread)
+		{
+			if (_threads.ContainsValue(thread))
+			{
+				thread.Abort();
+				_threads.Remove(thread.Name);
+			}
+		}
+
+		//Starts a timer
+		public static Timer StartTimer(string name, TimerCallback callback, int delay, int interval)
+		{
+			if (_timers.ContainsKey(name))
+				throw new DuplicateTimerExeception(name);
+			Timer timer = new Timer(callback, null, delay, interval);
+			_timers.Add(name, timer);
+			return timer;
+		}
+
+
+		//Stops a timer
+		public static void StopTimer(string name)
+		{
+			if (!_timers.ContainsKey(name))
+				throw new NoSuchTimerExeception(name);
+			_timers[name].Dispose();
+			_timers.Remove(name);
 		}
 
 		//Invoke a command
@@ -233,7 +278,7 @@ namespace com.LuminousVector.Karuta
 		{
 			if(!commands.ContainsKey(command))
 			{
-				//throw new NoSuchCommandException();
+				throw new NoSuchCommandException(command);
 			}else
 			{
 				try

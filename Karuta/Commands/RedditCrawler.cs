@@ -6,6 +6,7 @@ using System.Net;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
+using System.Threading.Tasks;
 using RedditSharp;
 using RedditSharp.Things;
 using Imgur.API.Authentication.Impl;
@@ -17,10 +18,12 @@ namespace com.LuminousVector.Karuta
 	public class CrawlerCommand : Command
 	{
 		private RedditCrawler crawler;
-		private bool _autoStart = true;
+		private bool _autoStart = false;
 
 		public CrawlerCommand() : base("crawl", "Connects to reddit and downloads images from specified subreddits")
 		{
+			bool? auto = Karuta.registry.GetBool("redditAutostart");
+			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
 			crawler = new RedditCrawler();
 			RegisterOption('c', crawler.SetPostsToGet, "Sets the number of posts to get");
 			RegisterOption('v', crawler.SetVerbose, "Toggles Verbose logging mode");
@@ -37,6 +40,12 @@ namespace com.LuminousVector.Karuta
 			RegisterKeyword("status", crawler.Status, "Shows the current status of the bot");
 			RegisterKeyword("start", crawler.Start, "Start a crawl of all subreddits on the list at a set interval");
 			RegisterKeyword("stop", crawler.Stop, "Stop all processes");
+			RegisterKeyword("autostart", () =>
+			{
+				_autoStart = !_autoStart;
+				Karuta.registry.SetValue("redditAutostart", _autoStart);
+				Karuta.Write("Autostart " + ((_autoStart) ? "enabled" : "disabled"));
+			}, "enable/disable autostart");
 			RegisterKeyword("imgur", () =>
 			{
 				Karuta.Write("Reset Imgur");
@@ -45,8 +54,11 @@ namespace com.LuminousVector.Karuta
 				crawler.ImgurSetup();
 			}, "Link Imgur API");
 
-			if (_autoStart)
-				crawler.Start();
+			init = () =>
+			{
+				if (_autoStart)
+					crawler.Start();
+			};
 		}
 
 		public override void Stop()
@@ -117,11 +129,13 @@ namespace com.LuminousVector.Karuta
 				Karuta.Write("Loading Prefs...");
 				if (Karuta.registry.GetString("baseDir") != "")
 					baseDir = Karuta.registry.GetString("baseDir");
-				if (Karuta.registry.GetInt("updateRate") != default(int))
-					updateRate = Karuta.registry.GetInt("updateRate");
-				int c = Karuta.registry.GetInt("reddit_postsToGet");
-				if (c == default(int))
+				if (Karuta.registry.GetInt("updateRate") != null)
+					updateRate = (int)Karuta.registry.GetInt("updateRate");
+				int c;
+				if (Karuta.registry.GetInt("reddit_postsToGet") == null)
 					c = 100;
+				else
+					c = (int)Karuta.registry.GetInt("reddit_postsToGet");
 				postsToGet = c;
 				string mode = Karuta.registry.GetString("reddit_searchMode");
 				SetSearchMode(mode == "" ? "new" : mode);
@@ -374,8 +388,9 @@ namespace com.LuminousVector.Karuta
 		{
 			Karuta.logger.Log("Crawl terminated by " + Karuta.user, name);
 			isRunning = false;
+			Karuta.StopTimer("RedditCrawler");
 			_client.Dispose();
-			_crawlLoop.Dispose();
+			_crawlLoop = null;
 		}
 
 		//Start find and download the images
@@ -398,8 +413,7 @@ namespace com.LuminousVector.Karuta
 			bool postGet = false;
 			
 			subs = new List<Subreddit>();
-			_crawlLoop?.Dispose();
-			_crawlLoop = new Timer(async info =>
+			_crawlLoop = Karuta.StartTimer("RedditCrawler", info =>
 			{
 				try
 				{
@@ -551,9 +565,9 @@ namespace com.LuminousVector.Karuta
 
 												try
 												{
-													var image = await imgEndpoint.GetImageAsync(imgurID);
-													//Task.WaitAll(task);
-													//var image = task.Result;
+													var task = imgEndpoint.GetImageAsync(imgurID);
+													Task.WaitAll(task);
+													var image = task.Result;
 													ext = Path.GetExtension(image.Link);
 													if (File.Exists(file + ((ext == ".gif") ? ext : ".png")))
 													{
@@ -589,8 +603,8 @@ namespace com.LuminousVector.Karuta
 					Karuta.Write("Crawl Ended");
 					isRunning = false;
 				}
-				if (!isRunning)
-					_crawlLoop.Dispose();
+				if (!isRunning && _crawlLoop != null)
+					Karuta.StopTimer("RedditCrawler");
 
 				if (!loop)
 				{
@@ -603,10 +617,10 @@ namespace com.LuminousVector.Karuta
 					Karuta.logger.Log("Dowloaded " + imgCount + " images...", name, verbose);
 					Karuta.logger.Log("Sleeping for " + updateRate + "ms", name, verbose);
 				}
-			}, null, 0, updateRate);
+			}, 0, updateRate);
 		}
 
-		async void DownloadImgurAlbum(Uri url, int epoch, string fileName, Post p, string curDir)
+		void DownloadImgurAlbum(Uri url, int epoch, string fileName, Post p, string curDir)
 		{
 			try
 			{
@@ -616,9 +630,9 @@ namespace com.LuminousVector.Karuta
 					return;
 				//Karuta.logger.Log("Saving Album: " + log, "/r/" + sub.Name, _verbose);
 				//Karuta.logger.Log("Album ID: " + imgurID, "/r/" + sub.Name, _verbose);
-				var album = await albumEndpoint.GetAlbumImagesAsync(imgurID);
-				//Task.WaitAll(task);
-				//var album = task.Result;
+				var task = albumEndpoint.GetAlbumImagesAsync(imgurID); 
+				Task.WaitAll(task);
+				var album = task.Result;
 				int i = 1;
 				foreach (var image in album)
 				{

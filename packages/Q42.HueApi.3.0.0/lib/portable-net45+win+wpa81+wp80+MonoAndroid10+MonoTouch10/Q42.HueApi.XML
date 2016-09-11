@@ -1,0 +1,1216 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Q42.HueApi</name>
+    </assembly>
+    <members>
+        <member name="T:Q42.HueApi.Converters.HueDateTimeConverter">
+            <summary>
+            Custom DateTime converter for hue bridge
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Converters.DateTimeConverter">
+            <summary>
+            Custom DateTime converter for hue bridge
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.HttpBridgeLocator">
+            <summary>
+            Uses the special nupnp url from meethue.com to find registered bridges based on your external IP
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.HttpBridgeLocator.LocateBridgesAsync(System.TimeSpan)">
+            <summary>
+            Locate bridges
+            </summary>
+            <param name="timeout"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.HueClient">
+            <summary>
+            Partial HueClient, contains requests to the /resourcelinks/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /config/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /config/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /Groups/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /rules/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /scenes/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /scenes/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /lights/ url
+            </summary>
+            <summary>
+            Partial HueClient, contains requests to the /schedules/ url
+            </summary>
+            <summary>
+            Responsible for communicating with the bridge
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteResourceLinkAsync(System.String)">
+            <summary>
+            Deletes a single ResourceLink
+            </summary>
+            <param name="resourceLinkId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetResourceLinksAsync">
+            <summary>
+            Get all ResourceLinks
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetResourceLinkAsync(System.String)">
+            <summary>
+            Get the state of a single ResourceLink
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.CreateResourceLinkAsync(Q42.HueApi.Models.ResourceLink)">
+            <summary>
+            Create a ResourceLink
+            </summary>
+            <param name="ResourceLink"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateResourceLinkAsync(System.String,Q42.HueApi.Models.ResourceLink)">
+            <summary>
+            Update a ResourceLink
+            </summary>
+            <param name="id"></param>
+            <param name="ResourceLink"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetTimeZonesAsync">
+            <summary>
+            Get all Timezones
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteWhiteListEntryAsync(System.String)">
+            <summary>
+            Deletes a whitelist entry
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetWhiteListAsync">
+            <summary>
+            Asynchronously gets the whitelist with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.WhiteList"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetBridgeAsync">
+            <summary>
+            Get bridge info
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetConfigAsync">
+            <summary>
+            Get bridge config
+            </summary>
+            <returns>BridgeConfig object</returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateBridgeConfigAsync(Q42.HueApi.BridgeConfigUpdate)">
+            <summary>
+            Update bridge config
+            </summary>
+            <param name="update"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.CreateGroupAsync(System.Collections.Generic.IEnumerable{System.String},System.String,System.Nullable{Q42.HueApi.Models.Groups.RoomClass})">
+            <summary>
+            Create a group for a list of lights
+            </summary>
+            <param name="lights">List of lights in the group</param>
+            <param name="name">Optional name</param>
+            <param name="roomClass">for room creation the room class has to be passed, without class it will get the default: "Other" class.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteGroupAsync(System.String)">
+            <summary>
+            Deletes a single group
+            </summary>
+            <param name="groupId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.SendGroupCommandAsync(Q42.HueApi.Interfaces.ICommandBody,System.String)">
+            <summary>
+            Send command to a group
+            </summary>
+            <param name="command"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.SendGroupCommandAsync(System.String,System.String)">
+            <summary>
+            Send command to a group
+            </summary>
+            <param name="command"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetGroupsAsync">
+            <summary>
+            Get all groups
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetGroupAsync(System.String)">
+            <summary>
+            Get the state of a single group
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateGroupAsync(System.String,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Update a group
+            </summary>
+            <param name="id">Group ID</param>
+            <param name="lights">List of light IDs</param>
+            <param name="name">Group Name</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetRulesAsync">
+            <summary>
+            Asynchronously gets all rules registered with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.Models.Rule"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetRuleAsync(System.String)">
+            <summary>
+            Asynchronously gets single rule
+            </summary>
+            <returns><see cref="T:Q42.HueApi.Models.Rule"/></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteRule(System.String)">
+            <summary>
+            Deletes a rule
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetSensorsAsync">
+            <summary>
+            Asynchronously gets all sensors registered with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.Models.Sensor"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.FindNewSensorsAsync">
+            <summary>
+            Starts a search for new sensors.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetNewSensorsAsync">
+            <summary>
+            Gets a list of sensors that were discovered the last time a search for new sensors was performed. The list of new sensors is always deleted when a new search is started.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetSensorAsync(System.String)">
+            <summary>
+            Asynchronously gets single sensor
+            </summary>
+            <returns><see cref="T:Q42.HueApi.Models.Sensor"/></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateSensorAsync(System.String,System.String)">
+            <summary>
+            Update a sensor
+            </summary>
+            <param name="id"></param>
+            <param name="newName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.ChangeSensorConfigAsync(System.String,Q42.HueApi.Models.SensorConfig)">
+            <summary>
+            Changes the Sensor configuration
+            </summary>
+            <param name="id"></param>
+            <param name="config"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteSensorAsync(System.String)">
+            <summary>
+            Deletes a single sensor
+            </summary>
+            <param name="groupId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetScenesAsync">
+            <summary>
+            Asynchronously gets all scenes registered with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.Models.Scene"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateSceneAsync(System.String,System.String,System.Collections.Generic.IEnumerable{System.String},System.Nullable{System.Boolean},System.Nullable{System.TimeSpan})">
+            <summary>
+            UpdateSceneAsync
+            </summary>
+            <param name="id"></param>
+            <param name="name"></param>
+            <param name="lights"></param>
+            <param name="storeLightState">If set, the lightstates of the lights in the scene will be overwritten by the current state of the lights. Can also be used in combination with transitiontime to update the transition time of a scene.</param>
+            <param name="transitionTime">Can be used in combination with storeLightState</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateSceneAsync(System.String,Q42.HueApi.Models.Scene)">
+            <summary>
+            UpdateSceneAsync
+            </summary>
+            <param name="id"></param>
+            <param name="scene"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteSceneAsync(System.String)">
+            <summary>
+            Deletes a scene
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetSceneAsync(System.String)">
+            <summary>
+            Get a single scene
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetLightAsync(System.String)">
+            <summary>
+            Asynchronously retrieves an individual light.
+            </summary>
+            <param name="id">The light's Id.</param>
+            <returns>The <see cref="T:Q42.HueApi.Light"/> if found, <c>null</c> if not.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="id"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="id"/> is empty or a blank string.</exception>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.SetLightNameAsync(System.String,System.String)">
+            <summary>
+            Sets the light name
+            </summary>
+            <param name="id"></param>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetLightsAsync">
+            <summary>
+            Asynchronously gets all lights registered with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.Light"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.SendCommandAsync(Q42.HueApi.LightCommand,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Send a lightCommand to a list of lights
+            </summary>
+            <param name="command"></param>
+            <param name="lightList">if null, send command to all lights</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.SendCommandRawAsync(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Send a json command to a list of lights
+            </summary>
+            <param name="command"></param>
+            <param name="lightList">if null, send command to all lights</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.SearchNewLightsAsync(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Start searching for new lights
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetNewLightsAsync">
+            <summary>
+            Gets a list of lights that were discovered the last time a search for new lights was performed. The list of new lights is always deleted when a new search is started.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteLightAsync(System.String)">
+            <summary>
+            Deletes a single light
+            </summary>
+            <param name="groupId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetSchedulesAsync">
+            <summary>
+            Get all schedules
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.GetScheduleAsync(System.String)">
+            <summary>
+            Get a single schedule
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.CreateScheduleAsync(Q42.HueApi.Models.Schedule)">
+            <summary>
+            Create a schedule
+            </summary>
+            <param name="schedule"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.UpdateScheduleAsync(System.String,Q42.HueApi.Models.Schedule)">
+            <summary>
+            Update a schedule
+            </summary>
+            <param name="id"></param>
+            <param name="schedule"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeleteScheduleAsync(System.String)">
+            <summary>
+            Delete a schedule
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="F:Q42.HueApi.HueClient._appKey">
+            <summary>
+            Whitelist ID
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.HueClient.IsInitialized">
+            <summary>
+            Indicates the HueClient is initialized with an AppKey
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.Initialize(System.String)">
+            <summary>
+            Initialize client with your app key
+            </summary>
+            <param name="appKey"></param>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.CheckInitialized">
+            <summary>
+            Check if the HueClient is initialized
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeserializeResult``1(System.String)">
+            <summary>
+            Deserialization helper that can also check for errors
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="json"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeserializeDefaultHueResult(System.String)">
+            <summary>
+            Checks if the json contains errors
+            </summary>
+            <param name="json"></param>
+        </member>
+        <member name="M:Q42.HueApi.HueClient.DeserializeDefaultHueResult``1(System.String)">
+            <summary>
+            Checks if the json contains errors
+            </summary>
+            <param name="json"></param>
+        </member>
+        <member name="T:Q42.HueApi.Interfaces.IRemoteHueClient">
+            <summary>
+            Remote Hue Client responsible for interacting with the bridge using the remote API
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IRemoteHueClient.Authorize(System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Untested
+            </summary>
+            <param name="clientId"></param>
+            <param name="state"></param>
+            <param name="deviceId"></param>
+            <param name="appId"></param>
+            <param name="deviceName"></param>
+            <param name="responseType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IRemoteHueClient.Initialize(System.String,System.String)">
+            <summary>
+            Initialize the client with a bridgeId and appKey (whitelist identifier)
+            </summary>
+            <param name="bridgeId"></param>
+            <param name="appKey"></param>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IRemoteHueClient.RegisterAsync(System.String,System.String)">
+            <summary>
+            Registers bridge for remote communication. Returns appKey and Initialized the client with this appkey
+            </summary>
+            <param name="bridgeId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IRemoteHueClient.SetRemoteAccessToken(System.String)">
+            <summary>
+            Set the accessToken for the RemoteHueClient
+            </summary>
+            <param name="accessToken"></param>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IRemoteHueClient.RefreshToken(System.String,System.String,System.String)">
+            <summary>
+            Untested
+            </summary>
+            <param name="refreshToken"></param>
+            <param name="clientId"></param>
+            <param name="clientSecret"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.Interfaces.ILocalHueClient">
+            <summary>
+            Hue Client for interaction with the bridge
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.ILocalHueClient.RegisterAsync(System.String,System.String)">
+            <summary>
+            Register your <paramref name="appName"/> and <paramref name="appKey"/> at the Hue Bridge.
+            </summary>
+            <param name="appKey">Secret key for your app. Must be at least 10 characters.</param>
+            <param name="appName">The name of your app or device.</param>
+            <returns><c>true</c> if success, <c>false</c> if the link button hasn't been pressed.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="appName"/> or <paramref name="appKey"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="appName"/> or <paramref name="appKey"/> aren't long enough, are empty or contains spaces.</exception>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.ILocalHueClient.Initialize(System.String)">
+            <summary>
+            Initialize the client with your app key
+            </summary>
+            <param name="appKey"></param>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.ILocalHueClient.CheckConnection">
+            <summary>
+            Check if there is a working connection with the bridge
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.Interfaces.IBridgeLocator">
+            <summary>
+            Different platforms can make specific implementations of this interface
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IBridgeLocator.LocateBridgesAsync(System.TimeSpan)">
+            <summary>
+            Returns list of bridge IPs
+            </summary>
+            <param name="timeout"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.Interfaces.IHueClient">
+            <summary>
+            Hue Client for interaction with the bridge
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetWhiteListAsync">
+            <summary>
+            Asynchronously gets all lights registered with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.WhiteList"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetBridgeAsync">
+            <summary>
+            Get bridge info
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.UpdateBridgeConfigAsync(Q42.HueApi.BridgeConfigUpdate)">
+            <summary>
+            Update bridge config
+            </summary>
+            <param name="update"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.DeleteWhiteListEntryAsync(System.String)">
+            <summary>
+            Deletes a whitelist entry
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.SendGroupCommandAsync(Q42.HueApi.Interfaces.ICommandBody,System.String)">
+            <summary>
+            Send command to a group
+            </summary>
+            <param name="command"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.CreateGroupAsync(System.Collections.Generic.IEnumerable{System.String},System.String,System.Nullable{Q42.HueApi.Models.Groups.RoomClass})">
+            <summary>
+            Create a group for a list of lights
+            </summary>
+            <param name="lights">List of lights in the group</param>
+            <param name="name">Optional name</param>
+            <param name="roomClass">for room creation the room class has to be passed, without class it will get the default: "Other" class.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.DeleteGroupAsync(System.String)">
+            <summary>
+            Deletes a single group
+            </summary>
+            <param name="groupId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetGroupsAsync">
+            <summary>
+            Get all groups
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetGroupAsync(System.String)">
+            <summary>
+            Get the state of a single group
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.UpdateGroupAsync(System.String,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Update a group
+            </summary>
+            <param name="id">Group ID</param>
+            <param name="lights">List of light IDs</param>
+            <param name="name">Group Name (optional)</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetLightsAsync">
+            <summary>
+            Asynchronously gets all lights registered with the bridge.
+            </summary>
+            <returns>An enumerable of <see cref="T:Q42.HueApi.Light"/>s registered with the bridge.</returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetLightAsync(System.String)">
+            <summary>
+            Asynchronously retrieves an individual light.
+            </summary>
+            <param name="id">The light's Id.</param>
+            <returns>The <see cref="T:Q42.HueApi.Light"/> if found, <c>null</c> if not.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="id"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="id"/> is empty or a blank string.</exception>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.DeleteLightAsync(System.String)">
+            <summary>
+            Delete Light
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.SetLightNameAsync(System.String,System.String)">
+            <summary>
+            Sets the light name
+            </summary>
+            <param name="id"></param>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.SendCommandRawAsync(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Send a raw string / json command
+            </summary>
+            <param name="command">json</param>
+            <param name="lightList">if null, send to all lights</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.SendCommandAsync(Q42.HueApi.LightCommand,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Send a light command
+            </summary>
+            <param name="command">Compose a new lightCommand()</param>
+            <param name="lightList">if null, send to all lights</param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.SearchNewLightsAsync(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Start searching for new lights
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetNewLightsAsync">
+            <summary>
+            Gets a list of lights that were discovered the last time a search for new lights was performed.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetSchedulesAsync">
+            <summary>
+            Get all schedules
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.GetScheduleAsync(System.String)">
+            <summary>
+            Get a single schedule
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.CreateScheduleAsync(Q42.HueApi.Models.Schedule)">
+            <summary>
+            Create a schedule
+            </summary>
+            <param name="schedule"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.UpdateScheduleAsync(System.String,Q42.HueApi.Models.Schedule)">
+            <summary>
+            Update a schedule
+            </summary>
+            <param name="id"></param>
+            <param name="schedule"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.DeleteScheduleAsync(System.String)">
+            <summary>
+            Delete a schedule
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.CreateSceneAsync(Q42.HueApi.Models.Scene)">
+            <summary>
+            Creates a new scene
+            </summary>
+            <param name="scene"></param>
+            <returns>ID of the new scene</returns>
+        </member>
+        <member name="M:Q42.HueApi.Interfaces.IHueClient.DeleteSensorAsync(System.String)">
+            <summary>
+            Delete Sensor
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.LocalHueClient">
+            <summary>
+            Responsible for communicating with the bridge
+            </summary>
+            <summary>
+             Partial HueClient, contains requests to the /api/ url
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LocalHueClient.ApiBase">
+            <summary>
+            Base URL for the API
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.LocalHueClient.#ctor(System.String)">
+            <summary>
+            Initialize with Bridge IP
+            </summary>
+            <param name="ip"></param>
+        </member>
+        <member name="M:Q42.HueApi.LocalHueClient.CheckValidIp(System.String)">
+            <summary>
+            Check if the provided IP is valid by using it in an URI to the Hue Bridge
+            </summary>
+            <param name="ip"></param>
+        </member>
+        <member name="M:Q42.HueApi.LocalHueClient.#ctor(System.String,System.String)">
+            <summary>
+            Initialize with Bridge IP and AppKey
+            </summary>
+            <param name="ip"></param>
+            <param name="appKey"></param>
+        </member>
+        <member name="M:Q42.HueApi.LocalHueClient.RegisterAsync(System.String,System.String)">
+            <summary>
+            Register your <paramref name="applicationName"/> and <paramref name="deviceName"/> at the Hue Bridge.
+            </summary>
+            <param name="applicationName">The name of your app.</param>
+            <param name="deviceName">The name of the device.</param>
+            <returns>Secret key for the app to communicate with the bridge.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="applicationName"/> or <paramref name="deviceName"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="applicationName"/> or <paramref name="deviceName"/> aren't long enough, are empty or contains spaces.</exception>
+        </member>
+        <member name="T:Q42.HueApi.Extensions.IEnumerableExtensions">
+            <summary>
+            IEnumerable Helpers
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.Extensions.IEnumerableExtensions.ForEachAsync``1(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Func{``0,System.Threading.Tasks.Task})">
+            <summary>
+            http://blogs.msdn.com/b/pfxteam/archive/2012/03/04/10277325.aspx
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="source"></param>
+            <param name="dop"></param>
+            <param name="body"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.BridgeState">
+            <summary>
+            Status data returned from the bridge
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Bridge">
+            <summary>
+            Hue Bridge
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Bridge.Lights">
+            <summary>
+            Light info from the bridge
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Bridge.Config">
+            <summary>
+            Bridge config info
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Bridge.WhiteList">
+            <summary>
+            Light info from the bridge
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.BridgeConfigUpdate">
+            <summary>
+            Allowed properties to update the BridgeConfig
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.BridgeConfigUpdate.TouchLink">
+            <summary>
+            As of 1.9. If set to true performs a touchlink action.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.BridgeConfig.TouchLink">
+            <summary>
+            Perform a touchlink action if set to true, setting to false is ignored. When set to true a touchlink procedure starts which adds the closet lamp (within range) to the ZigBee network.  You can then search for new lights and lamp will show up in the bridge.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.BridgeConfig.FactoryNew">
+            <summary>
+            Indicates if bridge settings are factory new.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.BridgeConfig.ReplacesBridgeId">
+            <summary>
+             If a bridge backup file has been restored on this bridge from a bridge with a different bridgeid, it will indicate that bridge id, otherwise it will be null.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.BridgeConfig.ModelId">
+            <summary>
+            This parameter uniquely identifies the hardware model of the bridge (BSB001, BSB002).
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.BridgeConfig.BridgeId">
+            <summary>
+            The unique bridge id. This is currently generated from the bridge Ethernet mac address.
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Models.GenericScheduleCommand">
+            <summary>
+            Can be used to create any type of schedule command
+            Use a raw jsonString as input
+            
+            dynamic dynamicCOmmand = new ExpandoObject();
+            dynamicCOmmand.status = 1;
+            var jsonString = JsonConvert.SerializeObject(dynamicCOmmand);
+            var commandBody = new GenericScheduleCommand(jsonString);
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.CreateGroupRequest.Lights">
+            <summary>
+            The IDs of the lights that are in the group.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.CreateGroupRequest.Type">
+            <summary>
+            Luminaire / Lightsource / LightGroup
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.CreateGroupRequest.Class">
+            <summary>
+            Category of the Room type. Default is "Other".
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.Group.Type">
+            <summary>
+            Luminaire / Lightsource / LightGroup
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.Group.Class">
+            <summary>
+            Category of the Room type. Default is "Other".
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.Group.ModelId">
+            <summary>
+            As of 1.4. Uniquely identifies the hardware model of the luminaire. Only present for automatically created Luminaires.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.Group.Lights">
+            <summary>
+            The IDs of the lights that are in the group.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Groups.Group.Action">
+            <summary>
+            The light state of one of the lamps in the group.
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Models.Groups.GroupType">
+            <summary>
+            Possible group types
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Models.Groups.RoomClass">
+            <summary>
+            Possible room types
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Models.Groups.HueResults">
+            <summary>
+            A PUT or POST returns a list which can contain multiple success and errors
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.HueDateTime.DateTime">
+            <summary>
+            Absolute time
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.HueDateTime.TimerTime">
+            <summary>
+            Timers and timeparts for recurring times
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.HueDateTime.RandomizedTime">
+            <summary>
+            Randomized time
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.HueDateTime.RecurringDay">
+            <summary>
+            Recurring days
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.HueDateTime.NumberOfRecurrences">
+            <summary>
+            Number of recurrences (0=repeat forever)
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.ResourceLink.Name">
+            <summary>
+            Human readable name for this resourcelink
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.ResourceLink.Description">
+            <summary>
+            Human readable description of what this resourcelink does. If not specified it's set to "".
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.ResourceLink.Type">
+            <summary>
+            Not writeable and there is only 1 type: "Link"
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.ResourceLink.ClassId">
+            <summary>
+            Class of resourcelink given by application. The resourcelink class can be used to identify resourcelink with the same purpose, like classid 1 for wake-up, 2 for going to sleep, etc. (best practice use range 1 - 10000)
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.ResourceLink.Owner">
+            <summary>
+            Not writeable, this respresents the owner (username) of the creator of the resourcelink
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.ResourceLink.Recycle">
+            <summary>
+            When true: Resource is automatically deleted when not referenced anymore in any resource link. Only on creation of resourcelink. "false" when omitted.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Q42.HueApi.Models.ResourceLink.Links" -->
+        <member name="T:Q42.HueApi.Models.RuleOperator">
+            <summary>
+            Possible light alerts
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.Equal">
+            <summary>
+            Equal, Used for bool and int.
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.OnChange">
+            <summary>
+            OnChange, Used for Time (timestamps) int and bool values..
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.OnChangeDdx">
+            <summary>
+            OnChange, Used for Time (timestamps) int and bool values..
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.OnChangeStable">
+            <summary>
+            OnChange, Used for Time (timestamps) int and bool values..
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.OnChangeNotStable">
+            <summary>
+            OnChange, Used for Time (timestamps) int and bool values..
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.LessThan">
+            <summary>
+            LessThan, Allowed on int values
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Models.RuleOperator.GreaterThan">
+            <summary>
+            GreaterThan, Allowed on int values
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Scene.Owner">
+            <summary>
+            Whitelist user that created or modified the content of the scene. Note that changing name does not change the owner.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Scene.AppData">
+            <summary>
+            App specific data linked to the scene.  Each individual application should take responsibility for the data written in this field.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Q42.HueApi.Models.Scene.Picture" -->
+        <member name="P:Q42.HueApi.Models.Scene.Recycle">
+            <summary>
+            Indicates whether the scene can be automatically deleted by the bridge. Only available by POSTSet to 'false' when omitted. Legacy scenes created by PUT are defaulted to true. When set to 'false' the bridge keeps the scene until deleted by an application.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Scene.Locked">
+            <summary>
+            Indicates that the scene is locked by a rule or a schedule and cannot be deleted until all resources requiring or that reference the scene are deleted.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Models.Schedule.StartTime">
+            <summary>
+            UTC time that the timer was started. Only provided for timers.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Q42.HueApi.Models.Schedule.Status" -->
+        <member name="P:Q42.HueApi.Models.Schedule.AutoDelete">
+            <summary>
+            If set to true, the schedule will be removed automatically if expired, if set to false it will be disabled. Default is true
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.SensorCommand">
+            <summary>
+            Sends a SensorCommand
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.SceneCommand">
+            <summary>
+            Send a SceneID as command
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.SceneCommand.Scene">
+            <summary>
+            Scene ID to activate
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.LightCommand">
+            <summary>
+            Compose a light command to send to a light
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.ColorCoordinates">
+            <summary>
+            Gets or sets the colors based on CIE 1931 Color coordinates.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.Brightness">
+            <summary>
+            Gets or sets the brightness 0-255.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.Hue">
+            <summary>
+            Gets or sets the hue for Hue and <see cref="P:Q42.HueApi.LightCommand.Saturation"/> mode.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.Saturation">
+            <summary>
+            Gets or sets the saturation for <see cref="P:Q42.HueApi.LightCommand.Hue"/> and Saturation mode.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.ColorTemperature">
+            <summary>
+            Gets or sets the Color Temperature
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.On">
+            <summary>
+            Gets or sets whether the light is on.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.Effect">
+            <summary>
+            Gets or sets the current effect for the light.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.Alert">
+            <summary>
+            Gets or sets the current alert for the light.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.TransitionTime">
+            <summary>
+            Gets or sets the transition time for the light.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.BrightnessIncrement">
+            <summary>
+            -254 to 254
+            As of 1.7. Increments or decrements the value of the brightness.  bri_inc is ignored if the bri attribute is provided. Any ongoing bri transition is stopped. Setting a value of 0 also stops any ongoing transition. The bridge will return the bri value after the increment is performed.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.SaturationIncrement">
+            <summary>
+            -254 to 254
+            As of 1.7. Increments or decrements the value of the sat.  sat_inc is ignored if the sat attribute is provided. Any ongoing sat transition is stopped. Setting a value of 0 also stops any ongoing transition. The bridge will return the sat value after the increment is performed.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.HueIncrement">
+            <summary>
+            -65534 to 65534
+            As of 1.7. Increments or decrements the value of the hue.   hue_inc is ignored if the hue attribute is provided. Any ongoing color transition is stopped. Setting a value of 0 also stops any ongoing transition. The bridge will return the hue value after the increment is performed.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.ColorTemperatureIncrement">
+            <summary>
+            -65534 to 65534
+            As of 1.7. Increments or decrements the value of the ct. ct_inc is ignored if the ct attribute is provided. Any ongoing color transition is stopped. Setting a value of 0 also stops any ongoing transition. The bridge will return the ct value after the increment is performed.
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.LightCommand.ColorCoordinatesIncrement">
+            <summary>
+            -0.5 to 0.5
+            As of 1.7. Increments or decrements the value of the xy.  xy_inc is ignored if the xy attribute is provided. Any ongoing color transition is stopped.  Will stop at it's gamut boundaries. Setting a value of 0 also stops any ongoing transition.  The bridge will return the xy value after the increment is performed.
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Alert">
+            <summary>
+            Possible light alerts
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Alert.None">
+            <summary>
+            Stop alert
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Alert.Once">
+            <summary>
+            Alert once
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Alert.Multiple">
+            <summary>
+            Alert multiple times
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.Effect">
+            <summary>
+            Possible light effects
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Effect.None">
+            <summary>
+            Stop current effect
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.Effect.ColorLoop">
+            <summary>
+            Color loop
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.lightCommandExtensions">
+            <summary>
+            Extension methods to compose a light command
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.lightCommandExtensions.SetColor(Q42.HueApi.LightCommand,System.Double,System.Double)">
+            <summary>
+            Helper to set the color based on the light's built in XY color schema
+            </summary>
+            <param name="lightCommand"></param>
+            <param name="x"></param>
+            <param name="y"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.lightCommandExtensions.SetColor(Q42.HueApi.LightCommand,System.Int32)">
+            <summary>
+            Helper to set the color based on the light's built in CT color scheme
+            </summary>
+            <param name="lightCommand"></param>
+            <param name="ct"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.lightCommandExtensions.TurnOn(Q42.HueApi.LightCommand)">
+            <summary>
+            Helper to create turn on command
+            </summary>
+            <param name="lightCommand"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.lightCommandExtensions.TurnOff(Q42.HueApi.LightCommand)">
+            <summary>
+            Helper to create turn off command
+            </summary>
+            <param name="lightCommand"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Q42.HueApi.Light.UniqueId">
+            <summary>
+            Unique id of the device. The MAC address of the device with a unique endpoint id in the form: AA:BB:CC:DD:EE:FF:00:11-XX
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.Light.LuminaireUniqueId">
+            <summary>
+            As of 1.9. Unique ID of the luminaire the light is a part of in the format: AA:BB:CC:DD-XX-YY.  AA:BB:, ... represents the hex of the luminaireid, XX the lightsource position (incremental but may contain gaps) and YY the lightpoint position (index of light in luminaire group).  A gap in the lightpoint position indicates an incomplete luminaire (light search required to discover missing light points in this case).
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.NuPnPResponse">
+            <summary>
+            Model for response from http://www.meethue.com/api/nupnp
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.SoftwareUpdate.UpdateState">
+            <summary>
+            0 means there is no update at all.
+            1 means there is an update to download. The bridge will eventually download it by himself. 
+            2 means there is an update available to apply.
+            3 means apply/applying the update. 
+            http://www.everyhue.com/vanilla/discussion/484/firmware-update-triggering
+            </summary>
+        </member>
+        <member name="P:Q42.HueApi.SoftwareUpdate.CheckForUpdate">
+            <summary>
+            Setting this flag to true lets the bridge search for software updates in the portal. After the search attempt, this flag is set back to false. Requires portal connection to update server
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.RemoteHueClient">
+            <summary>
+            http://www.developers.meethue.com/documentation/remote-api-authentication
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Q42.HueApi.RemoteHueClient.Authorize(System.String,System.String,System.String,System.String,System.String,System.String)" -->
+        <member name="M:Q42.HueApi.RemoteHueClient.Initialize(System.String,System.String)">
+            <summary>
+            Initialize client with your app key
+            </summary>
+            <param name="appKey"></param>
+        </member>
+        <member name="P:Q42.HueApi.RemoteHueClient.ApiBase">
+            <summary>
+            Base URL for the API
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
 using System.IO;
+using Imgur.API.Endpoints.Impl;
 using System.Threading.Tasks;
 
 namespace com.LuminousVector.Karuta
@@ -53,5 +55,7 @@ namespace com.LuminousVector.Karuta
 		{
 			return array[Karuta.random.Next(0, array.Count)];
 		}
+
+		
 	}
 }

@@ -11,14 +11,30 @@ namespace com.LuminousVector.Karuta.Commands
 		public HelpCommand() : base("help", "show this screen")
 		{
 			_default = Help;
-			RegisterOption('c', c => this.c = c);
+			init = () =>
+			{
+				foreach (Command c in Karuta.commands.Values)
+				{
+					//Karuta.Write(c.name);
+					RegisterKeyword(c.name, () =>
+					{
+						Karuta.Write("\t" + c.name + "\t" + c.helpMessage);
+						Karuta.Write("\tOptions:");
+						foreach (Option o in c.options)
+							Karuta.Write("\t\t -" + o.key + "\t" + o.usage);
+						Karuta.Write("\tKeywords:");
+						foreach (Keyword k in c.keywords)
+							Karuta.Write("\t\t " + k.keyword + "\t" + k.usage);
+					});
+				}
+			};
+			//RegisterOption('c', c => this.c = c);
 		}
 
 		private string c = null;
 
 		void Help()
 		{
-			Karuta.Write(c);
 			if (c != null)
 			{
 				if (Karuta.commands.ContainsKey(c))

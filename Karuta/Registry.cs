@@ -32,29 +32,41 @@ namespace com.LuminousVector.DataStore
 		public string GetString(string id)
 		{
 			string value;
+			if (stringStore == null)
+				return null;
 			stringStore.TryGetValue(id, out value);
 			if (value == null)
 				value = "";
 			return value;
 		}
 
-		public int GetInt(string id)
+		public int? GetInt(string id)
 		{
 			int value;
-			intStore.TryGetValue(id, out value);
-			return value;
+			if (intStore == null)
+				return null;
+			if (!intStore.TryGetValue(id, out value))
+				return null;
+			else
+				return value;
 		}
 
-		public bool GetBool(string id)
+		public bool? GetBool(string id)
 		{
 			bool value;
-			boolStore.TryGetValue(id, out value);
-			return value;
+			if (boolStore == null)
+				return null;
+			if (!boolStore.TryGetValue(id, out value))
+				return null;
+			else
+				return value;
 		}
 
-		public float GetFloat(string id)
+		public float? GetFloat(string id)
 		{
 			float value;
+			if (floatStore == null)
+				return null;
 			floatStore.TryGetValue(id, out value);
 			return value;
 		}

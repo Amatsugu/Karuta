@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Q42.HueApi.ColorConverters</name>
+    </assembly>
+    <members>
+        <member name="T:Q42.HueApi.ColorConverters.HSB.DoubleExtension">
+            <summary>
+            Based on code contributed by https://github.com/CharlyTheKid
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.HSB.DoubleExtension.AlmostEquals(System.Double,System.Double,System.Double)">
+            <summary>
+            Tests equality with a certain amount of precision.  Default to smallest possible double
+            </summary>
+            <param name="a">first value</param>
+            <param name="b">second value</param> 
+            <param name="precision">optional, smallest possible double value</param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.HSB.HSB">
+            <summary>
+            Based on code contributed by https://github.com/CharlyTheKid
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.HSB.Numbers">
+            <summary>
+            Based on code contributed by https://github.com/CharlyTheKid
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.HSB.RGBExtensions">
+            <summary>
+            Based on code contributed by https://github.com/CharlyTheKid
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.OriginalWithModel.CIE1931Gamut">
+            <summary>
+            Represents a gamut with red, green and blue primaries in CIE1931 color space.
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.OriginalWithModel.CIE1931Point">
+            <summary>
+            Represents a point in CIE1931 color space.
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.ColorConverters.OriginalWithModel.CIE1931Point.D65White">
+            <summary>
+            The D65 White Point.
+            </summary>
+        </member>
+        <member name="F:Q42.HueApi.ColorConverters.OriginalWithModel.CIE1931Point.PhilipsWhite">
+            <summary>
+            The slightly-off D65 White Point used by Philips.
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.OriginalWithModel.HueColorConverter">
+            <summary>
+            Used to convert colors between XY and RGB
+            internal: Do not expose
+            </summary>
+            <remarks>
+            Based on http://www.developers.meethue.com/documentation/color-conversions-rgb-xy
+            </remarks>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.OriginalWithModel.HueColorConverter.HexFromState(Q42.HueApi.State,System.String)">
+            <summary>
+            Returns hexvalue from Light State
+            </summary>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.OriginalWithModel.HueColorConverter.RgbFromState(Q42.HueApi.State,System.String)">
+            <summary>
+            Returns hexvalue from Light State
+            </summary>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.OriginalWithModel.HueColorConverter.InverseGamma(System.Double)">
+            <summary>
+            Converts a gamma-corrected value (e.g. as used in RGB pixel components) to
+            a linear color intensity level. All values are between 0.0 and 1.0.
+            Used when converting to XY chroma coordinates.
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.OriginalWithModel.HueColorConverter.Gamma(System.Double)">
+            <summary>
+            Converts a linear color intensity level to a gamma-corrected value for display
+            on a screen. All values are between 0.0 and 1.0.
+            Used when converting to 'RGB' pixel outputs.
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.OriginalWithModel.HueColorConverter.Bound(System.Double)">
+            <summary>
+            Bounds the specified value to between 0.0 and 1.0. 
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.Original.CGPoint">
+            <summary>
+            Internal helper class, holds XY
+            </summary>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.Original.HueColorConverter">
+            <summary>
+            Used to convert colors between XY and RGB
+            internal: Do not expose
+            </summary>
+            <summary>
+            Used to convert colors between XY and RGB
+            internal: Do not expose
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.XyFromColor(System.String,System.String,System.String)">
+            <summary>
+            Get XY from red,green,blue strings / ints
+            </summary>
+            <param name="red"></param>
+            <param name="green"></param>
+            <param name="blue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.XyFromColor(System.Int32,System.Int32,System.Int32)">
+            <summary>
+             Get XY from red,green,blue ints
+            </summary>
+            <param name="red"></param>
+            <param name="green"></param>
+            <param name="blue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.CheckPointInLampsReach(Q42.HueApi.ColorConverters.Original.CGPoint)">
+            <summary>
+             Method to see if the given XY value is within the reach of the lamps.
+            </summary>
+            <param name="p">p the point containing the X,Y value</param>
+            <returns>true if within reach, false otherwise.</returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.GetClosestPointToPoint(Q42.HueApi.ColorConverters.Original.CGPoint,Q42.HueApi.ColorConverters.Original.CGPoint,Q42.HueApi.ColorConverters.Original.CGPoint)">
+            <summary>
+            Find the closest point on a line.
+            This point will be within reach of the lamp.
+            </summary>
+            <param name="A">A the point where the line starts</param>
+            <param name="B">B the point where the line ends</param>
+            <param name="P">P the point which is close to a line.</param>
+            <returns> the point which is on the line.</returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.HexFromState(Q42.HueApi.State)">
+            <summary>
+            Returns hexvalue from Light State
+            </summary>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.HexFromXy(System.Double,System.Double)">
+            <summary>
+            Get the HEX color from an XY value
+            </summary>
+            <param name="xNumber"></param>
+            <param name="yNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.Original.HueColorConverter.HexFromState(Q42.HueApi.State,System.String)">
+            <summary>
+            Returns hexvalue from Light State
+            </summary>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Q42.HueApi.ColorConverters.RGBColor">
+            <summary>
+            Represents a color with red, green and blue components.
+            All values are between 0.0 and 1.0.
+            </summary>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.RGBColor.#ctor(System.Double,System.Double,System.Double)">
+            <summary>
+            RGB Color
+            </summary>
+            <param name="red">Between 0.0 and 1.0</param>
+            <param name="green">Between 0.0 and 1.0</param>
+            <param name="blue">Between 0.0 and 1.0</param>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.RGBColor.#ctor(System.String)">
+            <summary>
+            RGB Color from hex
+            </summary>
+            <param name="hexColor"></param>
+        </member>
+        <member name="M:Q42.HueApi.ColorConverters.RGBColor.ToHex">
+            <summary>
+            Returns the color as a six-digit hexadecimal string, in the form RRGGBB.
+            </summary>
+        </member>
+    </members>
+</doc>

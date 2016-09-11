@@ -1,11 +1,6 @@
 # Karuta
 A personal assistant that will allow me to apply and test my knowledge of machine learning. Currently it serves as a platform for random ideas or projects I have.
 
-
-#Features
-As of 9-10-2016:
-
-
 #Other APIs Used
 As of 9-10-2016 Karuta uses the following API's (and their dependecies) to some capacity:
 -[Imgur.API](https://github.com/DamienDennehy/Imgur.API)

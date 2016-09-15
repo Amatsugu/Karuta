@@ -5,10 +5,11 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using com.LuminousVector.Karuta.Commands;
+using LuminousVector.Karuta.Commands;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
+	[KarutaCommand(Name = "logs")]
 	public class Logs : Command
 	{
 		private string file = null;
@@ -29,8 +30,7 @@ namespace com.LuminousVector.Karuta
 				return;
 			}
 			Karuta.Write("---LOG START---");
-			string[] logs = Karuta.logger.logs.ToArray();
-			foreach (string s in logs)
+			foreach (string s in from l in Karuta.logger.logs select l.ToString())
 				Karuta.Write(s);
 			Karuta.Write("---LOG END---");
 		}
@@ -49,14 +49,14 @@ namespace com.LuminousVector.Karuta
 
 	public class Logger
 	{
-		public List<string> logs { get { return log; } }
+		public List<Log> logs { get { return log; } }
 		private DateTime startTime;
 
-		private List<string> log;
+		private List<Log> log;
 
 		public Logger()
 		{
-			log = new List<string>();
+			log = new List<Log>();
 			SetupLogDir();
 		}
 
@@ -86,7 +86,14 @@ namespace com.LuminousVector.Karuta
 			if (startTime == default(DateTime))
 				startTime = DateTime.Now;
 			DateTime now = DateTime.Now;
-			string l = "[" + now.ToShortDateString() + " " + now.ToShortTimeString() + "] " + "[" + Thread.CurrentThread.Name + "] (" + src + ") INFO: " + message;
+			Log l = new Log()
+			{
+				time = DateTime.Now,
+				threadName = Thread.CurrentThread.Name,
+				source = src,
+				logType = LogType.Error,
+				message = message
+			};
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
@@ -100,7 +107,14 @@ namespace com.LuminousVector.Karuta
 			if (startTime == null)
 				startTime = DateTime.Now;
 			DateTime now = DateTime.Now;
-			string l = "[" + now.ToShortDateString() + " " + now.ToShortTimeString() + "] " + "[" + Thread.CurrentThread.Name + "] (" + src + ") WARN: " + message;
+			Log l = new Log()
+			{
+				time = DateTime.Now,
+				threadName = Thread.CurrentThread.Name,
+				source = src,
+				logType = LogType.Error,
+				message = message
+			};
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
@@ -113,8 +127,14 @@ namespace com.LuminousVector.Karuta
 		{
 			if (startTime == null)
 				startTime = DateTime.Now;
-			DateTime now = DateTime.Now;
-			string l = "[" + now.ToShortDateString() + " " + now.ToShortTimeString() + "] " + "[" + Thread.CurrentThread.Name + "] (" + src + ") ERROR: " + message;
+			Log l = new Log()
+			{
+				time = DateTime.Now,
+				threadName = Thread.CurrentThread.Name,
+				source = src,
+				logType = LogType.Error,
+				message = message
+			};
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
@@ -126,7 +146,7 @@ namespace com.LuminousVector.Karuta
 		public Logger Dump()
 		{
 			DateTime endTime = DateTime.Now;
-			string file = startTime.ToShortDateString() + " " + startTime.ToShortTimeString() +" -- " + endTime.ToShortDateString() + " " + endTime.ToShortTimeString() + " log.txt";
+			string file = $"{startTime.ToShortDateString()} {startTime.ToShortTimeString()} -- {endTime.ToShortDateString()} {endTime.ToShortTimeString()} log.txt";
 			file = Regex.Replace(file, "/", "-");
 			file = Regex.Replace(file, ":", ".");
 			return Dump(Karuta.dataDir + "/Logs/" + file);
@@ -136,10 +156,30 @@ namespace com.LuminousVector.Karuta
 		{
 			if (log.Count == 0)
 				return this;
-			File.WriteAllLines(file, log.ToArray());
+			File.WriteAllLines(file, from l in log select l.ToString());
 			log.Clear();
 			startTime = default(DateTime);
 			return this;
 		}
+	}
+
+	public enum LogType
+	{
+		Info, Warn, Error
+	}
+
+	public class Log
+	{
+		public string message { get; set; }
+		public DateTime time { get; set; }
+		public string source { get; set; }
+		public string threadName { get; set; }
+		public LogType logType { get; set; }
+
+		public override string ToString()
+		{
+			return $"[{time.ToShortDateString()} {time.ToShortTimeString()}] [{threadName}] ({source}) {logType.ToString()}: {message}"; ;
+		}
+
 	}
 }

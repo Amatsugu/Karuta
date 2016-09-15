@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta.Commands
+namespace LuminousVector.Karuta.Commands
 {
 	public class Option
 	{

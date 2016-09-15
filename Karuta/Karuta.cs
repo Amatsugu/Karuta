@@ -3,13 +3,15 @@ using System.IO;
 using System.Threading;
 using System.Collections.Generic;
 using System.Diagnostics;
-using com.LuminousVector.Events;
-using com.LuminousVector.DataStore;
-using com.LuminousVector.Serialization;
-using com.LuminousVector.Karuta.Commands;
-using com.LuminousVector.Karuta.Commands.DiscordBot;
+using LuminousVector.Events;
+using LuminousVector.DataStore;
+using LuminousVector.Serialization;
+using LuminousVector.Karuta.Commands;
+using LuminousVector.Karuta.Commands.DiscordBot;
+using System.Reflection;
+using System.Linq;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
 	public static class Karuta
 	{
@@ -77,6 +79,7 @@ namespace com.LuminousVector.Karuta
 			eventManager = new EventManager();
 			eventManager.Init();
 			//Init Registry
+			Write("Loading Registry...");
 			if(File.Exists(dataDir + "/karuta.data"))
 			{
 				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes(dataDir + "/karuta.data"));
@@ -92,34 +95,40 @@ namespace com.LuminousVector.Karuta
 				//Register Commands
 				RegisterCommands();
 				//Initalize commands
+				Karuta.Write("Initializing processes...");
 				foreach (Command c in commands.Values)
 					c.init?.Invoke();
 			}catch(Exception e)
 			{
-				Write("An error occured while initializing commands: " + e.Message);
+				Write($"An error occured while initializing commands: {e.Message}");
 				Write(e.StackTrace);
 			}
 			sw.Stop();
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
 
-			Write("Karuta is ready. Finished in " + elapsedT + "ms");
+			Write($"Karuta is ready. Finished in {elapsedT}ms");
 		}
 
 		//Register all Commands
 		public static void RegisterCommands()
 		{
+			//Find all commands with attribute KarutaCommand
+			var cmds = from c in Assembly.GetExecutingAssembly().GetTypes()
+					   where c.GetCustomAttributes<KarutaCommand>().Count() > 0
+					   select c;
+
+			//Add each register each command
+			foreach(var c in cmds)
+			{
+				RegisterCommand(Activator.CreateInstance(c) as Command);
+			}
+			//Register Other Commands
 			RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
 			RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
-			RegisterCommand(new HelpCommand());
-			RegisterCommand(new UserCommand());
-			RegisterCommand(new Logs());
-			RegisterCommand(new CrawlerCommand());
-			RegisterCommand(new LightingCommand());
-			RegisterCommand(new DiscordBot());
-			RegisterCommand(new TestCommand());
 			RegisterCommand(new Command("save", () =>
 			{
 				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
+				Write("Registry saved");
 			}, "Save the registry"));
 			RegisterCommand(new ProcessMonitor(_threads, _timers));
 		}
@@ -139,8 +148,10 @@ namespace com.LuminousVector.Karuta
 			_isRunning = true;
 			while (_isRunning)
 			{
-				Console.Write(user + ": ");
+				Console.Write($"{user}: ");
 				_input = Console.ReadLine();
+				if (_input == null)
+					continue;
 				List<string> args = new List<string>();
 				args.AddRange(_input.Split(' '));
 				Command cmd;
@@ -152,17 +163,17 @@ namespace com.LuminousVector.Karuta
 					args.RemoveAt(0);
 					try
 					{
-						cmd.Pharse(args);
+						cmd.Parse(args);
 					}catch(Exception e)
 					{
-						Write("An error occured while executing the command: " + e.Message);
+						Write($"An error occured while executing the command: {e.Message}");
 						Write(e.StackTrace);
 					}
 				}
 			}
 		}
 
-		//Stop the program and dispose dispoables
+		//Stop the program, stops processes and dispose dispoables
 		public static void Close()
 		{
 			_isRunning = false;
@@ -174,7 +185,8 @@ namespace com.LuminousVector.Karuta
 			{
 				t.Abort();
 			}
-			//_voice.Dispose();
+			foreach (Timer t in _timers.Values)
+				t.Dispose();
 			logger.Dump();
 			File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
 			Console.WriteLine("GoodBye");
@@ -183,7 +195,7 @@ namespace com.LuminousVector.Karuta
 		//Say message with a name label
 		public static void Say(string message)
 		{
-			Console.WriteLine("Karuta: " + message);
+			Console.WriteLine($"Karuta: {message}");
 		}
 
 		//Say a message without name label
@@ -227,7 +239,7 @@ namespace com.LuminousVector.Karuta
 		public static Thread CreateThread(string name, ThreadStart thread)
 		{
 			Thread newThread = new Thread(thread);
-			newThread.Name = "Karuta." + name;
+			newThread.Name = $"Karuta.{name}";
 			_threads.Add(newThread.Name, newThread);
 			newThread.Start();
 			return newThread;
@@ -236,7 +248,7 @@ namespace com.LuminousVector.Karuta
 		//Force Join a Thread
 		public static void ForceJoinThread(string name)
 		{
-			string tName = "Karuta." + name;
+			string tName = $"Karuta.{name}";
 			if (_threads.ContainsKey(tName))
 			{
 				_threads[tName].Join();
@@ -283,10 +295,10 @@ namespace com.LuminousVector.Karuta
 			{
 				try
 				{
-					commands[command].Pharse(args);
+					commands[command].Parse(args);
 				}catch(Exception e)
 				{
-					Write("An error occured while executing the command: " + e.Message);
+					Write($"An error occured while executing the command: {e.Message}");
 					Write(e.StackTrace);
 				}
 			}

@@ -1,21 +1,43 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
-using System.Windows.Forms;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
 	static class Program
 	{
-		//[STAThread]
-		static void Main()
+		#region Trap application termination
+		[DllImport("Kernel32")]
+		private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
+
+		private delegate bool EventHandler(CtrlType sig);
+		static EventHandler _handler;
+
+		enum CtrlType
 		{
-			Thread.CurrentThread.Name = "Karuta.Main";
-			Karuta.Run();
+			CTRL_C_EVENT = 0,
+			CTRL_BREAK_EVENT = 1,
+			CTRL_CLOSE_EVENT = 2,
+			CTRL_LOGOFF_EVENT = 5,
+			CTRL_SHUTDOWN_EVENT = 6
 		}
 
-		static void OnProcessExit(object sender, EventArgs e)
+		private static bool Handler(CtrlType sig)
 		{
+			//Save data and clean up
 			Karuta.Close();
+			//Close 
+			Environment.Exit(-1);
+			return true;
+		}
+		#endregion
+
+		static void Main()
+		{
+			_handler += new EventHandler(Handler);
+			SetConsoleCtrlHandler(_handler, true);
+			Thread.CurrentThread.Name = "Karuta.Main";
+			Karuta.Run();
 		}
 	}
 }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ProtoBuf;
 
-namespace com.LuminousVector.DataStore
+namespace LuminousVector.DataStore
 {
 	[ProtoContract]
 	public class Registry

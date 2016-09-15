@@ -11,10 +11,11 @@ using RedditSharp;
 using RedditSharp.Things;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
-using com.LuminousVector.Karuta.Commands;
+using LuminousVector.Karuta.Commands;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
+	[KarutaCommand(Name = "crawl")]
 	public class CrawlerCommand : Command
 	{
 		private RedditCrawler crawler;
@@ -107,7 +108,7 @@ namespace com.LuminousVector.Karuta
 				Karuta.Write("Connecting to reddit...");
 				string user = Karuta.registry.GetString("reddit_user");
 				string pass = Karuta.registry.GetString("reddit_pass");
-				if(user == "" || pass == "")
+				if(string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass))
 				{
 					Karuta.Write("Please enter your reddit Credentials");
 					user = Karuta.GetInput("Username");
@@ -127,7 +128,7 @@ namespace com.LuminousVector.Karuta
 				Karuta.registry.SetValue("reddit_pass", pass);
 				ImgurSetup();
 				Karuta.Write("Loading Prefs...");
-				if (Karuta.registry.GetString("baseDir") != "")
+				if (!string.IsNullOrWhiteSpace(Karuta.registry.GetString("baseDir")))
 					baseDir = Karuta.registry.GetString("baseDir");
 				if (Karuta.registry.GetInt("updateRate") != null)
 					updateRate = (int)Karuta.registry.GetInt("updateRate");
@@ -138,9 +139,9 @@ namespace com.LuminousVector.Karuta
 					c = (int)Karuta.registry.GetInt("reddit_postsToGet");
 				postsToGet = c;
 				string mode = Karuta.registry.GetString("reddit_searchMode");
-				SetSearchMode(mode == "" ? "new" : mode);
+				SetSearchMode(string.IsNullOrWhiteSpace(mode) ? "new" : mode);
 				string list = Karuta.registry.GetString("reddit_subs");
-				if (list != "")
+				if (!string.IsNullOrWhiteSpace(list))
 				{
 					subreddits.AddRange(list.Split('|'));
 				}
@@ -157,7 +158,7 @@ namespace com.LuminousVector.Karuta
 		{
 			string imgID = Karuta.registry.GetString("imgur_id");
 			string imgSec = Karuta.registry.GetString("imgur_secret");
-			if (imgID == "" || imgSec == "")
+			if (string.IsNullOrWhiteSpace(imgID) || string.IsNullOrWhiteSpace(imgSec))
 			{
 				Karuta.Write("Please enter Imgur API information:");
 				imgID = Karuta.GetInput("Imgur API ID");
@@ -186,16 +187,17 @@ namespace com.LuminousVector.Karuta
 		{
 			if (_reddit == null || _imgurClient == null)
 				Setup();
-			Post p = new Post();
-			p.SubredditName = "Imgur";
-			p.NSFW = false;
+			Post p = new Post()
+			{
+				SubredditName = "Imgur",
+				NSFW = false,
+				CreatedUTC = DateTime.UtcNow
+			};
+
 			string curDir = baseDir + "/ImgurDownload";
-			int epoch = 0;
-			TimeSpan t = DateTime.UtcNow - minTime;
-			epoch = (int)t.TotalSeconds;
 			isRunning = true;
 			_client = new WebClient();
-			DownloadImgurAlbum(new Uri(url), epoch, "Imgur", p, curDir);
+			DownloadImgurAlbum(new Uri(url), "Imgur", p, curDir);
 			isRunning = false;
 		}
 
@@ -315,7 +317,7 @@ namespace com.LuminousVector.Karuta
 				Karuta.Write(sub + " removed");
 			}
 			else
-				Karuta.Write(sub + " is not on the list.");
+				Karuta.Write($"{sub} is not on the list.");
 		}
 
 		//Get posts from without looping
@@ -330,7 +332,7 @@ namespace com.LuminousVector.Karuta
 				loop = false;
 				_client = new WebClient();
 				Crawl();
-				Karuta.Write("Getting " + postsToGet + " images from " + subreddits.Count + " subreddits.");
+				Karuta.Write($"Getting {postsToGet} images from {subreddits.Count} subreddits.");
 			}
 			else
 				Karuta.Write("The crawller is already running...");
@@ -359,7 +361,7 @@ namespace com.LuminousVector.Karuta
 				loop = true;
 				_client = new WebClient();
 				Crawl();
-				Karuta.Write("Crawlings across " + postsToGet + " images from " + subreddits.Count + " subreddits.");
+				Karuta.Write($"Crawlings across {postsToGet} images from {subreddits.Count} subreddits.");
 			}
 			else
 			{
@@ -372,21 +374,21 @@ namespace com.LuminousVector.Karuta
 		{
 			if (_reddit == null || _imgurClient == null)
 				Setup();
-			Karuta.Write("Running: " + isRunning);
-			Karuta.Write("Loop: " + loop);
-			Karuta.Write("Needs Rebuild: " + needsReBuild);
-			Karuta.Write("Posts to Get: " + postsToGet);
-			Karuta.Write("Search Mode: " + searchMode);
-			Karuta.Write("Verbose: " + verbose);
-			Karuta.Write("Get From: " + ((getFrom == null) ? "all" : getFrom));
-			Karuta.Write("Save Dir: " + baseDir);
-			Karuta.Write("Update Rate: " + updateRate + "ms");
+			Karuta.Write($"Running: {isRunning}");
+			Karuta.Write($"Loop: {loop}");
+			Karuta.Write($"Needs Rebuild: {needsReBuild}");
+			Karuta.Write($"Posts to Get: {postsToGet}");
+			Karuta.Write($"Search Mode: {searchMode}");
+			Karuta.Write($"Verbose: {verbose}");
+			Karuta.Write($"Get From: {((getFrom == null) ? "all" : getFrom)}");
+			Karuta.Write($"Save Dir: {baseDir}");
+			Karuta.Write($"Update Rate: {updateRate}ms");
 		}
 
 		//Stop all processes
 		public void Stop()
 		{
-			Karuta.logger.Log("Crawl terminated by " + Karuta.user, name);
+			Karuta.logger.Log($"Crawl terminated by {Karuta.user}", name);
 			isRunning = false;
 			Karuta.StopTimer("RedditCrawler");
 			_client.Dispose();
@@ -399,17 +401,14 @@ namespace com.LuminousVector.Karuta
 			if (_reddit == null || _imgurClient == null)
 				Setup();
 			if (getFrom != null)
-				Karuta.logger.Log("Starting crawl of " + getFrom, name, verbose);
+				Karuta.logger.Log($"Starting crawl of {getFrom}", name, verbose);
 			else
-				Karuta.logger.Log("Starting Crawl of " + subreddits.Count + " subreddits", name, verbose);
+				Karuta.logger.Log($"Starting Crawl of {subreddits.Count} subreddits", name, verbose);
 			string curDir = "";
 			imgCount = 0;
 			string file = "";
 			Listing<Post> posts = default(Listing<Post>);
 			List<Subreddit> subs;
-			TimeSpan t;
-			
-			int epoch;
 			bool postGet = false;
 			
 			subs = new List<Subreddit>();
@@ -417,6 +416,7 @@ namespace com.LuminousVector.Karuta
 			{
 				try
 				{
+					
 					imgCount = 0;
 					if (needsReBuild)
 					{
@@ -427,11 +427,11 @@ namespace com.LuminousVector.Karuta
 							try
 							{
 								subs.Add(_reddit.GetSubreddit(getFrom));
-								Karuta.logger.Log("Connected to " + getFrom, name, verbose);
+								Karuta.logger.Log($"Connected to {getFrom}", name, verbose);
 							}
 							catch (Exception e)
 							{
-								Karuta.logger.LogWarning("Failed to connect to subreddit: " + getFrom + ", " + e.Message, name, verbose);
+								Karuta.logger.LogWarning($"Failed to connect to subreddit: {getFrom}, {e.Message}", name, verbose);
 								_crawlLoop.Dispose();
 							}
 						}
@@ -450,11 +450,11 @@ namespace com.LuminousVector.Karuta
 								try
 								{
 									subs.Add(_reddit.GetSubreddit(s));
-									Karuta.logger.Log("Connected to " + s, name, verbose);
+									Karuta.logger.Log($"Connected to {s}", name, verbose);
 								}
 								catch (Exception e)
 								{
-									Karuta.logger.LogWarning("Failed to connect to subreddit: " + s + ", " + e.Message, name, verbose);
+									Karuta.logger.LogWarning($"Failed to connect to subreddit: {s}, {e.Message}", name, verbose);
 									Karuta.logger.LogWarning(e.StackTrace, name, verbose);
 									continue;
 								}
@@ -469,18 +469,23 @@ namespace com.LuminousVector.Karuta
 					{
 						if (!isRunning)
 							break;
+						//Change the current directory and make sure it exists 
 						curDir = baseDir + "/" + sub.Name;
 						if (!Directory.Exists(curDir))
 							Directory.CreateDirectory(curDir);
 						bool subCollected = false;
+						int retryCount = 0;
 						while (!subCollected)
 						{
-							if (!isRunning)
+							if (!isRunning || retryCount >= 10)
 							{
+								if (retryCount >= 10)
+									Karuta.Write("Retry timeout");
 								break;
 							}
 							try
 							{
+								//Get posts 
 								switch (searchMode)
 								{
 									case SearchMode.Hot:
@@ -500,7 +505,8 @@ namespace com.LuminousVector.Karuta
 							}
 							catch (Exception e)
 							{
-								Karuta.logger.LogWarning("Failed to connect to reddit: " + e.Message + ", retrying...", name, verbose);
+								Karuta.logger.LogWarning($"Failed to connect to reddit: {e.Message}, retrying...", name, verbose);
+								retryCount++;
 							}
 						}
 						postGet = false;
@@ -533,13 +539,10 @@ namespace com.LuminousVector.Karuta
 									file = file.Replace(">", "");
 									file = file.Replace("|", "");
 									file = file.Replace("\\", "");
-									//Calculate epoch time
-									t = p.CreatedUTC - minTime;
-									epoch = (int)t.TotalSeconds;
 
 									if (allowedFiles.Contains(ext)) //Direct link to image file
 									{
-										file = "[" + epoch + "] " + file;
+										file = "[" + p.CreatedUTC.ToEpoch() + "] " + file;
 										file = curDir + ((p.NSFW) ? "/NSFW" : "") + "/" + file;
 										if (File.Exists(file + ((ext == ".gif") ? ext : ".png")))
 										{
@@ -554,13 +557,13 @@ namespace com.LuminousVector.Karuta
 										string imgurID = Path.GetFileNameWithoutExtension(p.Url.AbsolutePath);
 										if (p.Url.AbsolutePath.Contains("/a/") || p.Url.AbsolutePath.Contains("/gallery/")) //Save Imgur Album
 										{
-											DownloadImgurAlbum(p.Url, epoch, file, p, curDir);
+											DownloadImgurAlbum(p.Url, file, p, curDir);
 										}
 										else
 										{
 											if (imgurID != "new")//Save Imgur in-drect link
 											{
-												file = "[" + epoch + "] " + file;
+												file = "[" + p.CreatedUTC.ToEpoch() + "] " + file;
 												file = curDir + ((p.NSFW) ? "/NSFW" : "") + "/" + file;
 
 												try
@@ -579,7 +582,7 @@ namespace com.LuminousVector.Karuta
 												}
 												catch (Exception e)
 												{
-													Karuta.logger.LogWarning("Unable to Download " + p.Title + ", " + e.Message, "/r/" + p.SubredditName, verbose);
+													Karuta.logger.LogWarning($"Unable to Download {p.Title}, {e.Message}", $"/r/{p.SubredditName}", verbose);
 													Karuta.logger.LogError(e.StackTrace, name, verbose);
 												}
 											}
@@ -590,7 +593,7 @@ namespace com.LuminousVector.Karuta
 							}
 							catch (Exception e)
 							{
-								Karuta.logger.LogWarning("Failed to get posts: " + e.Message + ", retrying...", name, verbose);
+								Karuta.logger.LogWarning($"Failed to get posts: {e.Message}, retrying...", name, verbose);
 								postGet = false;
 							}
 						}
@@ -598,7 +601,7 @@ namespace com.LuminousVector.Karuta
 				}
 				catch (Exception e)
 				{
-					Karuta.logger.LogError("Crawl failed... " + e.Message + ", shutting down", name, verbose);
+					Karuta.logger.LogError($"Crawl failed... {e.Message}, shutting down", name, verbose);
 					Karuta.logger.LogError(e.StackTrace, name, verbose);
 					Karuta.Write("Crawl Ended");
 					isRunning = false;
@@ -608,19 +611,19 @@ namespace com.LuminousVector.Karuta
 
 				if (!loop)
 				{
-					Karuta.logger.Log("Finished Dowloading " + imgCount + " images... shutting down", name, verbose);
+					Karuta.logger.Log($"Finished Dowloading {imgCount} images... shutting down", name, verbose);
 					isRunning = false;
 					loop = true;
 				}
 				else
 				{
-					Karuta.logger.Log("Dowloaded " + imgCount + " images...", name, verbose);
-					Karuta.logger.Log("Sleeping for " + updateRate + "ms", name, verbose);
+					Karuta.logger.Log($"Dowloaded {imgCount} images...", name, verbose);
+					Karuta.logger.Log($"Sleeping for {updateRate}ms", name, verbose);
 				}
 			}, 0, updateRate);
 		}
 
-		void DownloadImgurAlbum(Uri url, int epoch, string fileName, Post p, string curDir)
+		void DownloadImgurAlbum(Uri url, string fileName, Post p, string curDir)
 		{
 			try
 			{
@@ -638,7 +641,7 @@ namespace com.LuminousVector.Karuta
 				{
 					if (!isRunning)
 						break;
-					string thisFile = "[" + epoch + "] [" + i + "] " + fileName;
+					string thisFile = "[" + p.CreatedUTC.ToEpoch() + "] [" + i + "] " + fileName;
 					thisFile = curDir + ((p.NSFW) ? "/NSFW" : "") + "/" + thisFile;
 					//Karuta.logger.Log(thisFile, name, verbose);
 					string ext = Path.GetExtension(image.Link);
@@ -654,11 +657,12 @@ namespace com.LuminousVector.Karuta
 			}
 			catch (Exception e)
 			{
-				Karuta.logger.LogWarning("Unable to Download " + p.Title + ", " + e.Message, "/r/" + p.SubredditName, verbose);
+				Karuta.logger.LogWarning($"Unable to Download {p.Title}, {e.Message}", $"/r/{p.SubredditName}", verbose);
 				Karuta.logger.LogError(e.StackTrace, name, verbose);
 			}
 		}
 
+		//Download an image via url
 		void SaveImage(Post p, string file, Uri url)
 		{
 			try
@@ -677,18 +681,17 @@ namespace com.LuminousVector.Karuta
 							if (Path.GetExtension(url.AbsolutePath) == ".gif")
 							{
 								image.Save(file + ".gif", ImageFormat.Gif);
-								Karuta.logger.Log("Saved " + file + ".gif", "/r/" + p.SubredditName, verbose);
 							}
 							else
 							{
 								image.Save(file + ".png", ImageFormat.Png);
-								Karuta.logger.Log("Saved " + file + ".png", "/r/" + p.SubredditName, verbose);
 							}
+							Karuta.logger.Log($"Saved {file}.{((Path.GetExtension(url.AbsolutePath) != ".gif") ? ".png" : ".gif")}", $"/r/{p.SubredditName}", verbose);
 							imgCount++;
 						}
 						catch (Exception e)
 						{
-							Karuta.logger.LogError("Failed to save \"" + p.Title + "\", " + e.Message, "/r/" + p.SubredditName, verbose);
+							Karuta.logger.LogError($"Failed to save \"{p.Title}\", {e.Message}", $"/r/{p.SubredditName}", verbose);
 							Karuta.logger.LogError(e.StackTrace, name, verbose);
 						}
 					}
@@ -696,7 +699,7 @@ namespace com.LuminousVector.Karuta
 			}
 			catch (Exception e)
 			{
-				Karuta.logger.LogWarning("Unable to Download " + p.Title + ", " + e.Message, "/r/" + p.SubredditName, verbose);
+				Karuta.logger.LogWarning($"Unable to Download {p.Title}, {e.Message}", $"/r/{p.SubredditName}", verbose);
 				Karuta.logger.LogError(e.StackTrace, name, verbose);
 			}
 		}

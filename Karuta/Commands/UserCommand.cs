@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta.Commands
+namespace LuminousVector.Karuta.Commands
 {
+	[KarutaCommand(Name = "user")]
 	class UserCommand : Command
 	{
 		public UserCommand() : base("user", "Allows you to change the username.")

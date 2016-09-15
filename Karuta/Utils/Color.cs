@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta.Util
+namespace LuminousVector.Karuta.Util
 {
 	class Color
 	{

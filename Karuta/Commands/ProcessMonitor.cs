@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace com.LuminousVector.Karuta.Commands
+namespace LuminousVector.Karuta.Commands
 {
 	class ProcessMonitor : Command
 	{
@@ -41,17 +41,17 @@ namespace com.LuminousVector.Karuta.Commands
 		{
 			if(_threads.Count != 0)
 			{
-				Karuta.Write("\tThreads: \n");
+				Karuta.Write("\tThreads:");
 				Karuta.Write("\t\tName \t\t Thread State");
 				foreach(Thread t in _threads.Values)
-					Karuta.Write("\t\t" + t.Name + "\t\t" + t.ThreadState);
+					Karuta.Write($"\t\t{t.Name}\t\t{t.ThreadState}");
 			}
 
 			if(_timers.Count != 0)
 			{
-				Karuta.Write("\tTimers: \n");
+				Karuta.Write("\tTimers:");
 				foreach (string t in _timers.Keys)
-					Karuta.Write("\t\t" + t);
+					Karuta.Write($"\t\t{t}");
 
 			}
 		}

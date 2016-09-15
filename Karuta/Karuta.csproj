@@ -7,7 +7,7 @@
     <ProjectGuid>{4547D032-5FC9-46AE-BE17-AEAEAB8B3DC7}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>com.LuminousVector.Karuta</RootNamespace>
+    <RootNamespace>LuminousVector.Karuta</RootNamespace>
     <AssemblyName>Karuta</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -57,7 +57,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>com.LuminousVector.Karuta.Program</StartupObject>
+    <StartupObject>LuminousVector.Karuta.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -111,6 +111,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="Commands\Attributes.cs" />
     <Compile Include="Commands\DiscordBotCommands.cs" />
     <None Include="Karuta.Sign.snk" />
     <None Include="Karuta_TemporaryKey.pfx" />
@@ -129,6 +130,7 @@
     <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="DataSerializer.cs" />
     <Compile Include="Commands\LightingCommand.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Commands\Command.old.cs" />

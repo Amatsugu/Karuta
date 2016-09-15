@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
 
 	public class NoSuchTimerExeception : Exception
@@ -25,5 +25,13 @@ namespace com.LuminousVector.Karuta
 	public class DuplicateCommandExeception : Exception
 	{
 		public DuplicateCommandExeception(string name) : base("A command with the name: '" + name + "' has already been registed") { }
+	}
+
+	public class CommandParsingExeception : Exception
+	{
+		public CommandParsingExeception(string message) : base(message)
+		{
+
+		}
 	}
 }

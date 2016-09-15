@@ -1,8 +1,8 @@
 using System.IO;
 using ProtoBuf.Meta;
-using com.LuminousVector.DataStore;
+using LuminousVector.DataStore;
 
-namespace com.LuminousVector.Serialization
+namespace LuminousVector.Serialization
 {
 	public static class DataSerializer
 	{

@@ -1,12 +1,13 @@
 using System.Threading;
 using System.Collections.Generic;
-using com.LuminousVector.Karuta.Util;
-using com.LuminousVector.Karuta.Commands;
+using LuminousVector.Karuta.Util;
+using LuminousVector.Karuta.Commands;
 using Q42.HueApi;
 using System;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
+	[KarutaCommand(Name = "lights")]
 	public class LightingCommand : Command
 	{
 		private string _url = "192.168.1.140";

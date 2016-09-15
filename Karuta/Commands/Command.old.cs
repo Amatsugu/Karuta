@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta.old
+namespace LuminousVector.Karuta.old
 {
 	//Base command
 	public class Command

@@ -9,8 +9,9 @@ using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
 using System.IO;
 
-namespace com.LuminousVector.Karuta.Commands.DiscordBot
+namespace LuminousVector.Karuta.Commands.DiscordBot
 {
+	[KarutaCommand(Name = "discord")]
 	class DiscordBot : Command
 	{
 		public Dictionary<string, DiscordCommand> commands = new Dictionary<string, DiscordCommand>();
@@ -37,7 +38,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 			{
 				_autoStart = !_autoStart;
 				Karuta.registry.SetValue("discordAutostart", _autoStart);
-				Karuta.Write("Autostart " + ((_autoStart) ? "enabled" : "disabled"));
+				Karuta.Write($"Autostart {((_autoStart) ? "enabled" : "disabled")}");
 			}, "enable/disable autostart");
 
 			RegisterOption('t', s =>
@@ -47,18 +48,14 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 				Karuta.Write("Token Saved");
 			}, "set the token");
 
-			try
-			{
-				ImgurSetup();
-			}catch(Exception e)
-			{
-				Karuta.Write("Unable to initiate Imgur Connection: " + e.Message);
-			}
 			RegisterCommand(new AddImageCommand(this));
 			RegisterCommand(new DiscordHelpCommand(this));
 			RegisterCommand(new DiscordSaveCommand(this));
 			RegisterCommand(new DiscordPurgeCommand(this));
 			RegisterCommand(new RemoveImageCommand(this));
+
+			foreach (Command c in commands.Values)
+				c.init?.Invoke();
 			
 			LoadData();
 
@@ -73,7 +70,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 		{
 			string imgID = Karuta.registry.GetString("imgur_id");
 			string imgSec = Karuta.registry.GetString("imgur_secret");
-			if (imgID == "" || imgSec == "")
+			if (string.IsNullOrWhiteSpace(imgID) || string.IsNullOrWhiteSpace(imgSec))
 			{
 				Karuta.Write("Please enter Imgur API information:");
 				imgID = Karuta.GetInput("Imgur API ID");
@@ -119,7 +116,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 		void LoadData()
 		{
 			string data = Karuta.registry.GetString("discordImageCommands");
-			if (data == "")
+			if (string.IsNullOrWhiteSpace(data))
 				return;
 			string[] cmds = data.Split('`');
 			if (cmds.Length == 0)
@@ -127,12 +124,16 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 			foreach(string cmd in cmds)
 			{
 				List<string> images = new List<string>();
-				images.AddRange(cmd.Split('{'));
+				string[] helpSplit = cmd.Split('}');
+				string hMessage = null;
+				if (helpSplit.Length > 1)
+					hMessage = helpSplit[1];
+				images.AddRange(helpSplit[0].Split('{'));
 				if (images.Count <= 1)
 					continue;
 				string cmdName = images[0];
 				images.RemoveAt(0);
-				RegisterCommand(new DiscordImageCommand(cmdName, images));
+				RegisterCommand((hMessage != null) ? new DiscordImageCommand(cmdName, hMessage) { images = images} : new DiscordImageCommand(cmdName) { images = images});
 			}
 
 		}
@@ -140,7 +141,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 		public void RegisterCommand(DiscordCommand cmd)
 		{
 			if (commands.ContainsKey(cmd.name))
-				throw new Exception("Command " + cmd.name + " already exsists!");
+				throw new Exception($"Command {cmd.name} already exsists!");
 			commands.Add(cmd.name, cmd);
 		}
 
@@ -148,8 +149,16 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 		{
 			_thread = Karuta.CreateThread("DiscordBot", async () =>
 			{
+				try
+				{
+					ImgurSetup();
+				}
+				catch (Exception e)
+				{
+					Karuta.Write($"Unable to initiate Imgur Connection: {e.Message}");
+				}
 				_client = new DiscordClient();
-				if(_token == "")
+				if(string.IsNullOrWhiteSpace(_token))
 				{
 					_token = Karuta.GetInput("Enter discord token");
 					Karuta.registry.SetValue("discordToken", _token);
@@ -161,7 +170,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 					await _client.Connect(_token, TokenType.Bot);
 				}catch(Exception e)
 				{
-					Karuta.Write("Unable to initiate connection to discord: " + e.Message);
+					Karuta.Write($"Unable to initiate connection to discord: {e.Message}");
 					Karuta.CloseThread(_thread);
 				}
 
@@ -177,7 +186,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 
 		void MessageRecieved(object sender, MessageEventArgs e)
 		{
-			if (!e.Message.IsAuthor && e.Message.Text.Length > 0 && e?.Message?.Text?[0] == '!')
+			if (!e.Message.IsAuthor && e.Message?.Text?.Length > 0 && e.Message?.Text?[0] == '!')
 			{
 				string message = e.Message.Text.ToLower().Split(' ')[0].Remove(0, 1);
 				Karuta.Write(message);
@@ -189,11 +198,11 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 						if (cmd.GetType() == typeof(DiscordImageCommand))
 							((DiscordImageCommand)cmd).SendImage(e.Channel);
 						else if (cmd.GetType() == typeof(DiscordHelpCommand))
-							cmd.Pharse(new List<string>(), e.Channel);
+							cmd.Parse(new List<string>(), e.Channel);
 						else if (cmd.GetType() == typeof(DiscordPurgeCommand))
 						{
 							if (e.Message.User.Id == 106962986572197888 && e.Channel.Name == "console")
-								cmd.Pharse(new List<string>(), e.Channel);
+								cmd.Parse(new List<string>(), e.Channel);
 							else
 								e.Channel.SendMessage("You are not authorized to use this command");
 						}
@@ -204,7 +213,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 								List<string> args = new List<string>();
 								args.AddRange(e.Message.Text.Split(' '));
 								args.RemoveAt(0);
-								cmd.Pharse(args, e.Channel);
+								cmd.Parse(args, e.Channel);
 							}
 							else
 							{
@@ -214,8 +223,8 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 					}
 					catch (Exception ex)
 					{
-						e.Channel.SendMessage("An error occured while executing the command: " + ex.Message);
-						Karuta.Write("An error occured while executing the command: " + ex.Message);
+						e.Channel.SendMessage($"An error occured while executing the command: {ex.Message}");
+						Karuta.Write($"An error occured while executing the command: {ex.Message}");
 						Karuta.Write(ex.StackTrace);
 					}
 				}
@@ -231,7 +240,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 			{
 				//Album
 				string id = url.AbsolutePath.Split('/')[2];
-				Karuta.Write("album: " + id);
+				Karuta.Write($"album: {id}");
 				if (id.Length < 3)
 				{
 					throw new Exception("Only Imgur URLs are supported");
@@ -244,7 +253,7 @@ namespace com.LuminousVector.Karuta.Commands.DiscordBot
 			else if (Path.GetFileNameWithoutExtension(url.AbsolutePath) != "new")
 			{
 				string id = Path.GetFileNameWithoutExtension(url.AbsolutePath);
-				Karuta.Write("item: " + id);
+				Karuta.Write($"item: {id}");
 				//Indirect Imgur DL
 				var image = await imgEndpoint.GetImageAsync(id);
 				imageLinks.Add(image.Link);

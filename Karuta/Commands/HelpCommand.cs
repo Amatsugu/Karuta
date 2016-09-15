@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta.Commands
+namespace LuminousVector.Karuta.Commands
 {
+	[KarutaCommand(Name = "help")]
 	public class HelpCommand : Command
 	{
 		public HelpCommand() : base("help", "show this screen")

@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta.Commands
+namespace LuminousVector.Karuta.Commands
 {
+	[KarutaCommand(Name = "test")]
 	class TestCommand : Command
 	{
 		public TestCommand() : base("test", "test")

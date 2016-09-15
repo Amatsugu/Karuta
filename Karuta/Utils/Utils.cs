@@ -8,19 +8,17 @@ using System.IO;
 using Imgur.API.Endpoints.Impl;
 using System.Threading.Tasks;
 
-namespace com.LuminousVector.Karuta
+namespace LuminousVector.Karuta
 {
 	class Utils
 	{
-		public static float Clamp(float value, float range)
-		{
-			return Clamp(value, -range, range);
-		}
+		public static float Clamp(float value, float range) => Clamp(value, -range, range);
 
-		public static float Clamp(float value, float min, float max)
-		{
-			return (value > max) ? max : (value < min) ? min: value;
-		}
+		public static float Clamp(float value, float min, float max) => (value > max) ? max : (value < min) ? min: value;
+
+		public static bool IsEven(int value) => (value / 2) == (value / 2f);
+
+		public static bool IsEven(float value) => ((int)value / 2) == (value / 2f);
 
 		public static string HttpRequest(string url, string data, string method)
 		{
@@ -45,17 +43,5 @@ namespace com.LuminousVector.Karuta
 			response.Close();
 			return output;
 		}
-
-		public static string Random(string[] array)
-		{
-			return array[Karuta.random.Next(0, array.Length)];
-		}
-
-		public static string Random(List<string> array)
-		{
-			return array[Karuta.random.Next(0, array.Count)];
-		}
-
-		
 	}
 }

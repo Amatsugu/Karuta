@@ -28,6 +28,41 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		}
 	}
 
+	class SetDescriptionCommand : DiscordCommand
+	{
+		private string _help, _name;
+		private DiscordBot bot;
+
+		public SetDescriptionCommand(DiscordBot bot) : base("set-info", "set the description of an image command")
+		{
+			_default = SetInfo;
+			this.bot = bot;
+			RegisterOption('n', n => { _name = n; }, "specify the image name");
+			RegisterOption('i', i => { _help = i; }, "specify a description of the image");
+		}
+
+		async void SetInfo()
+		{
+			if (!string.IsNullOrWhiteSpace(_help) && !string.IsNullOrWhiteSpace(_name))
+			{
+				if (bot.commands.ContainsKey(_name))
+				{
+					if (bot.commands[_name].GetType() == typeof(DiscordImageCommand))
+					{
+						((DiscordImageCommand)bot.commands[_name]).SetHelpMessage(_help);
+						await _channel.SendMessage("Description set");
+					}
+					else
+						await _channel.SendMessage("This is not an image command");
+
+				}
+			}
+			else
+				await _channel.SendMessage($"A name and description must be provided, use !help {name} for more info");
+
+		}
+	}
+
 	class AddImageCommand : DiscordCommand
 	{
 
@@ -40,16 +75,24 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			this.bot = bot;
 			RegisterOption('n', s => { _name = s; }, "specify the image name");
 			RegisterOption('u', s => { _url = s; }, "specify the url of the image");
-			RegisterOption('h', s => { _help = s; }, "specify a description of the image");
+			RegisterOption('i', s => { _help = s; }, "specify a description of the image");
 		}
 
 		async void Add()
 		{
 			//Validate
-			if (_name == null || _url == null || _url == "" || _name == "")
-				await _channel.SendMessage("An image name and url must be specified");
-			if (_url.Contains('`') || _url.Contains('{'))
+			if (string.IsNullOrWhiteSpace(_name) && string.IsNullOrWhiteSpace(_url))
+			{
+				await _channel.SendMessage($"An image name and url must be specified, use !help {name} for more info");
+				return;
+			}
+
+			if ((_url.Contains('`') || _url.Contains('{')))
+			{
 				await _channel.SendMessage("Invalid URL");
+				return;
+			}
+
 			List<string> imageLinks = new List<string>();
 			Uri url = new Uri(_url);
 
@@ -77,7 +120,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					DiscordImageCommand cmd = (DiscordImageCommand)bot.commands[_name];
 					int dupeCount = 0;
 					int addCount = 0;
-					if (_help != default(string))
+					if (!string.IsNullOrWhiteSpace(_help))
 						cmd.SetHelpMessage(_help);
 					foreach (string link in imageLinks)
 					{
@@ -90,8 +133,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 						addCount++;
 					}
 					if (dupeCount > 0)
-						await _channel.SendMessage(dupeCount + " Image" + ((dupeCount > 1) ? "s" : "") + " already existed and were not added");
-					await _channel.SendMessage(addCount + " Image" + ((addCount > 1) ? "s" : "") + " Added");
+						await _channel.SendMessage($"{dupeCount} Image{((dupeCount > 1) ? "s" : "")} already existed and were not added");
+					await _channel.SendMessage($"{addCount} Image{((addCount > 1) ? "s" : "")} Added");
 					//await _channel.SendMessage(cmd.ToString());
 				}
 				else
@@ -106,7 +149,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				bot.RegisterCommand(img);
 				img.init?.Invoke();
 				(from h in bot.commands.Values where h.GetType() == typeof(DiscordHelpCommand) select h as DiscordHelpCommand).First()?.init();
-				await _channel.SendMessage(imageLinks.Count + " Image" + ((imageLinks.Count > 1) ? "s" : "") + " Command Added");
+				await _channel.SendMessage($"{imageLinks.Count} Image{((imageLinks.Count > 1) ? "s" : "")} Command Added");
 				Karuta.Write(img.ToString());
 			}
 			//foreach (string c in bot.commands.Keys)
@@ -198,9 +241,9 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					if (cmd.images.Count == 0)
 						bot.commands.Remove(_name);
 				}
-				await _channel.SendMessage(removed + " Image" + ((removed > 1) ? "s" : "") + " removed");
+				await _channel.SendMessage($"{removed} Image{((removed > 1) ? "s" : "")} removed");
 				if (skipped != 0)
-					await _channel.SendMessage(skipped + "Image" + ((skipped > 1) ? "s" : "") + " were not found, and skipped");
+					await _channel.SendMessage($"{skipped} Image{((skipped > 1) ? "s" : "")} were not found, and skipped");
 			}
 			else
 				await _channel.SendMessage("that image command does not exsist");
@@ -217,7 +260,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		public List<string> images = new List<string>();
 		private bool _defaultHelp = true;
 
-		public DiscordImageCommand(string name) : base(name, "shows image(s) of " + name)
+		public DiscordImageCommand(string name) : base(name, $"shows image(s) of {name}")
 		{
 
 		}
@@ -277,36 +320,60 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 	class DiscordHelpCommand : DiscordCommand
 	{
 		DiscordBot bot;
+		bool search = false;
 		public DiscordHelpCommand(DiscordBot bot) : base("help", "shows this list")
 		{
 			this.bot = bot;
 			_default = ShowHelp;
+
+			RegisterOption('s', async s =>
+			{
+				search = true;
+				//Karuta.Write("Searching...");
+				await _channel.SendMessage("Searching...");
+				string output = "";
+				foreach (DiscordCommand dc in from c in bot.commands.Values where c.name.Contains(s) || c.helpMessage.Contains(s) select c)
+				{
+					output += $"!{dc.name} {dc.helpMessage}\n";
+				}
+
+				output = output.Replace(s, $"**{s}**");
+				output = (string.IsNullOrWhiteSpace(output) ? "No commands found" : $"Search results: \n{output}");
+
+				await _channel.SendMessage(output);
+			}, "list all commands matching the search parameters");
+
 			init = () =>
 			{
-				foreach(Command c in bot.commands.Values)
+				ClearKeywords();
+				foreach(DiscordCommand c in from d in bot.commands.Values where d.GetType() != typeof(DiscordImageCommand) select d)
 				{
-					RegisterKeyword(c.name, () =>
+					RegisterKeyword(c.name, async () =>
 					{
-						ClearKeywords();
-						_channel.SendMessage($"The \"{c.name}\" command:");
-						_channel.SendMessage($"  {c.helpMessage}");
+						//Karuta.Write(c.name);
+						await _channel.SendMessage($"The \"{c.name}\" command:");
+						await _channel.SendMessage($"  {c.helpMessage}");
 					});
 				}
 			};
 		}
 
+		public override ICommand Parse(List<string> args)
+		{
+			search = false;
+			return base.Parse(args);
+		}
+
 		void ShowHelp()
 		{
+			if (search)
+				return;
 			List<DiscordImageCommand> imgCmd = new List<DiscordImageCommand>();
 			List<DiscordCommand> cmd = new List<DiscordCommand>();
 
 			imgCmd.AddRange(from c in bot.commands.Values where c.GetType() == typeof(DiscordImageCommand) select c as DiscordImageCommand);
 			cmd.AddRange(from c in bot.commands.Values where c.GetType() != typeof(DiscordImageCommand) select c);
-			//foreach (DiscordCommand c in bot.commands.Values)
-			//	if (c.GetType() == typeof(DiscordImageCommand))
-			//		imgCmd.Add((DiscordImageCommand)c);
-			//	else
-			//		cmd.Add(c);
+
 			int i = 0;
 			List<string> output = new List<string>();
 			output.Add($"----- - Page {(i + 1)}------\n");
@@ -339,7 +406,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					}
 				}
 			}
-			Karuta.Write(output[i].Length + "| " + output);
+			//Karuta.Write(output[i].Length + "| " + output);
 			foreach (string o in output)
 				_channel.SendMessage(o);
 		}

@@ -14,6 +14,7 @@ namespace LuminousVector.Karuta.Tests
 		private static bool _rToggle = false;
 		private static string _inputA = null;
 		private static string _inputD = null;
+		private static string _inputB = null;
 
 		private ICommand testCommand;
 		private List<string> args;
@@ -95,13 +96,14 @@ namespace LuminousVector.Karuta.Tests
 		{
 			//Prepare Test
 			reset();
-			string input = "go -ard \"This is a quote\" \"This one too\"";
+			string input = "go -abrd \"quote\" hello \"This one too\"";
 			args.AddRange(input.Split(' '));
 			//Run Test
 			testCommand.Parse(args);
 			//Assert Results
 			Assert.IsTrue(_rToggle, "Option r triggered");
-			Assert.AreEqual(_inputA, "This is a quote", false, "Quote one parsed");
+			Assert.AreEqual(_inputA, "quote", false, "Quote one parsed");
+			Assert.AreEqual(_inputB, "hello", false, "text parsed");
 			Assert.AreEqual(_inputD, "This one too", false, "Quote two parsed");
 			Assert.IsTrue(_goCalled, "Go Called");
 		}
@@ -109,7 +111,7 @@ namespace LuminousVector.Karuta.Tests
 		void reset()
 		{
 			_defaultCalled = _goCalled = _rToggle = false;
-			_inputA = _inputD = null;
+			_inputA = _inputD = _inputB = null;
 			testCommand = new TestCommand("test", Deafult);
 			args = new List<string>();
 		}
@@ -127,6 +129,11 @@ namespace LuminousVector.Karuta.Tests
 		public static void OptionA(string input)
 		{
 			_inputA = input;
+		}
+
+		public static void OptionB(string input)
+		{
+			_inputB = input;
 		}
 
 		public static void OptionD(string input)
@@ -147,6 +154,7 @@ namespace LuminousVector.Karuta.Tests
 			RegisterOption('r', CommandTests.OptionR);
 			RegisterOption('a', CommandTests.OptionA);
 			RegisterOption('d', CommandTests.OptionD);
+			RegisterOption('b', CommandTests.OptionB);
 			RegisterKeyword("go", CommandTests.Go);
 		}
 	}

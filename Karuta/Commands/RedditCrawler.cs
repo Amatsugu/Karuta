@@ -70,29 +70,24 @@ namespace LuminousVector.Karuta
 
 	class RedditCrawler
 	{
-		public string name = "RedditCrawler";
-		public bool isRunning = false;
-		public bool needsReBuild = false;
-		public bool loop = true;
-		public List<string> subreddits = new List<string>();
-		public string[] allowedFiles = new string[] { ".png", ".jpg", ".jpeg", ".gif"};
-		public string baseDir = @"K:/RedditCrawl";
-		public int updateRate = 60 * 60 * 1000; //1 hour
-		public int postsToGet = 100;
-		public bool verbose = false;
-		public SearchMode searchMode = SearchMode.New;
-		public byte[] data;
-		public string getFrom;
-		int imgCount = 0;
+		private string name = "RedditCrawler";
+		private bool isRunning = false;
+		private bool needsReBuild = false;
+		private bool loop = true;
+		private List<string> subreddits = new List<string>();
+		private string[] allowedFiles = new string[] { ".png", ".jpg", ".jpeg", ".gif"};
+		private string baseDir = @"K:/RedditCrawl";
+		private int updateRate = 60 * 60 * 1000; //1 hour
+		private int postsToGet = 100;
+		private bool verbose = false;
+		private byte[] data;
+		private string getFrom;
+		private int imgCount = 0;
 		private Timer _crawlLoop;
-		private ImageEndpoint imgEndpoint;
 		private AlbumEndpoint albumEndpoint;
-		private DateTime minTime = new DateTime(1970, 1, 1);
+		private SearchMode searchMode = SearchMode.New;
 
-
-
-
-		public enum SearchMode
+		private enum SearchMode
 		{
 			New, Hot, Top
 		}
@@ -117,6 +112,7 @@ namespace LuminousVector.Karuta
 				try
 				{
 					_reddit = new Reddit(user, pass);
+					Karuta.Write(_reddit.RateLimit);
 				}catch(Exception e)
 				{
 					Karuta.Write(e.Message);
@@ -168,7 +164,7 @@ namespace LuminousVector.Karuta
 			try
 			{
 				_imgurClient = new ImgurClient(imgID, imgSec);
-				imgEndpoint = new ImageEndpoint(_imgurClient);
+				Karuta.Write(_imgurClient.RateLimit);
 				albumEndpoint = new AlbumEndpoint(_imgurClient);
 			}
 			catch (Exception e)
@@ -568,17 +564,18 @@ namespace LuminousVector.Karuta
 
 												try
 												{
-													var task = imgEndpoint.GetImageAsync(imgurID);
-													Task.WaitAll(task);
-													var image = task.Result;
-													ext = Path.GetExtension(image.Link);
+													//var task = imgEndpoint.GetImageAsync(imgurID);
+													//Task.WaitAll(task);
+													//var image = task.Result;
+													string link = $"http://i.imgur.com/{imgurID}.png";
+													ext = Path.GetExtension(link);
 													if (File.Exists(file + ((ext == ".gif") ? ext : ".png")))
 													{
 														//Karuta.logger.LogWarning("Skipping \"" + p.Title + "\", file already exsits", "/r/" + sub.Name, verbose);
 														continue;
 													}
 													//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
-													SaveImage(p, file, new Uri(image.Link));
+													SaveImage(p, file, new Uri(link));
 												}
 												catch (Exception e)
 												{

@@ -13,12 +13,18 @@ namespace LuminousVector.Karuta
 	public class Logs : Command
 	{
 		private string file = null;
+		private string src = null, search = null;
+		private IList<Log> logs;
+		private int count = -1;
 
 		public Logs() : base("logs", "shows the logs.")
 		{
 			_default = ShowLogs;
 			RegisterKeyword("dump", DumpLogs);
-			RegisterOption('f', f => file = f);
+			RegisterOption('f', f => file = f, "Specify the file name, for log dump");
+			RegisterOption('p', p => src = p.ToLower(), "Limit results to a specified program/command");
+			RegisterOption('s', s => search = s.ToLower(), "Limit results to a specifiied search term");
+			//RegisterOption('c', c => int.TryParse(c, out count), "Limit the ammount of results");
 		}
 
 		void ShowLogs()
@@ -30,9 +36,23 @@ namespace LuminousVector.Karuta
 				return;
 			}
 			Karuta.Write("---LOG START---");
-			foreach (string s in from l in Karuta.logger.logs select l.ToString())
-				Karuta.Write(s);
+			logs = Karuta.logger.logs.ToList();
+
+			//if (!string.IsNullOrWhiteSpace(src))
+			//	logs = (from l in logs where l.source.ToLower() == src select l).ToList();
+			if (!string.IsNullOrWhiteSpace(search))
+				logs = (from l in logs where l.ToString().ToLower().Contains(search) select l).ToList();
+			if (logs.Count == 0)
+				Karuta.Write("No results found");
+			else
+			{
+				foreach (string s in from l in Karuta.logger.logs select l.ToString())
+					Karuta.Write(s);
+			}
 			Karuta.Write("---LOG END---");
+			logs = null;
+			search = src = null;
+			count = -1;
 		}
 
 		void DumpLogs()
@@ -51,6 +71,7 @@ namespace LuminousVector.Karuta
 	{
 		public List<Log> logs { get { return log; } }
 		private DateTime startTime;
+		private readonly int logLimit = 100000;
 
 		private List<Log> log;
 
@@ -66,22 +87,7 @@ namespace LuminousVector.Karuta
 				Directory.CreateDirectory(Karuta.dataDir + "/Logs/");
 		}
 
-		public Logger Log(string message, string src)
-		{
-			return Log(message, src, false);
-		}
-
-		public Logger LogWarning(string message, string src)
-		{
-			return LogWarning(message, src, false);
-		}
-
-		public Logger LogError(string message, string src)
-		{
-			return LogError(message, src, false);
-		}
-
-		public Logger Log(string message, string src, bool verbose)
+		public Logger Log(string message, string src, bool verbose = false)
 		{
 			if (startTime == default(DateTime))
 				startTime = DateTime.Now;
@@ -91,18 +97,18 @@ namespace LuminousVector.Karuta
 				time = DateTime.Now,
 				threadName = Thread.CurrentThread.Name,
 				source = src,
-				logType = LogType.Error,
+				logType = LogType.Info,
 				message = message
 			};
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
-			if (logs.Count >= 1000)
+			if (logs.Count >= logLimit)
 				Dump();
 			return this;
 		}
 
-		public Logger LogWarning(string message, string src, bool verbose)
+		public Logger LogWarning(string message, string src, bool verbose = false)
 		{
 			if (startTime == null)
 				startTime = DateTime.Now;
@@ -112,18 +118,18 @@ namespace LuminousVector.Karuta
 				time = DateTime.Now,
 				threadName = Thread.CurrentThread.Name,
 				source = src,
-				logType = LogType.Error,
+				logType = LogType.Warn,
 				message = message
 			};
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
-			if (logs.Count >= 1000)
+			if (logs.Count >= logLimit)
 				Dump();
 			return this;
 		}
 
-		public Logger LogError(string message, string src, bool verbose)
+		public Logger LogError(string message, string src, bool verbose = false)
 		{
 			if (startTime == null)
 				startTime = DateTime.Now;
@@ -138,7 +144,7 @@ namespace LuminousVector.Karuta
 			log.Add(l);
 			if (verbose)
 				Karuta.Write(l);
-			if (logs.Count >= 1000)
+			if (logs.Count >= logLimit)
 				Dump();
 			return this;
 		}

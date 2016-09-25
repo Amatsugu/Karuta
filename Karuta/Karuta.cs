@@ -107,6 +107,7 @@ namespace LuminousVector.Karuta
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
 
 			Write($"Karuta is ready. Finished in {elapsedT}ms");
+			Karuta.logger.Log($"Karuta started in {elapsedT}ms", "Karuta");
 		}
 
 		//Register all Commands
@@ -152,22 +153,26 @@ namespace LuminousVector.Karuta
 				_input = Console.ReadLine();
 				if (_input == null)
 					continue;
-				List<string> args = new List<string>();
-				args.AddRange(_input.Split(' '));
-				Command cmd;
-				commands.TryGetValue(args[0], out cmd);
-				if (cmd == null)
-					Say(args[0]);
-				else
+				foreach (string c in _input.Split('&'))
 				{
-					args.RemoveAt(0);
-					try
+					List<string> args = new List<string>();
+					args.AddRange(from arg in c.Split(' ') where !string.IsNullOrWhiteSpace(arg) select arg);
+					Command cmd;
+					commands.TryGetValue(args[0], out cmd);
+					if (cmd == null)
+						Say($"No such command: \"{args[0]}\"");
+					else
 					{
-						cmd.Parse(args);
-					}catch(Exception e)
-					{
-						Write($"An error occured while executing the command: {e.Message}");
-						Write(e.StackTrace);
+						args.RemoveAt(0);
+						try
+						{
+							cmd.Parse(args);
+						}
+						catch (Exception e)
+						{
+							Write($"An error occured while executing the command: {e.Message}");
+							Write(e.StackTrace);
+						}
 					}
 				}
 			}

@@ -87,11 +87,20 @@ namespace LuminousVector.Karuta.Commands
 			//Find options to set
 			if (args.Count != 0)
 			{
+				IList<string> emptyArgs = (from empty in args where string.IsNullOrWhiteSpace(empty) select empty).ToList();
+
+				foreach (string arg in emptyArgs)
+					args.Remove(arg);
 
 				//Replace single quotes with double quotes if they exist
 				Debug.Print("Quote balance check START");
 				for (int i = 0; i < args.Count; i++)
+				{
 					args[i] = args[i].Replace("'", "\"");
+					if (args[i][0] == '\"' && args[i][args[i].Length - 1] == '\"')
+						args[i] = args[i].Replace("\"", "");
+				}
+
 				if (!Utils.IsEven((from q in args where q.Contains("\"") select q).ToList().Count))
 					throw new CommandParsingExeception("Unbalaced Quotes detected");
 				Debug.Print("Quote balance check END");

@@ -7,11 +7,17 @@ using System.Threading.Tasks;
 
 namespace LuminousVector.Karuta.Commands
 {
-	[KarutaCommand(Name = "test")]
+	//[KarutaCommand(Name = "test")]
 	class TestCommand : Command
 	{
 		public TestCommand() : base("test", "test")
 		{
+
+			_default = () =>
+			{
+				Karuta.CreateThread("testThread", () => Karuta.Write("Test")).Abort();
+			};
+
 			RegisterOption('t', t =>
 			{
 				int time;

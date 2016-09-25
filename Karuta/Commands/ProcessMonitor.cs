@@ -10,6 +10,7 @@ namespace LuminousVector.Karuta.Commands
 	{
 		private Dictionary<string, Thread> _threads;
 		private Dictionary<string, Timer> _timers;
+		private readonly string appName = "ThreadMonitor";
 
 		public ProcessMonitor(Dictionary<string, Thread> threadList, Dictionary<string, Timer> timers) : base("processes", "lists and manages threads and timers")
 		{
@@ -17,23 +18,21 @@ namespace LuminousVector.Karuta.Commands
 			_timers = timers;
 			_default = ListAll;
 
+			List<Thread> removalQ = new List<Thread>();
+
 			init = () =>
 			{
 				//Start Thread Monitor
 				Karuta.StartTimer("ThreadMonitor", e =>
 				{
-					List<Thread> removalQ = new List<Thread>();
-					foreach (Thread thread in _threads.Values)
-					{
-						if (thread.ThreadState.Equals(System.Diagnostics.ThreadState.Terminated))
-							removalQ.Add(thread);
-					}
+					removalQ.Clear();
+					removalQ.AddRange(from thread in _threads.Values where thread.ThreadState == ThreadState.Aborted || thread.ThreadState == ThreadState.Stopped select thread);
 					foreach (Thread thread in removalQ)
 					{
-						_threads.Remove(thread.Name);
+						Karuta.logger.Log($"Thread \"{thread.Name}\" has been {thread.ThreadState} and will be removed", appName);
+						Karuta.CloseThread(thread);
 					}
-					removalQ.Clear();
-				}, 10 * 1000, 10 * 1000);
+				}, 5 * 1000, 5 * 1000);
 			};
 		}
 

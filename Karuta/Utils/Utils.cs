@@ -16,6 +16,10 @@ namespace LuminousVector.Karuta
 
 		public static float Clamp(float value, float min, float max) => (value > max) ? max : (value < min) ? min: value;
 
+		public static int Clamp(int value, int range) => Clamp(value, -range, range);
+
+		public static int Clamp(int value, int min, int max) => (value > max) ? max : (value < min) ? min : value;
+
 		public static bool IsEven(int value) => (value / 2) == (value / 2f);
 
 		public static bool IsEven(float value) => ((int)value / 2) == (value / 2f);

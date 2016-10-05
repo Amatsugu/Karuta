@@ -12,17 +12,17 @@ namespace LuminousVector.Karuta
 		public NoSuchTimerExeception(string name) : base("Timer: '" + name + "' does not exsist") { }
 	}
 
-	public class NoSuchCommandException : Exception
+	public class NoSuchCommandException : CommandInterpretorExeception
 	{
 		public NoSuchCommandException(string name) : base("Command: '" + name + "' does not exist") { }
 	}
 
-	public class DuplicateTimerExeception : Exception
+	public class DuplicateTimerExeception : CommandInterpretorExeception
 	{
 		public DuplicateTimerExeception(string name) : base("A timer with the name: '" + name + "' already exists") { }
 	}
 
-	public class DuplicateCommandExeception : Exception
+	public class DuplicateCommandExeception : CommandInterpretorExeception
 	{
 		public DuplicateCommandExeception(string name) : base("A command with the name: '" + name + "' has already been registed") { }
 	}
@@ -30,6 +30,22 @@ namespace LuminousVector.Karuta
 	public class CommandParsingExeception : Exception
 	{
 		public CommandParsingExeception(string message) : base(message)
+		{
+
+		}
+	}
+
+	public class DiscordEventExeception : Exception
+	{
+		public DiscordEventExeception(string message) : base(message)
+		{
+
+		}
+	}
+
+	public class CommandInterpretorExeception : Exception
+	{
+		public CommandInterpretorExeception(string message) : base(message)
 		{
 
 		}

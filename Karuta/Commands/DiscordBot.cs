@@ -14,18 +14,17 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 	[KarutaCommand(Name = "discord")]
 	class DiscordBot : Command
 	{
-		public Dictionary<string, DiscordCommand> commands = new Dictionary<string, DiscordCommand>();
 		public AlbumEndpoint albumEndpoint;
 		public string[] validExtensions = new string[] { ".gfi", ".gifv", ".png", ".jpg", ".jpeg" };
+		public DiscordClient client;
+		public DiscordCommandInterpreter<DiscordCommand> interpreter;
 
-
-		private DiscordClient _client;
 		private string _token;
 		private Thread _thread;
 		private bool _autoStart = false;
 		private ImgurClient _imgurClient;
-		private readonly ulong adminUserID = 106962986572197888;
-		private readonly string appName = "Discord Bot";
+		private readonly ulong _adminUserID = 106962986572197888;
+		private readonly string _appName = "Discord Bot";
 
 		public DiscordBot() : base("discord", "a discord bot")
 		{
@@ -49,19 +48,23 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				Karuta.Write("Token Saved");
 			}, "set the token");
 
-			RegisterCommand(new AddImageCommand(this));
-			RegisterCommand(new DiscordHelpCommand(this));
-			RegisterCommand(new DiscordSaveCommand(this));
-			RegisterCommand(new DiscordPurgeCommand(this));
-			RegisterCommand(new RemoveImageCommand(this));
-			RegisterCommand(new SetDescriptionCommand(this));
-			
+			interpreter = new DiscordCommandInterpreter<DiscordCommand>()
+			{
+				adminUserID = _adminUserID,
+				rateLimit = 5
+			};
+
+			interpreter.RegisterCommand(new AddImageCommand(this));
+			interpreter.RegisterCommand(new DiscordHelpCommand(this));
+			interpreter.RegisterCommand(new DiscordSaveCommand(this));
+			interpreter.RegisterCommand(new DiscordPurgeCommand(this));
+			interpreter.RegisterCommand(new RemoveImageCommand(this));
+			interpreter.RegisterCommand(new SetDescriptionCommand(this));
+			interpreter.RegisterCommand(new DiscordEventCommand(this));
+
 			LoadData();
 
-			foreach (DiscordCommand c in commands.Values)
-			{
-				c.init?.Invoke();
-			}
+			interpreter.Init();
 
 			init = () =>
 			{
@@ -80,7 +83,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				imgID = Karuta.GetInput("Imgur API ID");
 				imgSec = Karuta.GetInput("Imgur API Sec");
 			}
-			Karuta.logger.Log("Connecting to imgur...", appName);
+			Karuta.logger.Log("Connecting to imgur...", _appName);
 			try
 			{
 				_imgurClient = new ImgurClient(imgID, imgSec);
@@ -100,7 +103,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		public string SaveData()
 		{
 			string output = "";
-			foreach(DiscordCommand C in commands.Values)
+			foreach(DiscordCommand C in interpreter.commands.Values)
 			{
 				if (C.GetType() == typeof(DiscordImageCommand))
 				{
@@ -136,21 +139,14 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					continue;
 				string cmdName = images[0];
 				images.RemoveAt(0);
-				RegisterCommand((hMessage != null) ? new DiscordImageCommand(cmdName, hMessage) { images = images} : new DiscordImageCommand(cmdName) { images = images});
+				interpreter.RegisterCommand((hMessage != null) ? new DiscordImageCommand(cmdName, hMessage) { images = images} : new DiscordImageCommand(cmdName) { images = images});
 			}
 
 		}
 
-		public void RegisterCommand(DiscordCommand cmd)
-		{
-			if (commands.ContainsKey(cmd.name))
-				throw new Exception($"Command {cmd.name} already exsists!");
-			commands.Add(cmd.name, cmd);
-		}
-
 		void Init()
 		{
-			Karuta.logger.Log("Starting Discord Bot..", appName);
+			Karuta.logger.Log("Starting Discord Bot..", _appName);
 			_thread = Karuta.CreateThread("DiscordBot", async () =>
 			{
 				try
@@ -159,41 +155,61 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				}
 				catch (Exception e)
 				{
-					Karuta.logger.LogError($"Unable to initiate Imgur Connection: {e.Message}", appName);
+					Karuta.logger.LogError($"Unable to initiate Imgur Connection: {e.Message}", _appName);
 				}
-				_client = new DiscordClient();
+				client = new DiscordClient();
 				if(string.IsNullOrWhiteSpace(_token))
 				{
 					_token = Karuta.GetInput("Enter discord token");
 					Karuta.registry.SetValue("discordToken", _token);
 				}
 
-				_client.MessageReceived += MessageRecieved;
-				_client.UserJoined += UserJoined;
+				client.MessageReceived += MessageRecieved;
+				client.UserJoined += UserJoined;
 				try
 				{
-					await _client.Connect(_token, TokenType.Bot);
+					await client.Connect(_token, TokenType.Bot);
+					client.SetGame("World Domination");
+					//SendToAllConsoles("Bot Online");
 				}catch(Exception e)
 				{
-					Karuta.logger.LogWarning($"Unable to initiate connection to discord: {e.Message}", appName);
-					Karuta.logger.LogError(e.StackTrace, appName);
+					Karuta.logger.LogWarning($"Unable to initiate connection to discord: {e.Message}", _appName);
+					Karuta.logger.LogError(e.StackTrace, _appName);
 					Karuta.Write("Unable to connect to discord...");
 					Karuta.CloseThread(_thread);
 				}
 			});
 		}
 
+		private async void SendToAllGeneral(string message)
+		{
+			foreach(Server s in client.Servers)
+			{
+				await s.DefaultChannel.SendMessage(message);
+			}
+		}
+
+		private async void SendToAllConsoles(string message)
+		{
+			foreach (Server s in client.Servers)
+			{
+				foreach(Channel c in s.FindChannels("console", ChannelType.Text, false))
+				{
+					await c.SendMessage(message);
+				}
+			}
+		}
+
 		private void UserJoined(object sender, UserEventArgs e)
 		{
 			e.Server.DefaultChannel.SendMessage($"Welcome {e.User.Name}");
-			//throw new NotImplementedException();
 		}
 
-		public override async void Stop()
+		public override void Stop()
 		{
-			if(_client != null)
+			/*if(client != null)
 			{
-				foreach(Server s in _client.Servers)
+				foreach(Server s in client.Servers)
 				{
 					Karuta.Write(s.Name);
 					foreach(Channel c in s.FindChannels("console", null, true))
@@ -202,72 +218,27 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					}
 				}
 			}
-			Thread.Sleep(2 * 1000);
+			Thread.Sleep(2 * 1000);*/
 			Karuta.Write("Shutting down...");
-			Karuta.logger.Log("Shutting down bot...", appName);
-			_client?.Disconnect();
-			_client = null;
+			Karuta.logger.Log("Shutting down bot...", _appName);
+			client?.Disconnect();
+			client = null;
 			_thread = null;
 			SaveData();
 		}
 
+		public void InvokeCommand(string command, Channel channel)
+		{
+			if (command[0] == '!')
+				command = command.Remove(0, 1);
+			interpreter.ExecuteCommands(new string[] { command }, channel, 0);
+
+			
+		}
+
 		void MessageRecieved(object sender, MessageEventArgs e)
 		{
-			if (!e.Message.IsAuthor && e.Message?.Text?.Length > 0 && e.Message?.Text?[0] == '!')
-			{
-				string message = e.Message.Text.Remove(0, 1);
-				string[] cmds = message.Split('&');
-				foreach (string command in cmds)
-				{
-					string cName = (from a in command.ToLower().Split(' ') where !string.IsNullOrWhiteSpace(a) select a).First();
-
-					Karuta.logger.Log($"Command recieved: \"{cName}\" from \"{e.Message.User.Name}\" in channel \"{e.Channel.Name}\" on server \"{e.Channel.Server.Name}\"", appName);
-					if (commands.ContainsKey(cName))
-					{
-						try
-						{
-							DiscordCommand cmd = commands[cName];
-							if (cmd.GetType() != typeof(DiscordImageCommand))
-							{
-								if ((e.Channel.Name == "console" || cmd.GetType() == typeof(DiscordHelpCommand)))
-								{
-									if (cmd.GetType() == typeof(DiscordPurgeCommand))
-									{
-										if (e.Message.User.Id == adminUserID && e.Channel.Name == "console")
-											cmd.Parse(new List<string>(), e.Channel);
-										else
-										{
-											e.Channel.SendMessage("You are not authorized to use this command");
-											Karuta.logger.LogWarning($"Underprivilaged user \"{e.User.Name}\" attempted to use command \"{cName}\"", appName);
-										}
-									}
-									else
-									{
-										List<string> args = new List<string>();
-										args.AddRange(from arg in command.Split(' ') where !string.IsNullOrWhiteSpace(arg) select arg);
-										args.RemoveAt(0);
-										cmd.Parse(args, e.Channel);
-									}
-								}
-								else
-								{
-									e.Channel.SendMessage("this command can only be used in the console");
-								}
-							}
-							else
-								((DiscordImageCommand)cmd).SendImage(e.Channel);
-						}
-						catch (Exception ex)
-						{
-							e.Channel.SendMessage($"An error occured while executing the command: {ex.Message}");
-							Karuta.logger.LogError($"An error occured while executing the command: {ex.Message}", appName);
-							Karuta.logger.LogError(ex.StackTrace, appName);
-						}
-					}
-					else
-						e.Channel.SendMessage("No such command");
-				}
-			}
+			interpreter.Interpret(e.Message);
 		}
 
 		public async Task<List<string>> ResolveImgurUrl(Uri url)

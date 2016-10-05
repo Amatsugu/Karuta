@@ -112,6 +112,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="Commands\Attributes.cs" />
+    <Compile Include="Commands\CommandInterpretor.cs" />
     <Compile Include="Commands\DiscordBotCommands.cs" />
     <None Include="Karuta.Sign.snk" />
     <None Include="Karuta_TemporaryKey.pfx" />
@@ -121,6 +122,9 @@
   <ItemGroup>
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\DiscordBot.cs" />
+    <Compile Include="Commands\DiscordCommandInterpreter.cs" />
+    <Compile Include="Commands\DiscordEvent.cs" />
+    <Compile Include="Commands\DiscordEventCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\Keyword.cs" />

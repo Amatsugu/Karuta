@@ -24,6 +24,10 @@ namespace LuminousVector.Karuta
 
 		public static bool IsEven(float value) => ((int)value / 2) == (value / 2f);
 
+		public static float SmartRound(float n, float d) => ((int)(n * d)) / d;
+
+		public static double SmartRound(double n, double d) => ((int)(n * d)) / d;
+
 		public static string HttpRequest(string url, string data, string method)
 		{
 			HttpWebRequest getRequest = (HttpWebRequest)WebRequest.Create(url);

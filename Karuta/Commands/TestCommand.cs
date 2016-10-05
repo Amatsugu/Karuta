@@ -15,6 +15,7 @@ namespace LuminousVector.Karuta.Commands
 
 			_default = () =>
 			{
+				Karuta.Write((DateTime.Now - DateTime.Now.AddSeconds(25)).TotalSeconds);
 				Karuta.CreateThread("testThread", () => Karuta.Write("Test")).Abort();
 			};
 

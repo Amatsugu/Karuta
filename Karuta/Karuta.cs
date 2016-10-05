@@ -16,7 +16,7 @@ namespace LuminousVector.Karuta
 	public static class Karuta
 	{
 		public static EventManager eventManager;
-		public static Dictionary<string, Command> commands { get { return _commands; } }
+		public static Dictionary<string, Command> commands { get { return _interpretor.commands; } }
 		public static Registry registry;
 		public static Logger logger;
 		public static Random random;
@@ -48,17 +48,17 @@ namespace LuminousVector.Karuta
 		private static string _regDir = "/Karuta";
 		private static bool _isRunning = false;
 		private static string _input;
-		private static Dictionary<string, Command> _commands;
 		private static Dictionary<string, Thread> _threads;
 		private static Dictionary<string, Timer> _timers;
+		private static CommandInterpreter<Command> _interpretor;
 
 		//Initialize
 		static Karuta()
 		{
 			//Init Vars
-			_commands = new Dictionary<string, Command>();
 			_threads = new Dictionary<string, Thread>();
 			_timers = new Dictionary<string, Timer>();
+			_interpretor = new CommandInterpreter<Command>();
 			logger = new Logger();
 			random = new Random();
 			//Prepare Console
@@ -95,9 +95,8 @@ namespace LuminousVector.Karuta
 				//Register Commands
 				RegisterCommands();
 				//Initalize commands
-				Karuta.Write("Initializing processes...");
-				foreach (Command c in commands.Values)
-					c.init?.Invoke();
+				Write("Initializing processes...");
+				_interpretor.Init();
 			}catch(Exception e)
 			{
 				Write($"An error occured while initializing commands: {e.Message}");
@@ -107,7 +106,7 @@ namespace LuminousVector.Karuta
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
 
 			Write($"Karuta is ready. Finished in {elapsedT}ms");
-			Karuta.logger.Log($"Karuta started in {elapsedT}ms", "Karuta");
+			logger.Log($"Karuta started in {elapsedT}ms", "Karuta");
 		}
 
 		//Register all Commands
@@ -121,25 +120,17 @@ namespace LuminousVector.Karuta
 			//Add each register each command
 			foreach(var c in cmds)
 			{
-				RegisterCommand(Activator.CreateInstance(c) as Command);
+				_interpretor.RegisterCommand(Activator.CreateInstance(c) as Command);
 			}
 			//Register Other Commands
-			RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
-			RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
-			RegisterCommand(new Command("save", () =>
+			_interpretor.RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
+			_interpretor.RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
+			_interpretor.RegisterCommand(new Command("save", () =>
 			{
 				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
 				Write("Registry saved");
 			}, "Save the registry"));
-			RegisterCommand(new ProcessMonitor(_threads, _timers));
-		}
-
-		//Register a new command
-		public static void RegisterCommand(Command command)
-		{
-			if (commands.ContainsKey(command.name))
-				throw new DuplicateCommandExeception(command.name);
-			commands.Add(command.name, command);
+			_interpretor.RegisterCommand(new ProcessMonitor(_threads, _timers));
 		}
 
 		//Start the main process loop
@@ -153,27 +144,12 @@ namespace LuminousVector.Karuta
 				_input = Console.ReadLine();
 				if (_input == null)
 					continue;
-				foreach (string c in _input.Split('&'))
+				try
 				{
-					List<string> args = new List<string>();
-					args.AddRange(from arg in c.Split(' ') where !string.IsNullOrWhiteSpace(arg) select arg);
-					Command cmd;
-					commands.TryGetValue(args[0], out cmd);
-					if (cmd == null)
-						Say($"No such command: \"{args[0]}\"");
-					else
-					{
-						args.RemoveAt(0);
-						try
-						{
-							cmd.Parse(args);
-						}
-						catch (Exception e)
-						{
-							Write($"An error occured while executing the command: {e.Message}");
-							Write(e.StackTrace);
-						}
-					}
+					_interpretor.Interpret(_input);
+				}catch (Exception e)
+				{
+					Write($"An error occured while interpreting the command: {e.Message}");
 				}
 			}
 		}

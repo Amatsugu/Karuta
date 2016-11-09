@@ -1,0 +1,3 @@
+[submodule "RinDB_web"]
+	path = RinDB_web
+	url = https://github.com/TheDarkVoid/RinDB_web

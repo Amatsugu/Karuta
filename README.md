@@ -8,3 +8,5 @@ As of 9-10-2016 Karuta uses the following API's (and their dependecies) to some 
 -[Q42.HueAPI](https://github.com/Q42/Q42.HueApi)
 -[RedditSharp](https://github.com/CrustyJew/RedditSharp)
 -[Protobuf-net](https://github.com/mgravell/protobuf-net)
+-[NancyFx](https://github.com/NancyFx/Nancy)
+-[npgsql](https://github.com/npgsql/npgsql)

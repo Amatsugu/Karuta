@@ -20,7 +20,6 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		public DiscordCommandInterpreter<DiscordCommand> interpreter;
 
 		private string _token;
-		private Thread _thread;
 		private bool _autoStart = false;
 		private ImgurClient _imgurClient;
 		private readonly ulong _adminUserID = 106962986572197888;
@@ -144,41 +143,37 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 
 		}
 
-		void Init()
+		async void Init()
 		{
 			Karuta.logger.Log("Starting Discord Bot..", _appName);
-			_thread = Karuta.CreateThread("DiscordBot", async () =>
+			try
 			{
-				try
-				{
-					ImgurSetup();
-				}
-				catch (Exception e)
-				{
-					Karuta.logger.LogError($"Unable to initiate Imgur Connection: {e.Message}", _appName);
-				}
-				client = new DiscordClient();
-				if(string.IsNullOrWhiteSpace(_token))
-				{
-					_token = Karuta.GetInput("Enter discord token");
-					Karuta.registry.SetValue("discordToken", _token);
-				}
+				ImgurSetup();
+			}
+			catch (Exception e)
+			{
+				Karuta.logger.LogError($"Unable to initiate Imgur Connection: {e.Message}", _appName);
+			}
+			client = new DiscordClient();
+			if(string.IsNullOrWhiteSpace(_token))
+			{
+				_token = Karuta.GetInput("Enter discord token");
+				Karuta.registry.SetValue("discordToken", _token);
+			}
 
-				client.MessageReceived += MessageRecieved;
-				client.UserJoined += UserJoined;
-				try
-				{
-					await client.Connect(_token, TokenType.Bot);
-					client.SetGame("World Domination");
-					//SendToAllConsoles("Bot Online");
-				}catch(Exception e)
-				{
-					Karuta.logger.LogWarning($"Unable to initiate connection to discord: {e.Message}", _appName);
-					Karuta.logger.LogError(e.StackTrace, _appName);
-					Karuta.Write("Unable to connect to discord...");
-					Karuta.CloseThread(_thread);
-				}
-			});
+			client.MessageReceived += MessageRecieved;
+			client.UserJoined += UserJoined;
+			try
+			{
+				await client.Connect(_token, TokenType.Bot);
+				client.SetGame("World Domination");
+				//SendToAllConsoles("Bot Online");
+			}catch(Exception e)
+			{
+				Karuta.logger.LogWarning($"Unable to initiate connection to discord: {e.Message}", _appName);
+				Karuta.logger.LogError(e.StackTrace, _appName, true);
+				Karuta.Write("Unable to connect to discord...");
+			}
 		}
 
 		private async void SendToAllGeneral(string message)
@@ -223,7 +218,6 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			Karuta.logger.Log("Shutting down bot...", _appName);
 			client?.Disconnect();
 			client = null;
-			_thread = null;
 			SaveData();
 		}
 

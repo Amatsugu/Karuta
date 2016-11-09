@@ -9,9 +9,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 {
 	class DiscordEventCommand : DiscordCommand
 	{
-
-		private List<DiscordEvent> _events;
-		private string eName, eMode, eTime, eMessage, eCommand, eRate;
+		private List<DiscordEvent> _events; 
+		private string eName, eMode, eTime, eMessage, eCommand, eRate, eServer;
 
 		public DiscordEventCommand(DiscordBot bot) : base("events", "Add/Remove/View upcoming events")
 		{
@@ -20,7 +19,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			_events = new List<DiscordEvent>();
 
 			RegisterKeyword("all", ListEvents, "lists all events");
-			RegisterKeyword("add", AddEvent, "adds a new event, options [n]ame, [t]ime, and either [e]vent message or [c]ommand are required. Optional [r]epeat rate, repeat [m]ode");
+			RegisterKeyword("add", AddEvent, "adds a new event, options [n]ame, [t]ime, and either [e]vent message or [c]ommand are required. Optional: [r]epeat rate, repeat [m]ode, [s]ervers");
+			RegisterKeyword("register", null, "register an exsisting event to be triggered on this channel on this server");
 			RegisterOption('n', n => eName = n, "Specify the name of an event");
 			RegisterOption('t', t => eTime = t, "Specify the time of an event, format: MM/DD/YYYY HH:MM");
 			RegisterOption('m', m => eMode = m, "Specify the mode of an event, Valid modes are: none, daily, weekly, monthly, and anually");
@@ -29,11 +29,11 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			RegisterOption('r', r => eRate = r, "Specify the rate multipler at which events will repeat, for example a value of 2 on an event of mode daily will repeat once every 2 days");
 		}
 
-		//public override DiscordCommand Parse(List<string> args, Channel channel)
-		//{
-		//	channel.SendMessage("This command is not yet implemented");
-		//	return this;
-		//}
+		public override DiscordCommand Parse(List<string> args, Channel channel)
+		{
+			channel.SendMessage("This command is not yet implemented");
+			return this;
+		}
 
 		async void Default()
 		{
@@ -57,7 +57,13 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			eRate = eTime = eName = eMessage = eCommand = eMode = null;
 		}
 
-		void AddEvent()
+		async void RegisterEvent()
+		{
+
+			await _channel.SendMessage("Event Registered to this channel");
+		}
+
+		async void AddEvent()
 		{
 			if(!string.IsNullOrEmpty(eName) && !string.IsNullOrEmpty(eMode) && !string.IsNullOrEmpty(eTime) && (!string.IsNullOrEmpty(eMessage) || !string.IsNullOrEmpty(eCommand)))
 			{
@@ -85,7 +91,10 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				}
 				DateTime eventTime = DateTime.Parse(eTime);
 				if (!_bot.interpreter.IsImageCommand(eCommand))
-					throw new DiscordEventExeception($"This command '{eCommand}' cannot be executed by the EventBot");
+				{
+					await _channel.SendMessage($"This command '{eCommand}' cannot be executed by the EventBot");
+					return;
+				}
 				_events.Add(new DiscordEvent(eName, mode, eventTime, async channels =>
 				{
 					DiscordClient client = _bot.client;
@@ -103,8 +112,13 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 							_bot.InvokeCommand(eCommand, chan);
 						}
 					}
-				}, _channel.Id, rate));
+				}, _channel.Id, rate).RegisterChannel(_channel.Id));
+				await _channel.SendMessage("Event Added!");
 
+
+			}else
+			{
+				await _channel.SendMessage((from k in keywords where k == "add" select k.usage).First());
 			}
 
 

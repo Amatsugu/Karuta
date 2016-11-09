@@ -328,16 +328,27 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				search = true;
 				//Karuta.Write("Searching...");
 				await _channel.SendMessage("Searching...");
-				string output = "";
+				List<string> output = new List<string>();
+				output.Add("");
+				int index = 0;
+				string curLine = "";
 				foreach (DiscordImageCommand dc in from c in bot.interpreter.commands.Values orderby c.name where c.GetType() == typeof(DiscordImageCommand) && (c.name.Contains(s) || c.helpMessage.Contains(s)) select c)
 				{
-					output += $"!{dc.name} {dc.helpMessage} [{dc.images.Count}]\n";
+					curLine = $"!{dc.name} {dc.helpMessage} [{dc.images.Count}]\n";
+					if (curLine.Length + output[index].Length >= 1500)
+					{
+						index++;
+						output.Add("");
+					}
+					output[index] += curLine;
 				}
-
-				output = output.Replace(s, $"**{s}**");
-				output = (string.IsNullOrWhiteSpace(output) ? "No commands found" : $"Search results: \n{output}");
-
-				await _channel.SendMessage(output);
+				for (int i = 0; i < output.Count; i++)
+				{
+					output[i] = output[i].Replace(s, $"**{s}**");
+				}
+				output[0] = ((string.IsNullOrWhiteSpace(output[0]) && output.Count == 1) ? "No commands found" : $"Search results: \n Page 1 of {output.Count}\n{output[0]}");
+				for (int i = 0; i < output.Count; i++)
+					await _channel.SendMessage($"{((i != 0) ? $"Page {i + 1} of {output.Count}\n" : "")} {output[i]}");
 			}, "list all commands matching the search parameters");
 
 			init = () =>
@@ -377,41 +388,50 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			imgCmd.AddRange(from c in _bot.interpreter.commands.Values orderby c.name where c.GetType() == typeof(DiscordImageCommand) select c as DiscordImageCommand);
 			cmd.AddRange(from c in _bot.interpreter.commands.Values orderby c.name where c.GetType() != typeof(DiscordImageCommand) select c);
 
-			int i = 0;
+			int index = 0;
 			List<string> output = new List<string>();
-			output.Add($"----- - Page {(i + 1)}------\n");
-			output[i] += ("The list of commands are:\n");
-			output[i] += "------Bot Commands------\n";
+			output.Add("");
+			output[index] += ("The list of commands are:\n");
+			output[index] += "------Bot Commands------\n";
 			if (cmd.Count == 0)
-				output[i] += ("There are no bot commands \n");
+				output[index] += ("There are no bot commands \n");
 			else
 			{
+				string curLine = "";
 				foreach (DiscordCommand c in cmd)
-					output[i] += ($"!{c.name} {c.helpMessage}\n");
-				if (output[i].Length >= 1500)
 				{
-					i++;
-					output.Add($"------Page {(i + 1)} ------\n");
+					curLine = ($"!{c.name} {c.helpMessage}\n");
+					if(curLine.Length + output[index].Length > 1500)
+					{
+						index++;
+						output.Add("");
+					}
+					output[index] += curLine;
 				}
 			}
-			output[i] += "------Image Commands------\n";
+			index++;
+			output.Add("------Image Commands------\n");
 			if (imgCmd.Count == 0)
-				output[i] += ("There are no image commands\n");
+				output[index] += ("There are no image commands\n");
 			else
 			{
+				string curLine = "";
 				foreach (DiscordImageCommand c in imgCmd)
 				{
-					output[i] += ($"!{c.name} {c.helpMessage} [{c.images.Count}]\n");
-					if (output[i].Length >= 1500)
+					curLine = ($"!{c.name} {c.helpMessage} [{c.images.Count}]\n");
+					if (curLine.Length + output[index].Length >= 1500)
 					{
-						i++;
-						output.Add($"------Page {(i + 1)} ------\n");
+						index++;
+						output.Add("");
 					}
+					output[index] += curLine;
 				}
 			}
 			//Karuta.Write(output[i].Length + "| " + output);
-			foreach (string o in output)
-				_channel.SendMessage(o);
+			for(int i = 0; i < output.Count; i++)
+			{
+				_channel.SendMessage($"{(i != 0 ? $"----- - Page {(i + 1)} of {output.Count}------\n" : "")} {output[i]}" );
+			}
 		}
 	}
 

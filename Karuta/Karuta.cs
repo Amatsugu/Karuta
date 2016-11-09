@@ -150,6 +150,7 @@ namespace LuminousVector.Karuta
 				}catch (Exception e)
 				{
 					Write($"An error occured while interpreting the command: {e.Message}");
+					Write(e.StackTrace);
 				}
 			}
 		}
@@ -219,11 +220,47 @@ namespace LuminousVector.Karuta
 		//Create a ChildThread
 		public static Thread CreateThread(string name, ThreadStart thread)
 		{
-			Thread newThread = new Thread(thread);
+			Thread newThread = new Thread(AddExeceptionWrapper(thread, name));
 			newThread.Name = $"Karuta.{name}";
 			_threads.Add(newThread.Name, newThread);
 			newThread.Start();
 			return newThread;
+		}
+
+		//Wraps the thread start in a try-catch
+		private static ThreadStart AddExeceptionWrapper(ThreadStart threadstart, string name)
+		{
+			return () =>
+			{
+				try
+				{
+					threadstart?.Invoke();
+				}
+				catch (Exception e)
+				{
+					Write($"Something went wront in {name}");
+					Write(e.Message);
+					Write(e.StackTrace);
+				}
+			};
+		}
+
+		//Wrarps the timercallback in a try-catch
+		private static TimerCallback AddExeceptionWrapper(Action<object> timer, string name)
+		{
+			return i =>
+			{
+				try
+				{
+					timer?.Invoke(i);
+				}
+				catch (Exception e)
+				{
+					Write($"Something went wront in {name}");
+					Write(e.Message);
+					Write(e.StackTrace);
+				}
+			};
 		}
 
 		//Force Join a Thread
@@ -247,11 +284,11 @@ namespace LuminousVector.Karuta
 		}
 
 		//Starts a timer
-		public static Timer StartTimer(string name, TimerCallback callback, int delay, int interval)
+		public static Timer StartTimer(string name, Action<object> callback, int delay, int interval)
 		{
 			if (_timers.ContainsKey(name))
 				throw new DuplicateTimerExeception(name);
-			Timer timer = new Timer(callback, null, delay, interval);
+			Timer timer = new Timer(AddExeceptionWrapper(callback,name), null, delay, interval);
 			_timers.Add(name, timer);
 			return timer;
 		}

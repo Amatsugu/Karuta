@@ -8,6 +8,12 @@ using System.Diagnostics;
 
 namespace LuminousVector.Karuta.Commands
 {
+	/// <summary>
+	/// Basic command
+	/// </summary>
+	/// <param name="name">The name of this command, used to execute the command</param>
+	/// <param name="defaultAction">The default action performed when this command is executed with no keywords</param>
+	/// <param name="helpMessage"/> The help message for this command, shown by the help command</param>
 	public class Command : ICommand
 	{
 		public string name { get; }
@@ -22,9 +28,12 @@ namespace LuminousVector.Karuta.Commands
 		private Dictionary<char, Option> _options;
 		private Dictionary<string, Keyword> _keywords;
 
-		public Command(string name, string helpMessage) : this(name, null, helpMessage) { }
+		public Command(string name, string helpMessage) : this(name, null, helpMessage)
+		{
+			
+		}
 
-		public Command(string name, Action defaultAction, string helpMessage)
+		public Command(string name, Action defaultAction, string helpMessage = null)
 		{
 			this.name = name;
 			_default = defaultAction;

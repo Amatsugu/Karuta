@@ -12,6 +12,8 @@ using RedditSharp.Things;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
 using LuminousVector.Karuta.Commands;
+using LuminousVector.Karuta.RinDB;
+using LuminousVector.Karuta.RinDB.Models;
 
 namespace LuminousVector.Karuta
 {
@@ -546,6 +548,13 @@ namespace LuminousVector.Karuta
 											continue;
 										}
 										//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
+										RinDB.RinDB.AddImage(new ImageModel()
+										{
+											name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file)),
+											fileUri = Uri.EscapeDataString(file.Replace($"{baseDir}/", "")),
+											timeadded = p.CreatedUTC.ToEpoch(),
+											isnsfw = p.NSFW
+										});
 										SaveImage(p, file, p.Url);
 									}
 									else if (p.Url.DnsSafeHost == "imgur.com") //Imgur in-direct link/album
@@ -575,6 +584,13 @@ namespace LuminousVector.Karuta
 														continue;
 													}
 													//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
+													RinDB.RinDB.AddImage(new ImageModel()
+													{
+														name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file)),
+														fileUri = Uri.EscapeDataString(file.Replace($"{baseDir}/", "")),
+														timeadded = p.CreatedUTC.ToEpoch(),
+														isnsfw = p.NSFW
+													});
 													SaveImage(p, file, new Uri(link));
 												}
 												catch (Exception e)
@@ -648,6 +664,13 @@ namespace LuminousVector.Karuta
 						i++;
 						continue;
 					}
+					RinDB.RinDB.AddImage(new ImageModel()
+					{
+						name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(thisFile)),
+						fileUri = Uri.EscapeDataString(thisFile.Replace($"{baseDir}/", "")),
+						timeadded = p.CreatedUTC.ToEpoch(),
+						isnsfw = p.NSFW
+					});
 					SaveImage(p, thisFile, new Uri(image.Link));
 					i++;
 				}

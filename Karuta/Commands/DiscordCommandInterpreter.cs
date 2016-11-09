@@ -74,14 +74,12 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			string username = channel.GetUser(user).Name;
 			if (!userCommandRate.ContainsKey(user))
 				userCommandRate.Add(user, new UserCommandRateInfo(0, DateTime.Now));
-			Karuta.Write($"{userCommandRate[user].useCount}");
 			if (channel.Name != "console" && userCommandRate[user].useCount > rateLimit)
 			{
 				double timeoutTime = (userCommandRate[user].timeoutEnd - DateTime.Now).TotalSeconds;
-				Karuta.Write($"{timeoutTime} {userCommandRate[user].useCount}");
 				if (timeoutTime > 0)
 				{
-					await channel.SendMessage($"{username}: Please wait {Utils.SmartRound(timeoutTime, 100)} seconds before using another command.");
+					await channel.SendMessage($"@{username}: Please wait {Utils.SmartRound(timeoutTime, 100)} seconds before using another command.");
 					return;
 				}
 				else
@@ -93,19 +91,17 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			{
 				if((DateTime.Now - userCommandRate[user].lastUsage).TotalSeconds < minTimeRange)
 				{
-					Karuta.Write("Too Fast");
 					userCommandRate[user].useCount++;
 				}else
 				{
 					userCommandRate[user].useCount = 0;
-					Karuta.Write("Clear");
 				}
 				userCommandRate[user].lastUsage = DateTime.Now;
 				//Limit Command usage
 				if (user != 0 && userCommandRate[user].useCount > rateLimit && channel.Name != "console")
 				{
 					userCommandRate[user].timeoutEnd = DateTime.Now.AddSeconds(timeoutDuration);
-					await channel.SendMessage($"{username}: Rate Limit reached, aborting... You have been timed out for {timeoutDuration} seconds");
+					await channel.SendMessage($"@{username}: Rate Limit reached, aborting... You have been timed out for {timeoutDuration} seconds");
 					break;
 				}
 				string cName = (from a in command.ToLower().Split(' ') where !string.IsNullOrWhiteSpace(a) select a).First();

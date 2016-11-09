@@ -105,6 +105,12 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			_hasPassed = false;
 		}
 
+		public DiscordEvent RegisterChannel(ulong channel)
+		{
+			channels.Add(channel);
+			return this;
+		}
+
 		public override string ToString()
 		{
 			return $"{name} on {time.ToLongDateString()} at {time.ToShortTimeString()}, {(repeatMode != RepeatMode.None ? $"{(repeatRate == 0 ? $"repeats {repeatMode}" : $"every {repeatRate} {ToRootName(repeatMode)}")}" : "")}";

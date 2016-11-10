@@ -220,10 +220,11 @@ namespace LuminousVector.Karuta.RinDB
 							return null;
 						while (reader.Read())
 						{
-							tag = new TagModel(reader.GetString(1))
+							tag = new TagModel(Uri.UnescapeDataString(reader.GetString(1)))
 							{
 								type = reader.GetString(2),
-								description = reader.GetString(3)
+								description = Uri.UnescapeDataString(reader.GetString(3)),
+								parentID = reader.GetString(4)
 							};
 						}
 					}
@@ -240,17 +241,18 @@ namespace LuminousVector.Karuta.RinDB
 				con.Open();
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
-					cmd.CommandText = $"SELECT * FROM tags WHERE name='{tagName}';";
+					cmd.CommandText = $"SELECT * FROM tags WHERE name='{Uri.EscapeDataString(tagName)}';";
 					using (var reader = cmd.ExecuteReader())
 					{
 						if (!reader.HasRows)
 							return null;
 						while (reader.Read())
 						{
-							tag = new TagModel(reader.GetString(1))
+							tag = new TagModel(Uri.UnescapeDataString(reader.GetString(1)))
 							{
 								type = reader.GetString(2),
-								description = reader.GetString(3)
+								description = Uri.UnescapeDataString(reader.GetString(3)),
+								parentID = reader.GetString(4)
 							};
 						}
 					}
@@ -268,7 +270,7 @@ namespace LuminousVector.Karuta.RinDB
 				con.Open();
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
-					cmd.CommandText = $"INSERT INTO tags(id, name, type, description) VALUES('{tag.id}', '{tag.name}', '{tag.type}', '{tag.description}');";
+					cmd.CommandText = $"INSERT INTO tags(id, name, type, description) VALUES('{tag.id}', '{Uri.EscapeDataString(tag.name)}', '{tag.type}', '{Uri.EscapeDataString(tag.description)}');";
 					cmd.ExecuteNonQuery();
 				}
 			}

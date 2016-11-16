@@ -111,7 +111,7 @@ namespace LuminousVector.Karuta.RinDB
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
 					cmd.CommandText = "SELECT nextval('images_index_seq');";
-					model.id = long.Parse($"{cmd.ExecuteScalar()}{model.timeadded}").ToBas36String();
+					model.id = $"{cmd.ExecuteScalar()}{model.timeadded}".ToBase60();
 					cmd.CommandText = $"INSERT INTO images (id, name, timeadded, fileuri, isnsfw) VALUES('{model.id}', '{model.name}', '{model.timeadded}', '{model.fileUri}', '{model.isnsfw}')";
 					cmd.ExecuteNonQuery();
 					if (model.tags != null)
@@ -134,7 +134,7 @@ namespace LuminousVector.Karuta.RinDB
 				string images = null;
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
-					cmd.CommandText = $"SELECT timeadded, id, fileuri, name FROM images ORDER BY timeadded DESC";
+					cmd.CommandText = $"SELECT timeadded, id, fileuri, name FROM images WHERE isnsfw=false ORDER BY timeadded DESC";
 					using (var reader = cmd.ExecuteReader())
 					{
 						int i = 0;
@@ -263,15 +263,19 @@ namespace LuminousVector.Karuta.RinDB
 
 		public static TagModel CreateTag(TagModel tag)
 		{
-			if (TagExists(tag.name))
-				return FindTag(tag.name);
 			using (NpgsqlConnection con = new NpgsqlConnection(CONNECTION_STRING))
 			{
 				con.Open();
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
-					cmd.CommandText = $"INSERT INTO tags(id, name, type, description) VALUES('{tag.id}', '{Uri.EscapeDataString(tag.name)}', '{tag.type}', '{Uri.EscapeDataString(tag.description)}');";
-					cmd.ExecuteNonQuery();
+					try
+					{
+						cmd.CommandText = $"INSERT INTO tags(id, name, type, description, parentid) VALUES('{tag.id}', '{Uri.EscapeDataString(tag.name)}', '{tag.type}', '{Uri.EscapeDataString(tag.description)}', '{tag.parentID}');";
+						cmd.ExecuteNonQuery();
+					}catch(Exception e)
+					{
+						return GetTag(tag.id);
+					}
 				}
 			}
 			return tag;
@@ -286,7 +290,7 @@ namespace LuminousVector.Karuta.RinDB
 				{
 					try
 					{
-						cmd.CommandText = $"INSERT INTO tagmap (id, tagid, imageid) VALUES('{tagid}{imageid}', '{tagid}', '{imageid}') WHERE NOT EXISTS (SELECT id FROM tagmap WHERE id='{tagid}{imageid}');";
+						cmd.CommandText = $"INSERT INTO tagmap (id, imageid, tagid) VALUES('{tagid}{imageid}', '{imageid}', '{tagid}');";
 						cmd.ExecuteNonQuery();
 					}catch(Exception e)
 					{

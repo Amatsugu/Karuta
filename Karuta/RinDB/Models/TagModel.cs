@@ -16,7 +16,7 @@ namespace LuminousVector.Karuta.RinDB.Models
 			this.type = type;
 		}
 
-		public string id { get { return long.Parse($"{name.GetHashCode()}{type.GetHashCode()}").ToBas36String(); } }
+		public string id { get { return name.ToBase60(); } }
 		public string name { get; set; }
 		public string description { get; set; }
 		public string type { get; set; }

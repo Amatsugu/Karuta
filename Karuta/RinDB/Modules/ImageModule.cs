@@ -18,15 +18,16 @@ namespace LuminousVector.Karuta.RinDB.Modules
 	{
 		public ImageModule() : base("/image")
 		{
+			
 			Get["/dl/{id}"] = p =>
 			{
 				ImageModel img = RinDB.GetImage((string)p.id);
 				if (img == null)
 				{
-					return $"{(string)p.id} direct";
+					return $"{(string)p.id} Not found";
 				}else
 				{
-					return Response.FromImage(Image.FromFile(img.fileUri), "image/png");
+					return Response.FromImage(Image.FromFile(img.fileUri, true), (Path.GetExtension(img.fileUri) == ".gif") ? "image/gif" : "image/png");
 				}
 			};
 			Get["/thumb/{id}"] = p =>
@@ -34,11 +35,11 @@ namespace LuminousVector.Karuta.RinDB.Modules
 				ImageModel img = RinDB.GetImage((string)p.id);
 				if (img == null)
 				{
-					return $"{(string)p.id} direct";
+					return $"{(string)p.id} Not found";
 				}
 				else
 				{
-					return Response.FromImage(GenerateThumb(img.fileUri), "image/png");
+					return GetOrGenerateThumb(img);
 				}
 			};
 			Get["/{id}"] = p =>
@@ -46,7 +47,7 @@ namespace LuminousVector.Karuta.RinDB.Modules
 				ImageModel img = RinDB.GetImage((string)p.id);
 				if (img == null)
 				{
-					return $"{(string)p.id} image page";
+					return $"{(string)p.id} Not Found";
 				}
 				else
 				{
@@ -55,9 +56,23 @@ namespace LuminousVector.Karuta.RinDB.Modules
 			};
 		}
 
-		private Image GenerateThumb(string uri)
+
+		private Response GetOrGenerateThumb(ImageModel image)
 		{
-			Image image = Image.FromFile(uri);
+			string ext = Path.GetExtension(image.fileUri);
+			if(!File.Exists($"{RinDB.BASE_DIR}/RinDB/thumbs/{image.id}{ext}"))
+			{
+				if (!Directory.Exists($"{RinDB.BASE_DIR}/RinDB/thumbs/"))
+					Directory.CreateDirectory($"{RinDB.BASE_DIR}/RinDB/thumbs/");
+				return Response.FromImage(GenerateThumb(image), (ext == ".gif") ? "image/gif" : "image/png");
+			}
+			return Response.FromImage(Image.FromFile($"{RinDB.BASE_DIR}/RinDB/thumbs/{image.id}{ext}", true), (ext == ".gif") ? "image/gif" : "image/png");
+		}
+
+		private Image GenerateThumb(ImageModel img)
+		{
+			string ext = Path.GetExtension(img.fileUri);
+			Image image = Image.FromFile(img.fileUri, true);
 			int height = (int)(image.Height / (image.Width/282f)), width = 282;
 			var destRect = new Rectangle(0, 0, width, height);
 			var destImage = new Bitmap(width, height);
@@ -78,6 +93,7 @@ namespace LuminousVector.Karuta.RinDB.Modules
 					graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
 				}
 			}
+			destImage.Save($"{RinDB.BASE_DIR}/RinDB/thumbs/{img.id}{ext}", (ext == ".gif") ? ImageFormat.Gif : ImageFormat.Png);
 			return destImage;
 		}
 	}

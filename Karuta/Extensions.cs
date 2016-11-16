@@ -5,6 +5,7 @@ using Nancy;
 using LuminousVector.Karuta.RinDB.Responses;
 using LuminousVector.Karuta.RinDB.Models;
 using System.Drawing;
+using System.Text;
 
 namespace LuminousVector.Karuta
 {
@@ -30,12 +31,23 @@ namespace LuminousVector.Karuta
 				return list[0];
 			return list[Karuta.random.Next(0, list.Count)];
 		}
-		
-		//Convert to Base36
-		public static string ToBas36String(this long value)
+
+		//String to base 60
+		public static string ToBase60(this string value) => value.ToLower().GetHashCode().ToBase60();
+
+		//Int to base 60
+		public static string ToBase60(this int value) => ((long)value).ToBase60();
+
+		//Convert to Base60
+		public static string ToBase60(this long value)
 		{
-			// 32 is the worst cast buffer size for base 2 and int.MaxValue
-			int i = 32;
+			bool neg = false;
+			if (value < 0)
+			{
+				value = -value;
+				neg = true;
+			}
+			int i = 64;
 			char[] baseChars = new char[]
 			{
 				'0','1','2','3','4','5','6','7','8','9',
@@ -56,10 +68,11 @@ namespace LuminousVector.Karuta
 			}
 			while (value > 0);
 
-			char[] result = new char[32 - i];
-			Array.Copy(buffer, i, result, 0, 32 - i);
+			char[] result = new char[64 - i];
+			Array.Copy(buffer, i, result, 0, 64 - i);
 
-			return new string(result);
+			string output = new string(result);
+			return (neg) ? $"-{output}" : output;
 	}
 
 		private static WebClient cli = null;
@@ -110,6 +123,11 @@ namespace LuminousVector.Karuta
 		}
 
 		public static Response FromImage(this IResponseFormatter formatter, Image image, string contentType = "image/png")
+		{
+			return new ImageResponse(image, contentType);
+		}
+
+		public static Response FromImage(this IResponseFormatter formatter, string image, string contentType = "image/png")
 		{
 			return new ImageResponse(image, contentType);
 		}

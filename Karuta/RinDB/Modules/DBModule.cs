@@ -21,6 +21,11 @@ namespace LuminousVector.Karuta.RinDB.Modules
 			{
 				return RinDB.GetSearch((string)p.query, (int)p.count, (int)p.page);
 			};
+
+			Get["/tags/description/{tag}"] = p =>
+			{
+				return RinDB.GetTag(((string)p.tag).ToBase60()).description;
+			};
 		}
 	}
 }

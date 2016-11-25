@@ -1,10 +1,6 @@
 #Karuta
 *.data
 
-#Sub Repo
-#Karuta/Karuta/Rin_web/*
-#Karuta/Karuta/Rin_web
-
 #################
 ## Eclipse
 #################

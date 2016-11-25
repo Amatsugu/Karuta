@@ -62,15 +62,17 @@ namespace LuminousVector.Karuta.RinDB.Modules
 			string ext = Path.GetExtension(image.fileUri);
 			if(!File.Exists($"{RinDB.BASE_DIR}/RinDB/thumbs/{image.id}{ext}"))
 			{
-				if (!Directory.Exists($"{RinDB.BASE_DIR}/RinDB/thumbs/"))
-					Directory.CreateDirectory($"{RinDB.BASE_DIR}/RinDB/thumbs/");
+				if (!Directory.Exists(RinDB.THUMB_DIR))
+					Directory.CreateDirectory(RinDB.THUMB_DIR);
 				return Response.FromImage(GenerateThumb(image), (ext == ".gif") ? "image/gif" : "image/png");
 			}
-			return Response.FromImage(Image.FromFile($"{RinDB.BASE_DIR}/RinDB/thumbs/{image.id}{ext}", true), (ext == ".gif") ? "image/gif" : "image/png");
+			return Response.FromImage(Image.FromFile($"{RinDB.THUMB_DIR}/{image.id}{ext}", true), (ext == ".gif") ? "image/gif" : "image/png");
 		}
 
 		private Image GenerateThumb(ImageModel img)
 		{
+			if (!File.Exists(img.fileUri))
+				return null;
 			string ext = Path.GetExtension(img.fileUri);
 			Image image = Image.FromFile(img.fileUri, true);
 			int height = (int)(image.Height / (image.Width/282f)), width = 282;
@@ -93,7 +95,7 @@ namespace LuminousVector.Karuta.RinDB.Modules
 					graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
 				}
 			}
-			destImage.Save($"{RinDB.BASE_DIR}/RinDB/thumbs/{img.id}{ext}", (ext == ".gif") ? ImageFormat.Gif : ImageFormat.Png);
+			destImage.Save($"{RinDB.THUMB_DIR}/{img.id}{ext}", (ext == ".gif") ? ImageFormat.Gif : ImageFormat.Png);
 			return destImage;
 		}
 	}

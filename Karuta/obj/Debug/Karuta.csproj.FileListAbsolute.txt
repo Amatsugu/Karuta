@@ -81,3 +81,4 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe.manifest
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.application
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\tagDisplay.js

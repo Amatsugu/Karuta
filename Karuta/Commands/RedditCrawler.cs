@@ -550,17 +550,6 @@ namespace LuminousVector.Karuta
 											continue;
 										}
 										//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
-										if (sub.Name.ToLower() != "hentaibeast")
-										{
-											RinDB.RinDB.AddImage(new ImageModel()
-											{
-												name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file).Remove(0, p.CreatedUTC.ToEpoch().ToString().Length + 2)),
-												fileUri = Uri.EscapeDataString($"{file.Replace($"{baseDir}/", "")}{((ext == ".gif") ? ext : ".png")}"),
-												timeadded = p.CreatedUTC.ToEpoch(),
-												isnsfw = p.NSFW,
-												tags = _curTags
-											});
-										}
 										SaveImage(p, file, p.Url);
 									}
 									else if (p.Url.DnsSafeHost == "imgur.com") //Imgur in-direct link/album
@@ -590,18 +579,8 @@ namespace LuminousVector.Karuta
 														continue;
 													}
 													//Karuta.logger.Log("Saving: " + log, "/r/" + sub.Name, _verbose);
-													if (sub.Name.ToLower() != "hentaibeast")
-													{
-														RinDB.RinDB.AddImage(new ImageModel()
-														{
-															name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file).Remove(0, p.CreatedUTC.ToEpoch().ToString().Length + 2)),
-															fileUri = Uri.EscapeDataString($"{file.Replace($"{baseDir}/", "")}{((ext == ".gif") ? ext : ".png")}"),
-															timeadded = p.CreatedUTC.ToEpoch(),
-															isnsfw = p.NSFW,
-															tags = _curTags
-														});
-													}
 													SaveImage(p, file, new Uri(link));
+													
 												}
 												catch (Exception e)
 												{
@@ -695,6 +674,12 @@ namespace LuminousVector.Karuta
 				case "consentacles":
 					_curTags = new TagModel[] { new TagModel("Consentacles") };
 					break;
+				case "megumin":
+					_curTags = new TagModel[] { new TagModel("Megumin"), new TagModel("KonoSuba") };
+					break;
+				case "oregairusnafu":
+					_curTags = new TagModel[] { new TagModel("Ore Gairu SNAFU") };
+					break;
 				default:
 					_curTags = null;
 					break;
@@ -729,17 +714,6 @@ namespace LuminousVector.Karuta
 						i++;
 						continue;
 					}
-					if (p.SubredditName.ToLower() != "hentaibeast")
-					{
-						RinDB.RinDB.AddImage(new ImageModel()
-						{
-							name = Uri.EscapeDataString($"[{i}] {fileName}"),
-							fileUri = Uri.EscapeDataString($"{thisFile.Replace($"{baseDir}/", "")}{((ext == ".gif") ? ext : ".png")}"),
-							timeadded = p.CreatedUTC.ToEpoch(),
-							isnsfw = p.NSFW,
-							tags = _curTags
-						});
-					}
 					SaveImage(p, thisFile, new Uri(image.Link));
 					i++;
 				}
@@ -757,6 +731,7 @@ namespace LuminousVector.Karuta
 			try
 			{
 				data = _client.DownloadData(url);
+				string ext = Path.GetExtension(url.AbsolutePath);
 				using (MemoryStream stream = new MemoryStream(data))
 				{
 					using (Image image = Image.FromStream(stream))
@@ -775,7 +750,15 @@ namespace LuminousVector.Karuta
 							{
 								image.Save(file + ".png", ImageFormat.Png);
 							}
-							Karuta.logger.Log($"Saved {file}.{((Path.GetExtension(url.AbsolutePath) != ".gif") ? ".png" : ".gif")}", $"/r/{p.SubredditName}", verbose);
+							Karuta.logger.Log($"Saved {file}.{((ext != ".gif") ? ".png" : ".gif")}", $"/r/{p.SubredditName}", verbose);
+							RinDB.RinDB.AddImage(new ImageModel()
+							{
+								name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file).Remove(0, p.CreatedUTC.ToEpoch().ToString().Length + 2)),
+								fileUri = Uri.EscapeDataString($"{file.Replace($"{baseDir}/", "")}{((ext == ".gif") ? ext : ".png")}"),
+								timeadded = p.CreatedUTC.ToEpoch(),
+								isnsfw = p.NSFW,
+								tags = _curTags
+							});
 							imgCount++;
 						}
 						catch (Exception e)

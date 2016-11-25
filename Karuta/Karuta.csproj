@@ -285,6 +285,9 @@
     <Content Include="Karuta.ico" />
     <Content Include="Karutax32.ico" />
     <Content Include="Karutax64.ico" />
+    <EmbeddedResource Include="RinDB_web\res\js\tagDisplay.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="RinDB_web\image.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

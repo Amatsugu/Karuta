@@ -12,6 +12,7 @@ namespace LuminousVector.Karuta.RinDB
 	{
 		public static string VIEW_LOCATION { get; set; } = "RinDB_web/";
 		public static string BASE_DIR { get; } = Karuta.registry.GetString("baseDir");
+		public static string THUMB_DIR { get; } = $"{BASE_DIR}/RinDB/thumbs";
 		public static string CONNECTION_STRING { get { return $"Host={HOST};Username={_user};Password={_pass};Database={_db};Pooling=true"; } }
 
 		public const string HOST = "karuta.luminousvector.com";

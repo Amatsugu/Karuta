@@ -4,7 +4,12 @@ C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe
 C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.pdb
 C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
 C:\Users\Khamraj\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe.config
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\img\DefaultThumb.png
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\tagDisplay.js
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\addImages.js
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\box.js
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\jquery-3.1.1.min.js
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\search.js
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\image.html
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\index.html
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\css\contentGrid.css
@@ -29,10 +34,7 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\img\imgte
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\img\imgtest7.jpg
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\img\imgtest8.jpg
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\img\imgtest9.jpg
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\addImages.js
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\box.js
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\jquery-3.1.1.min.js
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\search.js
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe.config
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe.manifest
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.application
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Karuta.exe
@@ -73,7 +75,6 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.NET.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RestSharp.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Extensions.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Primitives.xml
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\LuminousVector.Karuta.Properties.Resources.resources
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csproj.GenerateResource.Cache
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.TrustInfo.xml
@@ -81,4 +82,6 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe.manifest
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.application
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RinDB_web\res\js\tagDisplay.js
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RedditSharp.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RedditSharp.xml

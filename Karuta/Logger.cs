@@ -15,7 +15,7 @@ namespace LuminousVector.Karuta
 		private string file = null;
 		private string src = null, search = null;
 		private IList<Log> logs;
-		private int count = -1;
+		private int count { get { return logs.Count; } }
 
 		public Logs() : base("logs", "shows the logs.")
 		{
@@ -52,7 +52,6 @@ namespace LuminousVector.Karuta
 			Karuta.Write("---LOG END---");
 			logs = null;
 			search = src = null;
-			count = -1;
 		}
 
 		void DumpLogs()

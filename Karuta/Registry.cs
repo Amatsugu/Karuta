@@ -18,6 +18,8 @@ namespace LuminousVector.DataStore
 		private Dictionary<string, bool> boolStore;
 		[ProtoMember(4)]
 		private Dictionary<string, float> floatStore;
+		[ProtoMember(5)]
+		private Dictionary<string, object> objectStore;
 
 		public Registry() { }
 
@@ -27,9 +29,62 @@ namespace LuminousVector.DataStore
 			intStore = new Dictionary<string, int>();
 			boolStore = new Dictionary<string, bool>();
 			floatStore = new Dictionary<string, float>();
+			objectStore = new Dictionary<string, object>();
 		}
 
-		public string GetString(string id)
+		public T GetValue<T>(string id)
+		{
+			object obj;
+			if(!objectStore.TryGetValue(id, out obj))
+			{
+				return default(T);
+			}
+			return (T)obj;
+		}
+
+		public void SetValue<T>(string id, T value, bool overwrite = true)
+		{
+			if (objectStore.ContainsKey(id) && overwrite)
+				objectStore[id] = value;
+			else
+				objectStore.Add(id, value);
+		}
+
+		public void Migrate()
+		{
+			if (objectStore == null)
+				objectStore = new Dictionary<string, object>();
+			if (stringStore != null)
+			{
+				foreach (KeyValuePair<string, string> kp in stringStore)
+				{
+					objectStore.Add(kp.Key, kp.Value);
+				}
+			}
+			if (intStore != null)
+			{
+				foreach (KeyValuePair<string, int> kp in intStore)
+				{
+					objectStore.Add(kp.Key, kp.Value);
+				}
+			}
+			if (boolStore != null)
+			{
+				foreach (KeyValuePair<string, bool> kp in boolStore)
+				{
+					objectStore.Add(kp.Key, kp.Value);
+				}
+			}
+			if (floatStore != null)
+			{
+				foreach (KeyValuePair<string, float> kp in floatStore)
+				{
+					objectStore.Add(kp.Key, kp.Value);
+				}
+			}
+		}
+
+		/*public string GetString(string id)
 		{
 			string value;
 			if (stringStore == null)
@@ -109,11 +164,12 @@ namespace LuminousVector.DataStore
 				floatStore[id] = value;
 			else
 				floatStore.Add(id, value);
-		}
+		}*/
 
-		public void RemoveEntry<T>(string id)
+		public void RemoveEntry(string id)
 		{
-			if (typeof(T) == typeof(string))
+			objectStore.Remove(id);
+			/*if (typeof(T) == typeof(string))
 			{
 				stringStore.Remove(id);
 			}
@@ -128,7 +184,7 @@ namespace LuminousVector.DataStore
 			else if (typeof(T) == typeof(float))
 			{
 				floatStore.Remove(id);
-			}
+			}*/
 		}
 	}
 }

@@ -21,8 +21,8 @@ namespace LuminousVector.Karuta
 		public LightingCommand() : base("lights", "Controls lighting via phillips Lighting")
 		{
 			_default = Setup;
-			_user = Karuta.registry.GetString("lightuser");
-			bool? auto = Karuta.registry.GetBool("lightAutostart");
+			_user = Karuta.registry.GetValue<string>("lightuser");
+			bool? auto = Karuta.registry.GetValue<bool>("lightAutostart");
 			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
 			if (_user != "")
 			{
@@ -87,11 +87,17 @@ namespace LuminousVector.Karuta
 					State state = l.State;
 					if (state.Saturation == _defaultColor.s && state.Hue == _defaultColor.h && state.Brightness == (byte)_defaultColor.b)
 					{
-						Color curColor = _lightColors[l.Id];
-						LightCommand cmd = new LightCommand();
-						cmd.Hue = curColor.h;
-						cmd.Saturation = curColor.s;
-						await _client.SendCommandAsync(cmd, new string[] { l.Id });
+						try
+						{
+							Color curColor = _lightColors[l.Id];
+							LightCommand cmd = new LightCommand();
+							cmd.Hue = curColor.h;
+							cmd.Saturation = curColor.s;
+							await _client.SendCommandAsync(cmd, new string[] { l.Id });
+						}catch(Exception e)
+						{
+							Karuta.logger.LogWarning(e.Message, nameof(LightCommand));
+						}
 					}
 				}
 			}, 0, 1000);
@@ -115,7 +121,10 @@ namespace LuminousVector.Karuta
 				State state = l.State;
 				if (state.IsReachable == true)
 				{
-					_lightColors.Add(l.Id, new Color((int)state.Hue, (int)state.Saturation, state.Brightness));
+					if (_lightColors.ContainsKey(l.Id))
+						_lightColors[l.Id] = new Color((int)state.Hue, (int)state.Saturation, state.Brightness);
+					else
+						_lightColors.Add(l.Id, new Color((int)state.Hue, (int)state.Saturation, state.Brightness));
 				}
 			}
 			string data = "";
@@ -132,15 +141,22 @@ namespace LuminousVector.Karuta
 		//Load light colors
 		void LoadLightColors()
 		{
-			string data = Karuta.registry.GetString("lightColors");
-			if (data == "")
+			//TODO: Remove migration
+
+			string oldData = Karuta.registry.GetValue<string>("lightColors");
+			if (oldData == "")
 				return;
-			string[] lights = data.Split('|');
+			string[] lights = oldData.Split('|');
 			foreach(string l in lights)
 			{
 				string[] lSplit = l.Split('`');
 				_lightColors.Add(lSplit[0], new Color(lSplit[1]));
 			}
+			Karuta.registry.SetValue("lightColors", _lightColors);
+
+			_lightColors = Karuta.registry.GetValue<Dictionary<string, Color>>("lightColors");
+			
+			
 		}
 
 

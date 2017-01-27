@@ -14,12 +14,12 @@ namespace LuminousVector.Karuta.RinDB.Modules
 		{
 			Get["/latest/{count}/{page}"] = p =>
 			{
-				return RinDB.GetLatest((int)p.count, (int)p.page);
+				return Response.AsHTML(RinDB.GetLatest((int)p.count, (int)p.page));
 			};
 
 			Get["/search/{query}/{count}/{page}"] = p =>
 			{
-				return RinDB.GetSearch((string)p.query, (int)p.count, (int)p.page);
+				return Response.AsHTML(RinDB.GetSearch((string)p.query, (int)p.count, (int)p.page));
 			};
 
 			Get["/tags/description/{tag}"] = p =>

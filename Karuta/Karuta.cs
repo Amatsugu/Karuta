@@ -25,10 +25,14 @@ namespace LuminousVector.Karuta
 			set
 			{
 				registry.SetValue("user", value);
+				_user = value;
 			}
 			get
 			{
-				return registry.GetString("user");
+				if (string.IsNullOrWhiteSpace(_user))
+					return registry.GetValue<string>("user");
+				else
+					return _user;
 			}
 		}
 		public static string dataDir
@@ -45,6 +49,8 @@ namespace LuminousVector.Karuta
 			}
 		}
 
+
+		private static string _user;
 		private static string _regDir = "/Karuta";
 		private static bool _isRunning = false;
 		private static string _input;
@@ -83,6 +89,7 @@ namespace LuminousVector.Karuta
 			if(File.Exists(dataDir + "/karuta.data"))
 			{
 				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes(dataDir + "/karuta.data"));
+				registry.Migrate();
 			}else
 			{
 				registry = new Registry();
@@ -238,7 +245,7 @@ namespace LuminousVector.Karuta
 				}
 				catch (Exception e)
 				{
-					Write($"Something went wront in {name}");
+					Write($"Something went wrong in {name}");
 					Write(e.Message);
 					Write(e.StackTrace);
 				}
@@ -256,7 +263,7 @@ namespace LuminousVector.Karuta
 				}
 				catch (Exception e)
 				{
-					Write($"Something went wront in {name}");
+					Write($"Something went wrong in {name}");
 					Write(e.Message);
 					Write(e.StackTrace);
 				}

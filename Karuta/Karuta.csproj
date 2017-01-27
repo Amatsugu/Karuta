@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LuminousVector.Karuta</RootNamespace>
     <AssemblyName>Karuta</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -130,6 +130,11 @@
     <Compile Include="Commands\Keyword.cs" />
     <Compile Include="Commands\Option.cs" />
     <Compile Include="Commands\ProcessMonitor.cs" />
+    <Compile Include="RinDB\Async\DatabaseUpdateQueue.cs" />
+    <Compile Include="RinDB\Async\ThumbGenerator.cs" />
+    <Compile Include="RinDB\Modules\DiagnosticsModule.cs" />
+    <Compile Include="RinDB\Responses\ImageModelHtmlResponse.cs" />
+    <Compile Include="RinDB\Responses\ResonseExtensions.cs" />
     <Compile Include="RinDB\Models\ImageModel.cs" />
     <Compile Include="RinDB\Models\TagModel.cs" />
     <Compile Include="RinDB\Modules\DBModule.cs" />
@@ -200,8 +205,8 @@
       <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.Enlightenment.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Npgsql, Version=3.1.8.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Npgsql.3.1.8\lib\net451\Npgsql.dll</HintPath>
+    <Reference Include="Npgsql, Version=3.1.9.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.1.9\lib\net451\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
@@ -213,7 +218,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Q42.HueApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Q42.HueApi.3.2.5\lib\portable-net45+win+wpa81+wp80+MonoAndroid10+MonoTouch10\Q42.HueApi.dll</HintPath>
+      <HintPath>..\packages\Q42.HueApi.3.2.9\lib\portable-net45+win+wpa81+wp80+MonoAndroid10+MonoTouch10\Q42.HueApi.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Q42.HueApi.ColorConverters, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -224,8 +229,8 @@
       <HintPath>..\packages\Q42.HueApi.Net.2.0.0\lib\net45\Q42.HueApi.NET.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RedditSharp, Version=1.1.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RedditSharp.1.1.6\lib\net45\RedditSharp.dll</HintPath>
+    <Reference Include="RedditSharp, Version=1.1.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RedditSharp.1.1.11\lib\Net45\RedditSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
@@ -285,6 +290,9 @@
     <Content Include="Karuta.ico" />
     <Content Include="Karutax32.ico" />
     <Content Include="Karutax64.ico" />
+    <EmbeddedResource Include="RinDB_web\res\img\DefaultThumb.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="RinDB_web\res\js\tagDisplay.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

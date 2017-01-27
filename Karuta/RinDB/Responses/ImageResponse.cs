@@ -24,7 +24,8 @@ namespace LuminousVector.Karuta.RinDB.Responses
 			this.Contents = stream =>
 			{
 				//stream = File.OpenRead()
-				image?.Save(stream, ImageFormat.Png);
+				image?.Save(stream, image.RawFormat);
+				image.Dispose();
 			};
 		}
 

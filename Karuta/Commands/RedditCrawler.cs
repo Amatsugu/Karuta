@@ -25,7 +25,7 @@ namespace LuminousVector.Karuta
 
 		public CrawlerCommand() : base("crawl", "Connects to reddit and downloads images from specified subreddits")
 		{
-			bool? auto = Karuta.registry.GetBool("redditAutostart");
+			bool? auto = Karuta.registry.GetValue<bool>("redditAutostart");
 			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
 			crawler = new RedditCrawler();
 			RegisterOption('c', crawler.SetPostsToGet, "Sets the number of posts to get");
@@ -104,8 +104,8 @@ namespace LuminousVector.Karuta
 			try
 			{
 				Karuta.Write("Connecting to reddit...");
-				string user = Karuta.registry.GetString("reddit_user");
-				string pass = Karuta.registry.GetString("reddit_pass");
+				string user = Karuta.registry.GetValue<string>("reddit_user");
+				string pass = Karuta.registry.GetValue<string>("reddit_pass");
 				if(string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass))
 				{
 					Karuta.Write("Please enter your reddit Credentials");
@@ -114,7 +114,8 @@ namespace LuminousVector.Karuta
 				}
 				try
 				{
-					_reddit = new Reddit(user, pass);
+					_reddit = new Reddit(user, pass); //TODO: implement OAuth
+					
 					Karuta.Write(_reddit.RateLimit);
 				}catch(Exception e)
 				{
@@ -127,22 +128,31 @@ namespace LuminousVector.Karuta
 				Karuta.registry.SetValue("reddit_pass", pass);
 				ImgurSetup();
 				Karuta.Write("Loading Prefs...");
-				if (!string.IsNullOrWhiteSpace(Karuta.registry.GetString("baseDir")))
-					baseDir = Karuta.registry.GetString("baseDir");
-				if (Karuta.registry.GetInt("updateRate") != null)
-					updateRate = (int)Karuta.registry.GetInt("updateRate");
+				if (!string.IsNullOrWhiteSpace(Karuta.registry.GetValue<string>("baseDir")))
+					baseDir = Karuta.registry.GetValue<string>("baseDir");
+				if (Karuta.registry.GetValue<int?>("updateRate") != null)
+					updateRate = Karuta.registry.GetValue<int>("updateRate");
 				int c;
-				if (Karuta.registry.GetInt("reddit_postsToGet") == null)
+				if (Karuta.registry.GetValue<int?>("reddit_postsToGet") == null)
 					c = 100;
 				else
-					c = (int)Karuta.registry.GetInt("reddit_postsToGet");
+					c = Karuta.registry.GetValue<int>("reddit_postsToGet");
 				postsToGet = c;
-				string mode = Karuta.registry.GetString("reddit_searchMode");
+				string mode = Karuta.registry.GetValue<string>("reddit_searchMode");
 				SetSearchMode(string.IsNullOrWhiteSpace(mode) ? "new" : mode);
-				string list = Karuta.registry.GetString("reddit_subs");
-				if (!string.IsNullOrWhiteSpace(list))
+				//TODO: Remove migration
+
+				string oldData = Karuta.registry.GetValue<string>("reddit_subs");
+				if(!string.IsNullOrWhiteSpace(oldData))
 				{
-					subreddits.AddRange(list.Split('|'));
+					subreddits.AddRange(oldData.Split('|'));
+				}
+				Karuta.registry.SetValue("reddit.subs", subreddits);
+
+				List<string> data = Karuta.registry.GetValue<List<string>>("reddit.subs");
+				if (data != null)
+				{
+					subreddits.AddRange(data);
 				}
 				Karuta.Write("Done...");
 			}
@@ -155,8 +165,8 @@ namespace LuminousVector.Karuta
 
 		public void ImgurSetup()
 		{
-			string imgID = Karuta.registry.GetString("imgur_id");
-			string imgSec = Karuta.registry.GetString("imgur_secret");
+			string imgID = Karuta.registry.GetValue<string>("imgur_id");
+			string imgSec = Karuta.registry.GetValue<string>("imgur_secret");
 			if (string.IsNullOrWhiteSpace(imgID) || string.IsNullOrWhiteSpace(imgSec))
 			{
 				Karuta.Write("Please enter Imgur API information:");
@@ -167,7 +177,6 @@ namespace LuminousVector.Karuta
 			try
 			{
 				_imgurClient = new ImgurClient(imgID, imgSec);
-				Karuta.Write(_imgurClient.RateLimit);
 				albumEndpoint = new AlbumEndpoint(_imgurClient);
 			}
 			catch (Exception e)
@@ -281,15 +290,7 @@ namespace LuminousVector.Karuta
 				sub = "/r/" + sub;
 			subreddits.Add(sub);
 			Karuta.Write("Added " + sub);
-			string subs = "";
-			foreach (string s in subreddits)
-			{
-				if (subs == "")
-					subs += s;
-				else
-					subs += "|" + s;
-			}
-			Karuta.registry.SetValue("reddit_subs", subs);
+			Karuta.registry.SetValue("reddit.subs", subreddits);
 			needsReBuild = true;
 		}
 
@@ -527,19 +528,7 @@ namespace LuminousVector.Karuta
 										Directory.CreateDirectory(curDir + "/NSFW");
 
 									//Create file name
-									file = p.Title;
-									file = file.Replace("/r/", "");
-									file = file.Replace("?", "");
-									file = file.Replace("*", "");
-									file = file.Replace("!", "");
-									file = file.Replace("/", "");
-									file = file.Replace(":", "");
-									file = file.Replace("\"", "'");
-									file = file.Replace("<", "");
-									file = file.Replace(">", "");
-									file = file.Replace("|", "");
-									file = file.Replace("\\", "");
-
+									file = FormatFileName(p.Title);
 									if (allowedFiles.Contains(ext)) //Direct link to image file
 									{
 										file = "[" + p.CreatedUTC.ToEpoch() + "] " + file;
@@ -568,9 +557,6 @@ namespace LuminousVector.Karuta
 
 												try
 												{
-													//var task = imgEndpoint.GetImageAsync(imgurID);
-													//Task.WaitAll(task);
-													//var image = task.Result;
 													string link = $"http://i.imgur.com/{imgurID}.png";
 													ext = Path.GetExtension(link);
 													if (File.Exists(file + ((ext == ".gif") ? ext : ".png")))
@@ -623,6 +609,21 @@ namespace LuminousVector.Karuta
 					Karuta.logger.Log($"Sleeping for {updateRate}ms", name, verbose);
 				}
 			}, 0, updateRate);
+		}
+
+		private string FormatFileName(string name)
+		{
+			return name.Replace("/r/", "")
+				.Replace("?", "")
+				.Replace("*", "")
+				.Replace("!", "")
+				.Replace("/", "")
+				.Replace(":", "")
+				.Replace("\"", "'")
+				.Replace("<", "")
+				.Replace(">", "")
+				.Replace("|", "")
+				.Replace("\\", "");
 		}
 
 		private void SelectTags(string sub)
@@ -679,6 +680,9 @@ namespace LuminousVector.Karuta
 					break;
 				case "oregairusnafu":
 					_curTags = new TagModel[] { new TagModel("Ore Gairu SNAFU") };
+					break;
+				case "SukumizuIRL":
+					_curTags = new TagModel[] { new TagModel("Sukumizu"), new TagModel("IRL") };
 					break;
 				default:
 					_curTags = null;
@@ -750,7 +754,7 @@ namespace LuminousVector.Karuta
 							{
 								image.Save(file + ".png", ImageFormat.Png);
 							}
-							Karuta.logger.Log($"Saved {file}.{((ext != ".gif") ? ".png" : ".gif")}", $"/r/{p.SubredditName}", verbose);
+							Karuta.logger.Log($"Saved {file}{((ext != ".gif") ? ".png" : ".gif")}", $"/r/{p.SubredditName}", verbose);
 							RinDB.RinDB.AddImage(new ImageModel()
 							{
 								name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file).Remove(0, p.CreatedUTC.ToEpoch().ToString().Length + 2)),

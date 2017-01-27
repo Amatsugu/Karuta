@@ -22,7 +22,7 @@ namespace LuminousVector.Karuta.RinDB.Responses
 						try
 						{
 							writer.Write(body);
-						}catch(Exception e)
+						}catch
 						{
 							//Karuta.Write(e.Message);
 						}

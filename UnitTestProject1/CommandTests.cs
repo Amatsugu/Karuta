@@ -25,7 +25,7 @@ namespace LuminousVector.Karuta.Tests
 			//Prepare Test
 			reset();
 			string input = "-ra test";
-			args.AddRange(input.Split(' '));
+			args.AddRange(input.SplitPreserveGrouping());
 			//Run Test
 			testCommand.Parse(args);
 			//Assert Results
@@ -40,7 +40,7 @@ namespace LuminousVector.Karuta.Tests
 			//Prepare Test
 			reset();
 			string input = "go";
-			args.AddRange(input.Split(' '));
+			args.AddRange(input.SplitPreserveGrouping());
 			//Run Test
 			testCommand.Parse(args);
 			//Asert Results
@@ -53,7 +53,7 @@ namespace LuminousVector.Karuta.Tests
 			//Prepare Test
 			reset();
 			string input = "go -ra test";
-			args.AddRange(input.Split(' '));
+			args.AddRange(input.SplitPreserveGrouping());
 			//Run Test
 			testCommand.Parse(args);
 			//Assert Results
@@ -68,7 +68,7 @@ namespace LuminousVector.Karuta.Tests
 			//Prepare Test
 			reset();
 			string input = "-a \"This is a quote\"";
-			args.AddRange(input.Split(' '));
+			args.AddRange(input.SplitPreserveGrouping());
 			//Run Test
 			testCommand.Parse(args);
 			//Assert Results
@@ -82,7 +82,7 @@ namespace LuminousVector.Karuta.Tests
 			//Prepare Test
 			reset();
 			string input = "-ad \"This is a quote\" \"This one too\"";
-			args.AddRange(input.Split(' '));
+			args.AddRange(input.SplitPreserveGrouping());
 			//Run Test
 			testCommand.Parse(args);
 			//Assert Results
@@ -97,7 +97,7 @@ namespace LuminousVector.Karuta.Tests
 			//Prepare Test
 			reset();
 			string input = "go -abrd \"quote\" hello \"This one too\"";
-			args.AddRange(input.Split(' '));
+			args.AddRange(input.SplitPreserveGrouping());
 			//Run Test
 			testCommand.Parse(args);
 			//Assert Results

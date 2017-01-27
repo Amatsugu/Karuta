@@ -21,7 +21,7 @@ namespace LuminousVector.Karuta.Commands
 		public CommandInterpreter<T> RegisterCommand(T command)
 		{
 			if (command == null)
-				throw new CommandInterpretorExeception("Command cannot be null");
+				throw new CommandInterpreterExeception("Command cannot be null");
 			if (_commands.ContainsKey(command.name))
 				throw new DuplicateCommandExeception(command.name);
 			_commands.Add(command.name, command);
@@ -34,12 +34,11 @@ namespace LuminousVector.Karuta.Commands
 		{
 			foreach (string c in command.Split('&'))
 			{
-				List<string> args = new List<string>();
-				args.AddRange(from arg in c.Split(' ') where !string.IsNullOrWhiteSpace(arg) select arg);
+				List<string> args = c.SplitPreserveGrouping();
 				T cmd;
 				_commands.TryGetValue(args[0], out cmd);
 				if (cmd == null)
-					throw new CommandInterpretorExeception($"No such command: \"{args[0]}\"");
+					throw new CommandInterpreterExeception($"No such command: \"{args[0]}\"");
 				else
 				{
 					args.RemoveAt(0);

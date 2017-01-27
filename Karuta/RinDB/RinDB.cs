@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Npgsql;
+using LuminousVector.Karuta.RinDB.Async;
 using LuminousVector.Karuta.RinDB.Models;
 
 namespace LuminousVector.Karuta.RinDB
@@ -11,7 +12,7 @@ namespace LuminousVector.Karuta.RinDB
 	public static class RinDB
 	{
 		public static string VIEW_LOCATION { get; set; } = "RinDB_web/";
-		public static string BASE_DIR { get; } = Karuta.registry.GetString("baseDir");
+		public static string BASE_DIR { get; } = Karuta.registry.GetValue<string>("baseDir");
 		public static string THUMB_DIR { get; } = $"{BASE_DIR}/RinDB/thumbs";
 		public static string CONNECTION_STRING { get { return $"Host={HOST};Username={_user};Password={_pass};Database={_db};Pooling=true"; } }
 
@@ -27,11 +28,6 @@ namespace LuminousVector.Karuta.RinDB
 			_db = db;
 
 		}
-
-		public static void Close()
-		{
-		}
-
 
 		public static ImageModel GetImage(string id)
 		{
@@ -88,7 +84,6 @@ namespace LuminousVector.Karuta.RinDB
 						return images.ToArray();
 					while (reader.Read())
 					{
-						//Karuta.Write(reader.GetString(3));
 						images.Add(new ImageModel()
 						{
 							fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(reader.GetString(4))}",
@@ -124,18 +119,20 @@ namespace LuminousVector.Karuta.RinDB
 					}
 				}
 			}
+			model.fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(model.fileUri)}";
+			ThumbGenerator.QueueThumb(model);
 			return model;
 		}
 
-		public static string GetLatest(int count, int page = 1)
+		public static List<ImageModel> GetLatest(int count, int page = 1)
 		{
 			using (NpgsqlConnection con = new NpgsqlConnection(CONNECTION_STRING))
 			{
 				con.Open();
-				string images = null;
+				List<ImageModel> images = new List<ImageModel>();
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
-					cmd.CommandText = $"SELECT timeadded, id, fileuri, name FROM images WHERE isnsfw=false ORDER BY timeadded DESC";
+					cmd.CommandText = $"SELECT id, fileuri, name FROM images WHERE isnsfw=false ORDER BY timeadded DESC";
 					using (var reader = cmd.ExecuteReader())
 					{
 						int i = 0;
@@ -145,9 +142,12 @@ namespace LuminousVector.Karuta.RinDB
 						{
 							if (i <= (page - 1) * count)
 								continue;
-							if (images == null)
-								images = "";
-							images += $"<a href=\"/image/{Uri.UnescapeDataString(reader.GetString(1))}\" style=\"display:none;\" class=\"imageCard\"><div class=\"image\"><img src=\"/image/thumb/{Uri.UnescapeDataString(reader.GetString(1))}\"></div><div class=\"name\">{Uri.UnescapeDataString(reader.GetString(3))}</div></a>";
+							images.Add(new ImageModel()
+							{
+								id = Uri.UnescapeDataString(reader.GetString(0)),
+								fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(reader.GetString(1))}",
+								name = Uri.UnescapeDataString(reader.GetString(2))
+							});
 						}
 					}
 					return images;
@@ -155,27 +155,128 @@ namespace LuminousVector.Karuta.RinDB
 			}
 		}
 
-		public static string GetSearch(string query, int count, int page = 1)
+		public static List<ImageModel> GetAll()
 		{
 			using (NpgsqlConnection con = new NpgsqlConnection(CONNECTION_STRING))
 			{
 				con.Open();
-				string images = null;
+				List<ImageModel> images = new List<ImageModel>();
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
-					cmd.CommandText = $"SELECT timeadded, id, fileuri, name FROM images WHERE lower(name) LIKE '%{Uri.EscapeDataString(query.ToLower())}%'";
+					cmd.CommandText = $"SELECT id, fileuri, name FROM images";
 					using (var reader = cmd.ExecuteReader())
 					{
 						if (!reader.HasRows)
 							return null;
+						while (reader.Read())
+						{
+							images.Add(new ImageModel()
+							{
+								id = Uri.UnescapeDataString(reader.GetString(0)),
+								fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(reader.GetString(1))}",
+								name = Uri.UnescapeDataString(reader.GetString(2))
+							});
+						}
+					}
+					return images;
+				}
+			}
+		}
+
+		enum NSFWMode
+		{
+			None, Only, Allow, Default
+		}
+
+		public static List<ImageModel> GetSearch(string query, int count, int page = 1)
+		{
+			List<string> splitQuery = query.ToLower().Replace(':', ' ').SplitPreserveGrouping();
+			List<string> tags = new List<string>();
+			string cleanQuery = "";
+			NSFWMode mode = NSFWMode.Allow;
+			for(int i = 0; i < splitQuery.Count; i++)
+			{
+				switch (splitQuery[i])
+				{
+					case "tag":
+						if (i + 1 > splitQuery.Count - 1)
+							continue;
+						tags.Add(splitQuery[i + 1]);
+
+						i++;
+						break;
+					case "nsfw":
+						if (i + 1 > splitQuery.Count - 1)
+							continue;
+						switch (splitQuery[i + 1].ToLower())
+						{
+							case "none":
+								mode = NSFWMode.None;
+								break;
+							case "only":
+								mode = NSFWMode.Only;
+								break;
+							case "allow":
+								mode = NSFWMode.Allow;
+								break;
+							default:
+								mode = NSFWMode.Default;
+								break;
+						}
+						i++;
+						break;
+					default:
+						if (cleanQuery == "")
+							cleanQuery += splitQuery[i];
+						else
+							cleanQuery += $" {splitQuery[i]}";
+						break;
+
+				}
+			}
+
+			if (!string.IsNullOrWhiteSpace(cleanQuery))
+				cleanQuery = $"lower(name) LIKE '%{Uri.EscapeDataString(cleanQuery)}%'";
+			string tagQuery = "";
+			foreach (string tag in tags)
+			{
+				if (tagQuery == "")
+					tagQuery += $"T.id = '{tag.ToBase60()}' || I.id";
+				else
+					tagQuery += $" AND T.id = '{tag.ToBase60()}' || I.id";
+			}
+			if(tagQuery != "")
+				cleanQuery += $"{(string.IsNullOrWhiteSpace(cleanQuery) ? "" : "AND")} EXISTS (SELECT T.id from tagmap T WHERE {tagQuery})";
+			if (string.IsNullOrWhiteSpace(cleanQuery))
+			{
+				cleanQuery = ((mode == NSFWMode.Only) ? $"I.isnsfw = true" : ((mode == NSFWMode.None) ? $"I.isnsfw = false" : cleanQuery));
+				if (mode == NSFWMode.Default)
+					return new List<ImageModel>();
+			}else
+				cleanQuery = ((mode == NSFWMode.Only) ? $"I.isnsfw = true AND {cleanQuery}" : ((mode == NSFWMode.None) ? $"I.isnsfw = false AND {cleanQuery}" : cleanQuery));
+
+			using (NpgsqlConnection con = new NpgsqlConnection(CONNECTION_STRING))
+			{
+				con.Open();
+				List<ImageModel> images = new List<ImageModel>();
+				using (NpgsqlCommand cmd = con.CreateCommand())
+				{
+					cmd.CommandText = $"SELECT I.id, I.fileUri, I.name, I.isnsfw, I.timeadded FROM images I {(string.IsNullOrWhiteSpace(cleanQuery) ? "" : $"WHERE {cleanQuery}")} ORDER BY I.timeadded DESC";
+					using (var reader = cmd.ExecuteReader())
+					{
+						if (!reader.HasRows)
+							return images;
 						int i = 0;
 						while (reader.Read() && i++ < count * page)
 						{
 							if (i <= (page - 1) * count)
 								continue;
-							if (images == null)
-								images = "";
-							images += $"<a href=\"/image/{Uri.UnescapeDataString(reader.GetString(1))}\" style=\"display:none;\" class=\"imageCard\"><div class=\"image\"><img src=\"/image/thumb/{Uri.UnescapeDataString(reader.GetString(1))}\"></div><div class=\"name\">{Uri.UnescapeDataString(reader.GetString(3))}</div></a>";
+							images.Add(new ImageModel()
+							{
+								id = Uri.UnescapeDataString(reader.GetString(0)),
+								fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(reader.GetString(1))}",
+								name = Uri.UnescapeDataString(reader.GetString(2))
+							});
 						}
 					}
 					return images;
@@ -273,7 +374,7 @@ namespace LuminousVector.Karuta.RinDB
 					{
 						cmd.CommandText = $"INSERT INTO tags(id, name, type, description, parentid) VALUES('{tag.id}', '{Uri.EscapeDataString(tag.name)}', '{tag.type}', '{Uri.EscapeDataString(tag.description)}', '{tag.parentID}');";
 						cmd.ExecuteNonQuery();
-					}catch(Exception e)
+					}catch
 					{
 						return GetTag(tag.id);
 					}

@@ -448,9 +448,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			await _channel.SendMessage("Saving Data...");
 			Karuta.InvokeCommand("save", new List<string>());
 			Karuta.Write("Data is saved:");
-			string[] data = _bot.SaveData().Split('`');
-			foreach (string s in data)
-				Karuta.Write(s);
+			_bot.SaveData();
 			await _channel.SendMessage("Saved!");
 		}
 	}

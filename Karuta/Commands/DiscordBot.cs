@@ -29,8 +29,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		{
 			//Thread.CurrentThread.Name = "DiscordBot";
 			_default = Init;
-			_token = Karuta.registry.GetString("discordToken");
-			bool? auto = Karuta.registry.GetBool("discordAutostart");
+			_token = Karuta.registry.GetValue<string>("discordToken");
+			bool? auto = Karuta.registry.GetValue<bool>("discordAutostart");
 			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
 			RegisterKeyword("stop", Stop, "stops the bot");
 			RegisterKeyword("autostart", () =>
@@ -53,13 +53,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				rateLimit = 5
 			};
 
-			interpreter.RegisterCommand(new AddImageCommand(this));
-			interpreter.RegisterCommand(new DiscordHelpCommand(this));
-			interpreter.RegisterCommand(new DiscordSaveCommand(this));
-			interpreter.RegisterCommand(new DiscordPurgeCommand(this));
-			interpreter.RegisterCommand(new RemoveImageCommand(this));
-			interpreter.RegisterCommand(new SetDescriptionCommand(this));
-			interpreter.RegisterCommand(new DiscordEventCommand(this));
+			RegisterSystemCommands();
 
 			LoadData();
 
@@ -72,10 +66,21 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			};
 		}
 
+		void RegisterSystemCommands()
+		{
+			interpreter.RegisterCommand(new AddImageCommand(this));
+			interpreter.RegisterCommand(new DiscordHelpCommand(this));
+			interpreter.RegisterCommand(new DiscordSaveCommand(this));
+			interpreter.RegisterCommand(new DiscordPurgeCommand(this));
+			interpreter.RegisterCommand(new RemoveImageCommand(this));
+			interpreter.RegisterCommand(new SetDescriptionCommand(this));
+			interpreter.RegisterCommand(new DiscordEventCommand(this));
+		}
+
 		public void ImgurSetup()
 		{
-			string imgID = Karuta.registry.GetString("imgur_id");
-			string imgSec = Karuta.registry.GetString("imgur_secret");
+			string imgID = Karuta.registry.GetValue<string>("imgur_id");
+			string imgSec = Karuta.registry.GetValue<string>("imgur_secret");
 			if (string.IsNullOrWhiteSpace(imgID) || string.IsNullOrWhiteSpace(imgSec))
 			{
 				Karuta.Write("Please enter Imgur API information:");
@@ -99,9 +104,9 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			Karuta.registry.SetValue("imgur_secret", imgSec);
 		}
 
-		public string SaveData()
+		public void SaveData()
 		{
-			string output = "";
+			/*string output = "";
 			foreach(DiscordCommand C in interpreter.commands.Values)
 			{
 				if (C.GetType() == typeof(DiscordImageCommand))
@@ -113,17 +118,17 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 						output += "`" + cmd.ToString();
 
 				}
-			}
-			Karuta.registry.SetValue("discordImageCommands", output);
-			return output;
+			}*/
+			Karuta.registry.SetValue("discordImageCommands", (from DiscordCommand c in interpreter.commands.Values where c.GetType() == typeof(DiscordImageCommand) select c));
 		}
 
 		void LoadData()
 		{
-			string data = Karuta.registry.GetString("discordImageCommands");
-			if (string.IsNullOrWhiteSpace(data))
+			//TODO: Remove migration
+			string oldData = Karuta.registry.GetValue<string>("discordImageCommands");
+			if (string.IsNullOrWhiteSpace(oldData))
 				return;
-			string[] cmds = data.Split('`');
+			string[] cmds = oldData.Split('`');
 			if (cmds.Length == 0)
 				return;
 			foreach(string cmd in cmds)
@@ -140,6 +145,15 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				images.RemoveAt(0);
 				interpreter.RegisterCommand((hMessage != null) ? new DiscordImageCommand(cmdName, hMessage) { images = images} : new DiscordImageCommand(cmdName) { images = images});
 			}
+			SaveData();
+			interpreter.commands.Clear();
+			RegisterSystemCommands();
+			IEnumerable<DiscordCommand> data = Karuta.registry.GetValue<IEnumerable<DiscordCommand>>("discordImageCommands");
+			foreach(DiscordCommand c in data)
+			{
+				interpreter.RegisterCommand(c);
+			}
+			
 
 		}
 

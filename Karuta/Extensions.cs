@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Net;
 using Nancy;
@@ -11,7 +12,15 @@ namespace LuminousVector.Karuta
 {
 	public static class Extensions
 	{
-
+		public static readonly char[] BASE60_CHARS = new char[]
+		{
+			'0','1','2','3','4','5','6','7','8','9',
+			'A','B','C','D','E','F','G','H','I','J',
+			'K','L','M','N','O','P','Q','R','S','T',
+			'U','V','W','X','Y','Z','a','b','c','d',
+			'e','f','g','h','i','j','k','l','m','n',
+			'o','p','q','r','s','t','u','v','w','x'
+		};
 		public static readonly DateTime minTime = new DateTime(1970, 1, 1);
 
 		//Extend DateTime to allow conversion to Epoch time
@@ -20,7 +29,6 @@ namespace LuminousVector.Karuta
 			TimeSpan t = time - minTime;
 			return (int)t.TotalSeconds;
 		}
-
 
 		//Extend Lists to allow obtaining a random item
 		public static T GetRandom<T>(this IList<T> list)
@@ -48,22 +56,14 @@ namespace LuminousVector.Karuta
 				neg = true;
 			}
 			int i = 64;
-			char[] baseChars = new char[]
-			{
-				'0','1','2','3','4','5','6','7','8','9',
-				'A','B','C','D','E','F','G','H','I','J',
-				'K','L','M','N','O','P','Q','R','S','T',
-				'U','V','W','X','Y','Z','a','b','c','d',
-				'e','f','g','h','i','j','k','l','m','n',
-				'o','p','q','r','s','t','u','v','w','x'
-			};
+			
 
 			char[] buffer = new char[i];
-			int targetBase = baseChars.Length;
+			int targetBase = BASE60_CHARS.Length;
 
 			do
 			{
-				buffer[--i] = baseChars[value % targetBase];
+				buffer[--i] = BASE60_CHARS[value % targetBase];
 				value = value / targetBase;
 			}
 			while (value > 0);
@@ -73,7 +73,53 @@ namespace LuminousVector.Karuta
 
 			string output = new string(result);
 			return (neg) ? $"-{output}" : output;
-	}
+		}
+
+		public static List<string> SplitPreserveGrouping(this string s, char deliminator = ' ', char group = '"')
+		{
+			List<string> args = new List<string>();
+			args.AddRange(from arg in s.Split(' ') where !string.IsNullOrWhiteSpace(arg) select arg);
+			for (int i = 0; i < args.Count; i++)
+			{
+				args[i] = args[i].Replace("'", "\"");
+				if (args[i][0] == '\"' && args[i][args[i].Length - 1] == '\"')
+					args[i] = args[i].Replace("\"", "");
+			}
+			if (!Utils.IsEven((from q in args where q.Contains("\"") select q).ToList().Count))
+			{
+				for(int i = args.Count - 1; i >= 0; i--)
+				{
+					if(args[i].Contains('"'))
+					{
+						args[i] = args[i].Replace("\"", "");
+						break;
+					}
+				}
+			}
+			List<int> start = new List<int>(), size = new List<int>();
+			for (int i = 0; i < args.Count; i++)
+			{
+				if (args[i].Contains("\""))
+				{
+					if (start.Count == size.Count)
+						start.Add(i);
+					else
+						size.Add(i - start.Last() + 1);
+				}
+			}
+
+			//Find and merge quoted text
+			int offset = 0;
+			foreach (int g in start)
+			{
+				int i = start.IndexOf(g);
+				string quote = string.Join(" ", args.GetRange(g - offset, size[i])).Replace("\"", "");
+				args.RemoveRange(g - offset, size[i]);
+				args.Insert(g - offset, quote);
+				offset += size[i] - 1;
+			}
+			return args;
+		} 
 
 		private static WebClient cli = null;
 		//Extend Random to allow true random powered by random.org
@@ -115,26 +161,6 @@ namespace LuminousVector.Karuta
 				Karuta.Write($"Unable to connect to random.org {e.Message}");
 				return random.Next(minValue, maxValue);
 			}
-		}
-
-		public static Response FromByteArray(this IResponseFormatter formatter, byte[] body, string contentType = null)
-		{
-			return new ByteArrayResponse(body, contentType);
-		}
-
-		public static Response FromImage(this IResponseFormatter formatter, Image image, string contentType = "image/png")
-		{
-			return new ImageResponse(image, contentType);
-		}
-
-		public static Response FromImage(this IResponseFormatter formatter, string image, string contentType = "image/png")
-		{
-			return new ImageResponse(image, contentType);
-		}
-
-		public static Response FromImageModel(this IResponseFormatter formatter, ImageModel image)
-		{
-			return null;
 		}
 	}
 }

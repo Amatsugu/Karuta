@@ -86,9 +86,9 @@ namespace LuminousVector.Karuta.Commands
 			if (_keywords.Count != 0)
 			{
 				//Select and assign the keyword if it exists
-				IList<Keyword> kl = (from arg in args where _keywords.ContainsKey(arg) select _keywords[arg]).ToList();
-				selectedKeyword = (kl.Count == 0) ? null : kl.First();
-				if (selectedKeyword != null)
+				//IList<Keyword> kl = (from arg in args where _keywords.ContainsKey(arg) select _keywords[arg]).ToList();
+				//selectedKeyword = (kl.Count == 0) ? null : kl.First();
+				if(_keywords.TryGetValue(args[0], out selectedKeyword))
 					args.Remove(selectedKeyword.keyword);
 			}
 			Debug.Print("Keyword parse END");
@@ -100,19 +100,6 @@ namespace LuminousVector.Karuta.Commands
 
 				foreach (string arg in emptyArgs)
 					args.Remove(arg);
-
-				//Replace single quotes with double quotes if they exist
-				Debug.Print("Quote balance check START");
-				for (int i = 0; i < args.Count; i++)
-				{
-					args[i] = args[i].Replace("'", "\"");
-					if (args[i][0] == '\"' && args[i][args[i].Length - 1] == '\"')
-						args[i] = args[i].Replace("\"", "");
-				}
-
-				if (!Utils.IsEven((from q in args where q.Contains("\"") select q).ToList().Count))
-					throw new CommandParsingExeception("Unbalaced Quotes detected");
-				Debug.Print("Quote balance check END");
 				Debug.Print($">{string.Join(", ", from s in args select s)}");
 
 				string optKeys = "";
@@ -128,33 +115,6 @@ namespace LuminousVector.Karuta.Commands
 					args.Remove(a);
 				Debug.Print("Option flags parse END");
 				Debug.Print($">{string.Join(", ", from s in args select s)}");
-
-				Debug.Print("Quote Parse START");
-				List<int> start = new List<int>(), size = new List<int>();
-				//Find location and size of quotes
-				for(int i = 0; i < args.Count; i++)
-				{
-					if (args[i].Contains("\""))
-					{
-						if (start.Count == size.Count)
-							start.Add(i);
-						else
-							size.Add(i - start.Last() + 1);
-					}
-				}
-
-				//Find and merge quoted text
-				int offset = 0;
-				foreach (int s in start)
-				{
-					int i = start.IndexOf(s);
-					string quote = string.Join(" ", args.GetRange(s - offset, size[i])).Replace("\"", "");
-					args.RemoveRange(s - offset, size[i]);
-					args.Insert(s - offset, quote);
-					offset += size[i] - 1;
-				}
-
-				Debug.Print("Quote Parse END");
 				Debug.Print($">{string.Join(", ", from s in args select s)}");
 
 				int index = 0;

@@ -15,7 +15,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		public DiscordEventCommand(DiscordBot bot) : base("events", "Add/Remove/View upcoming events")
 		{
 			_bot = bot;
-			Karuta.StartTimer("DiscordEventKeeper", CheckEvents, 0, 60 * 1000);
+			init = () => Karuta.StartTimer("DiscordEventKeeper", CheckEvents, 0, 60 * 1000);
 			_events = new List<DiscordEvent>();
 
 			RegisterKeyword("all", ListEvents, "lists all events");

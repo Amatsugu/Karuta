@@ -8,7 +8,7 @@ using System.IO;
 using Imgur.API.Endpoints.Impl;
 using System.Threading.Tasks;
 
-namespace LuminousVector.Karuta
+namespace LuminousVector.Utils
 {
 	class Utils
 	{

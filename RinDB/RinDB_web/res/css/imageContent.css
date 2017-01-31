@@ -1,0 +1,83 @@
+#imageContent
+{
+	display: block;
+}
+
+#imageContent #imageName
+{
+	height: 50px;
+	line-height: 50px;
+	font-size: 28px;
+	padding: 10px;
+	color: #000;
+	overflow: hidden;
+}
+
+#imageContent #imageDisplay
+{
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-content: flex-start;
+}
+
+#imageDisplay img
+{
+	max-width: 100%;
+	align-self: flex-start;
+}
+
+#imageContent #description
+{
+	color: #000;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+#imageContent #related
+{
+	padding: 20px;
+	font-size: 30px;
+	line-height: 35px;
+	color: #000;
+}
+
+#contentGrid
+{
+}
+
+.tag
+{
+	overflow: hidden;
+	display: inline-flex;
+	border: 1px solid #fff;
+	height: 25px;
+	margin: 5px;
+	padding: 5px;
+	background-color: #fff;
+	justify-content: space-around;
+	transition: background-color .5s;
+}
+
+.tag:hover
+{
+	background-color: #efefef;
+	cursor: default;
+}
+
+.tag .tagName
+{
+	display: block;
+	align-self: center;
+	
+}
+
+#tagDescription
+{
+	position: absolute;
+	display: block;
+	z-index: 2;
+	top: 0px;
+	background-color: #fff;
+	padding: 5px;
+}

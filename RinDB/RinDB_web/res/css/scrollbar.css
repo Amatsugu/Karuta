@@ -1,0 +1,17 @@
+::-webkit-scrollbar
+{
+	width: 5px;
+	margin: 0;
+	background-color: #fff;
+}
+::-webkit-scrollbar-button
+{
+	display: none;
+}
+::-webkit-scrollbar-thumb
+{
+	padding: 0;
+	width: 5px;
+	margin: auto;
+	background-color: #ff0064;
+}

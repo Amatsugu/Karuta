@@ -1,0 +1,33 @@
+a.imageCard
+{
+	height: calc(200px + 20px);
+	width: 200px;
+	margin-bottom: 20px;
+}
+
+.imageCard .image
+{
+	height: 200px;
+	width: 200px;
+	top: 0px;
+}
+
+.imageCard .name
+{
+	top:200px;
+	height: 20px;
+	width: 200px;
+	line-height: 20px;
+}
+
+.imageCard:hover > .image img
+{
+	max-width: calc(200px + 10%);
+}
+
+.image img
+{
+	max-width: 200px;
+	position: absolute;
+	transition: max-width .5s;
+}

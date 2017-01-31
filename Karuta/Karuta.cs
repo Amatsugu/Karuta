@@ -7,7 +7,6 @@ using LuminousVector.Events;
 using LuminousVector.DataStore;
 using LuminousVector.Serialization;
 using LuminousVector.Karuta.Commands;
-using LuminousVector.Karuta.Commands.DiscordBot;
 using System.Reflection;
 using System.Linq;
 
@@ -117,18 +116,18 @@ namespace LuminousVector.Karuta
 		}
 
 		//Register all Commands
-		public static void RegisterCommands()
+		private static void RegisterCommands()
 		{
 			//Find all commands with attribute KarutaCommand
 			var cmds = from c in Assembly.GetExecutingAssembly().GetTypes()
 					   where c.GetCustomAttributes<KarutaCommand>().Count() > 0
 					   select c;
-
 			//Add each register each command
 			foreach(var c in cmds)
 			{
 				_interpretor.RegisterCommand(Activator.CreateInstance(c) as Command);
 			}
+			LoadPlugins();
 			//Register Other Commands
 			_interpretor.RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
 			_interpretor.RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
@@ -140,6 +139,25 @@ namespace LuminousVector.Karuta
 			_interpretor.RegisterCommand(new ProcessMonitor(_threads, _timers));
 		}
 
+		private static void LoadPlugins()
+		{
+			Write("Loading Plugins...");
+			//Load Plugins
+			if (Directory.Exists("Plugins"))
+			{
+				foreach (string p in Directory.GetFiles("Plugins", "*.dll", SearchOption.TopDirectoryOnly))
+				{
+					var cmds = from c in Assembly.LoadFrom(p).GetTypes()
+							   where c.GetCustomAttributes<KarutaCommand>().Count() > 0
+							   select c;
+					foreach(var c in cmds)
+					{
+						_interpretor.RegisterCommand(Activator.CreateInstance(c) as Command);
+					}
+				}
+			}
+		}
+		
 		//Start the main process loop
 		public static void Run()
 		{
@@ -163,7 +181,7 @@ namespace LuminousVector.Karuta
 		}
 
 		//Stop the program, stops processes and dispose dispoables
-		public static void Close()
+		private static void Close()
 		{
 			_isRunning = false;
 			foreach(Command c in commands.Values)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Discord;
 using System.IO;
+using LuminousVector.Utils.Extensions;
 
 namespace LuminousVector.Karuta.Commands.DiscordBot
 {

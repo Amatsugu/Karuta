@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using LuminousVector.Karuta.Commands;
+using static LuminousVector.Utils.Utils;
 
 namespace LuminousVector.Karuta.Commands.DiscordBot
 {
@@ -79,7 +79,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				double timeoutTime = (userCommandRate[user].timeoutEnd - DateTime.Now).TotalSeconds;
 				if (timeoutTime > 0)
 				{
-					await channel.SendMessage($"@{username}: Please wait {Utils.SmartRound(timeoutTime, 100)} seconds before using another command.");
+					await channel.SendMessage($"@{username}: Please wait {SmartRound(timeoutTime, 100)} seconds before using another command.");
 					return;
 				}
 				else

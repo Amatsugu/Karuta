@@ -12,8 +12,8 @@ using RedditSharp.Things;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
 using LuminousVector.Karuta.Commands;
-using LuminousVector.Karuta.RinDB;
-using LuminousVector.Karuta.RinDB.Models;
+using LuminousVector.Utils.Extensions;
+using LuminousVector.RinDB.Models;
 
 namespace LuminousVector.Karuta
 {
@@ -736,40 +736,30 @@ namespace LuminousVector.Karuta
 			{
 				data = _client.DownloadData(url);
 				string ext = Path.GetExtension(url.AbsolutePath);
-				using (MemoryStream stream = new MemoryStream(data))
+				using (FileStream image = new FileStream($"file{ext}", FileMode.Create, FileAccess.Write))
 				{
-					using (Image image = Image.FromStream(stream))
+					try
 					{
-						try
+						if (!Directory.GetParent(file).Exists)
 						{
-							if(!Directory.GetParent(file).Exists)
-							{
-								Directory.GetParent(file).Create();
-							}
-							if (Path.GetExtension(url.AbsolutePath) == ".gif")
-							{
-								image.Save(file + ".gif", ImageFormat.Gif);
-							}
-							else
-							{
-								image.Save(file + ".png", ImageFormat.Png);
-							}
-							Karuta.logger.Log($"Saved {file}{((ext != ".gif") ? ".png" : ".gif")}", $"/r/{p.SubredditName}", verbose);
-							RinDB.RinDB.AddImage(new ImageModel()
-							{
-								name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file).Remove(0, p.CreatedUTC.ToEpoch().ToString().Length + 2)),
-								fileUri = Uri.EscapeDataString($"{file.Replace($"{baseDir}/", "")}{((ext == ".gif") ? ext : ".png")}"),
-								timeadded = p.CreatedUTC.ToEpoch(),
-								isnsfw = p.NSFW,
-								tags = _curTags
-							});
-							imgCount++;
+							Directory.GetParent(file).Create();
 						}
-						catch (Exception e)
+						image.Write(data, 0, data.Length);
+						Karuta.logger.Log($"Saved {file}{ext}", $"/r/{p.SubredditName}", verbose);
+						image.Flush();
+						/*RinDB.AddImage(new ImageModel()
 						{
-							Karuta.logger.LogError($"Failed to save \"{p.Title}\", {e.Message}", $"/r/{p.SubredditName}", verbose);
-							Karuta.logger.LogError(e.StackTrace, name, verbose);
-						}
+							name = Uri.EscapeDataString(Path.GetFileNameWithoutExtension(file).Remove(0, p.CreatedUTC.ToEpoch().ToString().Length + 2)),
+							fileUri = Uri.EscapeDataString($"{file.Replace($"{baseDir}/", "")}{ext}"),
+							timeadded = p.CreatedUTC.ToEpoch(),
+							isnsfw = p.NSFW,
+							tags = _curTags
+						});*/
+						imgCount++;
+					}catch(Exception e)
+					{
+						Karuta.logger.LogError($"Failed to save \"{p.Title}\", {e.Message}", $"/r/{p.SubredditName}", verbose);
+						Karuta.logger.LogError(e.StackTrace, name, verbose);
 					}
 				}
 			}

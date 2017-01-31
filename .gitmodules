@@ -1,6 +1,6 @@
 [submodule "RinDB_web"]
-	path = Karuta/RinDB_web
+	path = RinDB/RinDB_web
 	url = https://github.com/TheDarkVoid/RinDB_web
-[submodule "Karuta/RinDB_web"]
-	path = Karuta/RinDB_web
+[submodule "RinDB/RinDB_web"]
+	path = RinDB/RinDB_web
 	url = https://github.com/TheDarkVoid/RinDB_web

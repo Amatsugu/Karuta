@@ -48,13 +48,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>LuminousVector.Karuta.Program</StartupObject>
@@ -130,21 +131,6 @@
     <Compile Include="Commands\Keyword.cs" />
     <Compile Include="Commands\Option.cs" />
     <Compile Include="Commands\ProcessMonitor.cs" />
-    <Compile Include="RinDB\Async\DatabaseUpdateQueue.cs" />
-    <Compile Include="RinDB\Async\ThumbGenerator.cs" />
-    <Compile Include="RinDB\Modules\DiagnosticsModule.cs" />
-    <Compile Include="RinDB\Responses\ImageModelHtmlResponse.cs" />
-    <Compile Include="RinDB\Responses\ResonseExtensions.cs" />
-    <Compile Include="RinDB\Models\ImageModel.cs" />
-    <Compile Include="RinDB\Models\TagModel.cs" />
-    <Compile Include="RinDB\Modules\DBModule.cs" />
-    <Compile Include="RinDB\Modules\IndexModule.cs" />
-    <Compile Include="RinDB\NancyCustomConventionsBootstrap.cs" />
-    <Compile Include="RinDB\Responses\ImageResponse.cs" />
-    <Compile Include="RinDB\RinDB.cs" />
-    <Compile Include="RinDB\Modules\ImageModule.cs" />
-    <Compile Include="RinDB\Responses\ByteArrayResponse.cs" />
-    <Compile Include="RinDB\RinDBCommand.cs" />
     <Compile Include="Commands\TestCommand.cs" />
     <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="DataSerializer.cs" />
@@ -152,7 +138,6 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Commands\Command.old.cs" />
     <Compile Include="Events\EventManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Karuta.cs" />
@@ -290,102 +275,13 @@
     <Content Include="Karuta.ico" />
     <Content Include="Karutax32.ico" />
     <Content Include="Karutax64.ico" />
-    <EmbeddedResource Include="RinDB_web\res\img\DefaultThumb.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\js\tagDisplay.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\image.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\contentGrid.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\imageContent.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\main.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\nightmode.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\scrollbar.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\sideBar.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\smallerScreen.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\css\smallScreen.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest10.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest11.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest12.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest13.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest14.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest3.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest4.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest5.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest6.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest7.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest8.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\img\imgtest9.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\js\addImages.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\js\box.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\js\jquery-3.1.1.min.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="RinDB_web\res\js\search.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
     <None Include="res\Karutax16.ico" />
     <None Include="res\Karuta.ico" />
     <None Include="res\Karutax32.ico" />
     <None Include="res\Karutax64.ico" />
     <None Include="res\Karutax32.png" />
   </ItemGroup>
+  <Import Project="..\RinDB.Models\RinDB.Models.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -394,6 +290,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -401,4 +301,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+<Target Name="AfterClean">
+    <RemoveDir Directories="$(OutDir)\Plugins"/>
+    <RemoveDir Directories="$(OutDir)\RinDB_Web"/>
+  </Target>
 </Project>

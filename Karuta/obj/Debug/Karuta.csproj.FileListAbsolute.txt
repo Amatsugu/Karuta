@@ -72,9 +72,12 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Npgsql.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.ColorConverters.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\Q42.HueApi.NET.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RedditSharp.pdb
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RedditSharp.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RestSharp.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Extensions.xml
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\System.Net.Http.Primitives.xml
+C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\LuminousVector.Karuta.Properties.Resources.resources
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csproj.GenerateResource.Cache
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.TrustInfo.xml
@@ -82,6 +85,3 @@ C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe.manifest
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.application
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.exe
 C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.pdb
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\obj\Debug\Karuta.csprojResolveAssemblyReference.cache
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RedditSharp.pdb
-C:\Users\Karuta\Documents\GitHub\Karuta\Karuta\bin\Debug\RedditSharp.xml

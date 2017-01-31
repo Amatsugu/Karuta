@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using LuminousVector.Karuta.Commands;
 using System.Diagnostics;
+using LuminousVector.Utils.Extensions;
 
 namespace LuminousVector.Karuta.Tests
 {

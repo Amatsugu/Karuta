@@ -2,13 +2,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Net;
-using Nancy;
-using LuminousVector.Karuta.RinDB.Responses;
-using LuminousVector.Karuta.RinDB.Models;
-using System.Drawing;
-using System.Text;
+using static LuminousVector.Karuta.Karuta;
 
-namespace LuminousVector.Karuta
+namespace LuminousVector.Utils.Extensions
 {
 	public static class Extensions
 	{
@@ -37,7 +33,7 @@ namespace LuminousVector.Karuta
 				throw new Exception("Empty List!");
 			if (list.Count == 1)
 				return list[0];
-			return list[Karuta.random.Next(0, list.Count)];
+			return list[random.Next(0, list.Count)];
 		}
 
 		//String to base 60
@@ -142,7 +138,7 @@ namespace LuminousVector.Karuta
 					);
 				if (string.IsNullOrWhiteSpace(data))
 				{
-					Karuta.Write("No response from random.org, falling back to psudo random");
+					Write("No response from random.org, falling back to psudo random");
 					return random.Next(minValue, maxValue);
 				}
 
@@ -153,12 +149,12 @@ namespace LuminousVector.Karuta
 				}
 				else
 				{
-					Karuta.Write("Uable to parse data from random.org, falling back to psudo random");
+					Write("Uable to parse data from random.org, falling back to psudo random");
 					return random.Next(minValue, maxValue);
 				}
 			}catch(Exception e)
 			{
-				Karuta.Write($"Unable to connect to random.org {e.Message}");
+				Write($"Unable to connect to random.org {e.Message}");
 				return random.Next(minValue, maxValue);
 			}
 		}

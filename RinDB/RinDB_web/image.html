@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<link href="https://fonts.googleapis.com/css?family=Roboto:100&amp;subset=latin-ext" rel="stylesheet">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/res/css/main.css" type="text/css">
+		<link rel="stylesheet" href="/res/css/contentGrid.css" type="text/css">
+		<link rel="stylesheet" href="/res/css/imageContent.css" type="text/css">
+		<link rel="stylesheet" type="text/css" href="/res/css/smallScreen.css" media="only screen and (max-width: 480px)" />
+		<link rel="stylesheet" type="text/css" href="/res/css/smallerScreen.css" media="only screen and (max-width: 400px)" />
+		<link rel="stylesheet" type="text/css" href="/res/css/nightmode.css">
+		<script src="/res/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+		<script src="/res/js/tagDisplay.js" type="text/javascript"></script>
+		<title>
+			リンDB | Home
+		</title>
+	</head>
+	<body>
+		<div id="Header" class="Panel">
+			<div id="Logo"><a href="/">リンDB</a></div>
+			<div id="Subtitle">Image</div>
+		</div>
+		<div id="wrapper">
+			<form id="search" class="panel">
+				<div id="searchWrap">
+					<input type="search" name="search" placeholder="Search" value="" autocomplete="off" autofocus>
+					<div id="advancedSearchButton"></div>
+				</div>
+				<div id="advancedSearch">
+					<div class="inputArea">
+						<input type="checkbox" value="false">
+						<label>Exclude </label>
+					</div>
+				</div>
+			</form>
+			<div id="imageContent">
+				<div id="imageName" class="panel">
+					@Model.name
+				</div>
+				<div id="imageDisplay">
+					<img src="@Model.imgUri">
+				</div>
+				<div id="description" class="panel">
+					<div id="tagDescription">Tag Description</div>
+					@Each.tags
+					<a class="tag">
+						<div class="tagName">@Current.name</div>
+					</a>
+					@EndEach
+				</div>
+				<div id="related" class="panel">
+					Related
+					<div id="contentGrid">
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

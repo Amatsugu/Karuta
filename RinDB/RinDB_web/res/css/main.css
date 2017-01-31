@@ -1,0 +1,273 @@
+@import "scrollbar.css";
+
+*
+{
+	font-family: 'Roboto', sans-serif;
+}
+
+body
+{
+	background-color: #ddd;
+	margin: 0px;
+	display: block;
+	overflow-x: hidden;
+}
+
+#Header
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	display: flex;
+	height: 128px;
+	padding-left: 32px;
+	overflow: hidden;
+	align-items: center;
+}
+
+#Header #Logo
+{
+	color: #ff0064;
+	font-size: 80px;
+	height: 80px;
+	line-height: 80px;
+	padding-right: 15px;
+}
+
+
+#Logo a
+{
+	color: #ff0064;
+}
+
+#Logo a:visited
+{
+	color: #ff0064;
+}
+
+
+#Header #Subtitle
+{
+	height: 80px;
+	line-height: 110px;
+	font-size: 40px;
+	border-left:2px solid #fff; 
+	padding-left: 15px;
+}
+
+#Header #User
+{
+	position: absolute;
+	right: 10px;
+	display: flex;
+	
+}
+
+#User #Profile
+{
+	height: 96px;
+	width: 96px;
+	background-color: #fff;
+	border: 1px solid #333;
+	margin: 5px;
+	z-index: 1;
+	opacity: .25;
+	border-radius: 50%;
+	transition: opacity .5s;
+}
+
+#User #Profile img
+{
+	height: inherit;
+	width: inherit;
+	border-radius: 50%;
+	background-color: #fff;
+}
+
+#User #menu
+{
+	display: flex;
+	z-index: 0;
+	opacity: 0;
+	transition: opacity .5s;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: space-around;
+}
+
+#User:hover > #menu
+{
+	opacity: 1;
+}
+
+#User:hover > #Profile
+{
+	opacity: 1;
+}
+
+
+#menu li
+{
+	display:block;
+	padding: 5px;
+	color: #ff0064;
+	font-size: 20px;
+}
+
+
+.Panel
+{
+	background-color: #eee;
+	box-shadow: 0px 5px 5px #ccc;
+}
+
+#wrapper #search
+{
+	height: 45px;
+	padding-top: 5px;
+	display: flex;
+	align-items: center;
+	position: relative;
+	display: block;
+	padding-left: 15px;
+	padding-right: 15px;
+	transition: height .5s;
+	overflow: hidden;
+}
+
+#search #advancedSearch
+{
+	height: 380px;
+	display: flex;
+	flex-wrap:wrap;
+	flex-direction: column;
+	justify-content: flex-start;
+	position: absolute;
+	padding: 10px;
+	top: 50px;
+}
+
+#advancedSearch .inputArea
+{
+	height: 25px;
+	min-width: 200px;
+	display: flex;
+	align-content: center;
+	justify-content: flex-start;
+	padding: 5px;
+	margin: 5px;
+	flex-grow: 0;
+	
+}
+
+.inputArea label
+{
+	display: block;
+	margin-left: 20px;
+	height: 25px;
+	line-height: 25px;
+}
+
+.inputArea input[type="checkbox" i]
+{
+	display: block;
+	height: 20px;
+	width: 20px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	transition: border .5s, background-color .5s;
+}
+
+.inputArea input[type="checkbox" i]:hover
+{
+	border: 1px solid #ff0064;
+}
+
+#searchWrap
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+
+#searchWrap #advancedSearchButton
+{
+	width: 0px;
+	height: 0px;
+	border-bottom: 10px solid transparent;
+	border-right: 15px solid #333;
+	border-top: 10px solid transparent; 
+	margin-left: 15px;
+	transition: border-right .5s, transform .1s;
+}
+
+#searchWrap #advancedSearchButton:hover
+{
+	border-right: 15px solid #ff0064;
+}
+
+
+#searchWrap input[type="search" i]
+{
+	-webkit-appearance: textfield;
+	-webkit-border-radius: 0;
+	height: 40px;
+	border: 1px solid #ddd;
+	transition: border .5s, color .5s;
+	font-size: 30px;
+	color: #ddd;
+	width: 100%;
+	outline: none;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+#search input[type="search" i]:hover
+{
+	-webkit-appearance: textfield;
+	border: 1px solid #ff0064;
+	color: #000;
+}
+
+#search input[type="search" i]:selected
+{
+	-webkit-appearance: textfield;
+	border: 1px solid #ff0064;
+	color: #000;
+}
+
+#search input[type="search" i]:focus
+{
+	-webkit-appearance: textfield;
+	border: 1px solid #ff0064;
+	color: #000;
+}
+
+.searching
+{
+	color: #333;
+	font-size: 25px;
+}
+
+a
+{
+	text-decoration: none;
+}
+
+
+#windowArea
+{
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+	margin: 0px;
+	padding: 0px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0,0,0,.2);
+	z-index: 3;
+}

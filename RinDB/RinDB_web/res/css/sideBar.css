@@ -1,0 +1,44 @@
+#flex
+{
+	display: flex;
+	justify-content: space-around;
+}
+
+
+#flex #sideBar
+{
+	min-width: 10px;
+	opacity: 0;
+	transition: opacity .5s, min-width .5s;
+	background-color: #eee;
+	overflow: hidden;
+}
+
+#flex #sideBar:hover
+{
+	min-width: 300px;
+	opacity: 1;
+}
+
+#sideBar .section
+{
+	background-color: #ddd;
+	margin: 10px;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.section .header
+{
+	font-size: 20px;
+	height: 20px;
+	line-height: 20px;
+	padding: 5px;
+}
+
+.section .content
+{
+	min-height: 100px;
+	background-color: #f1f1f1;
+	margin-bottom: 10px;
+}

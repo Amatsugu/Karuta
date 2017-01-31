@@ -1,0 +1,108 @@
+#subtitle
+{
+	color: #fff;
+}
+
+.panel
+{
+	background-color: #333;
+	box-shadow: 0px 5px 5px #000;
+}
+
+body
+{
+	background-color: #222;
+	color: #FFF;
+}
+
+a.imageCard
+{
+	box-shadow: 0px 5px 5px #111;
+	background-color: #333;
+}
+
+.imageCard .image
+{
+	background-color: #000;
+}
+
+.imageCard .name
+{
+	color: #fff;
+}
+
+.imageCard:hover
+{
+	box-shadow: 0px 5px 8px #000;
+}
+
+#advancedSearch .inputArea
+{
+	color: #fff;
+}
+
+#searchWrap #advancedSearchButton
+{
+	border-right: 15px solid #fff;
+}
+
+#searchWrap input[type="search" i]
+{
+	-webkit-appearance:texfield;
+	border: 1px solid #000;
+	background-color: #222;
+	color: #ddd;
+}
+
+#search input[type="search" i]:hover
+{
+	border: 1px solid #ff0064;
+	color: #fff;
+}
+
+#search input[type="search" i]:selected
+{
+	border: 1px solid #ff0064;
+	color: #fff;
+}
+
+#search input[type="search" i]:focus
+{
+	border: 1px solid #ff0064;
+	color: #fff;
+}
+
+::-webkit-scrollbar
+{
+	background-color: #444;
+}
+
+#imageContent #description
+{
+	color: #fff;
+}
+
+#imageContent #imageName
+{
+	color: #fff;
+}
+#imageContent #related
+{
+	color: #fff;
+}
+
+.tag
+{
+	background-color: #222;
+	border: 1px solid #444;
+}
+
+.tag:hover
+{
+	background-color: #444;
+}
+
+#tagDescription
+{
+	background-color: #444;
+}

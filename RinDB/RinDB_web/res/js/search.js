@@ -48,7 +48,11 @@ $(document).ready(function () {
 			            history.pushState("RinDB", "Home", "/" + page);
 			        else
 			            history.pushState("RinDB \"" + lastQuery + "\"", "Search", "/" + page + "/" + encodeURIComponent(lastQuery))
-			    }
+			    },
+				fail: function()
+				{
+					content.html("<div class=\"searching\">An Error Occured</div>");
+				}
 			});
         }
     });
@@ -88,7 +92,11 @@ $(document).ready(function () {
 			            text = "<div class=\"searching\">No Results found</div";
 			        content.html(text);
 			        $(".imageCard").fadeIn();
-			    }
+			    },
+				fail: function()
+				{
+					content.html("<div class=\"searching\">An Error Occured</div>");
+				}
 			});
         }
     });

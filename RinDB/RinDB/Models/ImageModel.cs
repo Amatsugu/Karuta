@@ -17,12 +17,12 @@ namespace LuminousVector.RinDB.Models
 		public string srcUri { get; set; }
 		public long timeadded { get; set; }
 		public bool isnsfw { get; set; }
-		public TagModel[] tags
+		public List<TagModel> tags
 		{
 			get
 			{
 				if (_tags == null)
-					return _tags = RinDB.GetTags(id).ToArray();
+					return _tags = RinDB.GetTags(id);
 				else
 					return _tags;
 			}
@@ -32,7 +32,7 @@ namespace LuminousVector.RinDB.Models
 			}
 		}
 
-		private TagModel[] _tags;
+		private List<TagModel> _tags;
 
 		public ImageModel AddTag(string tagID)
 		{
@@ -50,7 +50,6 @@ namespace LuminousVector.RinDB.Models
 
 		public bool HasTag(TagModel tag) => RinDB.HasTag(id, tag.id);
 
-		public TagModel[] GetTags() => RinDB.GetTags(id).ToArray();
-
+		public List<TagModel> GetTags() => RinDB.GetTags(id);
 	}
 }

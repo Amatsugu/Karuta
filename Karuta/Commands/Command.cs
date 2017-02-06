@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using ProtoBuf;
 
 namespace LuminousVector.Karuta.Commands
 {
@@ -14,16 +15,21 @@ namespace LuminousVector.Karuta.Commands
 	/// <param name="name">The name of this command, used to execute the command</param>
 	/// <param name="defaultAction">The default action performed when this command is executed with no keywords</param>
 	/// <param name="helpMessage"/> The help message for this command, shown by the help command</param>
+	[ProtoContract]
 	public class Command : ICommand
 	{
-		public string name { get; }
-		public string helpMessage { get { return _helpMessage; } }
+		public string name { get { return identity.name; } }
+		public string helpMessage { get { return identity.helpMessage; } }
 		public List<Option> options { get { return (from o in _options select o.Value).ToList(); } }
 		public List<Keyword> keywords { get { return (from k in _keywords select k.Value).ToList(); } }
 		public Action init;
+		public CommandIdentity identity { get { return _identity; } }
+
+		[ProtoMember(1)]
+		protected CommandIdentity _identity { get; set; }
 
 		protected Action _default { get; set; }
-		protected string _helpMessage;
+
 
 		private Dictionary<char, Option> _options;
 		private Dictionary<string, Keyword> _keywords;
@@ -35,9 +41,8 @@ namespace LuminousVector.Karuta.Commands
 
 		public Command(string name, Action defaultAction, string helpMessage = null)
 		{
-			this.name = name;
+			_identity = new CommandIdentity(name, helpMessage, GetType());
 			_default = defaultAction;
-			_helpMessage = helpMessage;
 			_options = new Dictionary<char, Option>();
 			_keywords = new Dictionary<string, Keyword>();
 		}
@@ -45,29 +50,34 @@ namespace LuminousVector.Karuta.Commands
 		protected ICommand RegisterKeyword(string keyword, Action action, string usage = "")
 		{
 			_keywords.Add(keyword, new Keyword(keyword, action, usage));
+			_identity.SetOptionsAndKeywords(_keywords.Values.ToList(), _options.Values.ToList());
 			return this;
 		}
 
 		protected ICommand RegisterOption(char key, Action action, string usage = "")
 		{
 			_options.Add(key, new Option(key, action, usage));
+			_identity.SetOptionsAndKeywords(_keywords.Values.ToList(), _options.Values.ToList());
 			return this;
 		}
 
 		protected ICommand RegisterOption(char key, Action<string> action, string usage = "")
 		{
 			_options.Add(key, new Option(key, action, usage));
+			_identity.SetOptionsAndKeywords(_keywords.Values.ToList(), _options.Values.ToList());
 			return this;
 		}
 
 		protected void ClearKeywords()
 		{
 			_keywords.Clear();
+			_identity.SetOptionsAndKeywords(_keywords.Values.ToList(), _options.Values.ToList());
 		}
 
 		protected void ClearOptions()
 		{
 			_options.Clear();
+			_identity.SetOptionsAndKeywords(_keywords.Values.ToList(), _options.Values.ToList());
 		}
 
 		public virtual ICommand Parse(List<string> args)

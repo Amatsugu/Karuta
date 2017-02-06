@@ -29,7 +29,7 @@ namespace LuminousVector.Karuta.Commands
 					removalQ.AddRange(from thread in _threads.Values where thread.ThreadState == ThreadState.Aborted || thread.ThreadState == ThreadState.Stopped select thread);
 					foreach (Thread thread in removalQ)
 					{
-						Karuta.logger.Log($"Thread \"{thread.Name}\" has been {thread.ThreadState} and will be removed", appName);
+						Karuta.LOGGER.Log($"Thread \"{thread.Name}\" has been {thread.ThreadState} and will be removed", appName);
 						Karuta.CloseThread(thread);
 					}
 				}, 5 * 1000, 5 * 1000);

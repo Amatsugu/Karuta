@@ -47,7 +47,6 @@ namespace LuminousVector.Utils
 			StreamReader reader = new StreamReader(response.GetResponseStream());
 			string output = reader.ReadToEnd();
 			reader.Close();
-			reader.Dispose();
 			response.Close();
 			return output;
 		}

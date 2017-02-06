@@ -14,43 +14,33 @@ namespace LuminousVector.Karuta
 {
 	public static class Karuta
 	{
-		public static EventManager eventManager;
-		public static Dictionary<string, Command> commands { get { return _interpretor.commands; } }
-		public static Registry registry;
-		public static Logger logger;
-		public static Random random;
-		public static string user
+		public static Registry REGISTY { get { return _registry; } }
+		public static Logger LOGGER {  get { return _logger; } }
+		public static Random RANDOM { get { return _random; } }
+		public static string USER
 		{
 			set
 			{
-				registry.SetValue("user", value);
+				_registry.SetValue("user", value);
 				_user = value;
 			}
 			get
 			{
 				if (string.IsNullOrWhiteSpace(_user))
-					return registry.GetValue<string>("user");
+					return _registry.GetString("user");
 				else
 					return _user;
 			}
 		}
-		public static string dataDir
-		{
-			get
-			{
-				return _regDir;
-			}
-			set
-			{
-				_regDir = value;
-				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
-				logger.SetupLogDir();
-			}
-		}
+		public static readonly string DATA_DIR = @"/Karuta";
 
+		internal static List<CommandIdentity> commandIDs { get { return _interpretor.commandIDs; } }
 
+		private static Random _random;
+		private static Logger _logger;
+		private static Registry _registry;
+		private static EventManager eventManager;
 		private static string _user;
-		private static string _regDir = "/Karuta";
 		private static bool _isRunning = false;
 		private static string _input;
 		private static Dictionary<string, Thread> _threads;
@@ -60,12 +50,6 @@ namespace LuminousVector.Karuta
 		//Initialize
 		static Karuta()
 		{
-			//Init Vars
-			_threads = new Dictionary<string, Thread>();
-			_timers = new Dictionary<string, Timer>();
-			_interpretor = new CommandInterpreter<Command>();
-			logger = new Logger();
-			random = new Random();
 			//Prepare Console
 			try
 			{
@@ -77,42 +61,53 @@ namespace LuminousVector.Karuta
 			{
 				Write(e.StackTrace);
 			}
+			Write("Preparing Karuta...");
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
-			Write("Preparing Karuta...");
+			//Init Vars
+			_threads = new Dictionary<string, Thread>();
+			_timers = new Dictionary<string, Timer>();
+			_interpretor = new CommandInterpreter<Command>();
+			_logger = new Logger();
+			_random = new Random();
 			//Init Event Manager
 			eventManager = new EventManager();
 			eventManager.Init();
 			//Init Registry
-			Write("Loading Registry...");
-			if(File.Exists(dataDir + "/karuta.data"))
+			if(File.Exists($@"{DATA_DIR}/karuta.data"))
 			{
-				registry = DataSerializer.deserializeData<Registry>(File.ReadAllBytes(dataDir + "/karuta.data"));
-				registry.Migrate();
-			}else
+				Write("Loading Registry...", false);
+				_registry = Registry.Load($@"{DATA_DIR}/karuta.data");
+				//_registry.Migrate();
+				Write(" Done!");
+			}
+			else
 			{
-				registry = new Registry();
-				registry.Init();
-				registry.SetValue("user", "user");
+				_registry = new Registry();
+				_registry.Init();
+				_registry.SetValue("user", "user");
 			}
 
 			try
 			{
 				//Register Commands
 				RegisterCommands();
+				LoadPlugins();
 				//Initalize commands
-				Write("Initializing processes...");
+				Write("Initializing processes...", false);
 				_interpretor.Init();
+				Write(" Done!");
 			}catch(Exception e)
 			{
 				Write($"An error occured while initializing commands: {e.Message}");
 				Write(e.StackTrace);
 			}
+
 			sw.Stop();
 			long elapsedT = sw.ElapsedTicks / (Stopwatch.Frequency / (1000L));
 
 			Write($"Karuta is ready. Finished in {elapsedT}ms");
-			logger.Log($"Karuta started in {elapsedT}ms", "Karuta");
+			LOGGER.Log($"Karuta started in {elapsedT}ms", "Karuta");
 		}
 
 		//Register all Commands
@@ -127,35 +122,42 @@ namespace LuminousVector.Karuta
 			{
 				_interpretor.RegisterCommand(Activator.CreateInstance(c) as Command);
 			}
-			LoadPlugins();
 			//Register Other Commands
 			_interpretor.RegisterCommand(new Command("stop", Close, "stops all commands and closes Karuta."));
 			_interpretor.RegisterCommand(new Command("clear", Console.Clear, "Clears the screen."));
 			_interpretor.RegisterCommand(new Command("save", () =>
 			{
-				File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
+				_registry.Save($@"{DATA_DIR}/karuta.data");
 				Write("Registry saved");
 			}, "Save the registry"));
 			_interpretor.RegisterCommand(new ProcessMonitor(_threads, _timers));
 		}
 
+		//Load Plugins
 		private static void LoadPlugins()
 		{
-			Write("Loading Plugins...");
-			//Load Plugins
-			if (Directory.Exists("Plugins"))
+			try
 			{
-				foreach (string p in Directory.GetFiles("Plugins", "*.dll", SearchOption.TopDirectoryOnly))
+				Write("Loading Plugins...", false);
+				if (Directory.Exists("Plugins"))
 				{
-					var cmds = from c in Assembly.LoadFrom(p).GetTypes()
-							   where c.GetCustomAttributes<KarutaCommand>().Count() > 0
-							   select c;
-					foreach(var c in cmds)
+					foreach (string p in Directory.GetFiles("Plugins", "*.dll", SearchOption.TopDirectoryOnly))
 					{
-						_interpretor.RegisterCommand(Activator.CreateInstance(c) as Command);
+						var cmds = from c in Assembly.LoadFrom(p).GetTypes()
+								   where c.GetCustomAttributes<KarutaCommand>().Count() > 0
+								   select c;
+						foreach (var c in cmds)
+						{
+							_interpretor.RegisterDynamicCommand(Activator.CreateInstance(c));
+						}
 					}
 				}
+			}catch(Exception e)
+			{
+				Write($"Failed to load plugin: {e.Message}");
+				Write(e.StackTrace);
 			}
+			Write(" Done!");
 		}
 		
 		//Start the main process loop
@@ -165,7 +167,7 @@ namespace LuminousVector.Karuta
 			_isRunning = true;
 			while (_isRunning)
 			{
-				Console.Write($"{user}: ");
+				Console.Write($"{USER}: ");
 				_input = Console.ReadLine();
 				if (_input == null)
 					continue;
@@ -184,18 +186,15 @@ namespace LuminousVector.Karuta
 		private static void Close()
 		{
 			_isRunning = false;
-			foreach(Command c in commands.Values)
-			{
-				c.Stop();
-			}
+			_interpretor.Stop();
 			foreach(Thread t in _threads.Values)
 			{
 				t.Abort();
 			}
 			foreach (Timer t in _timers.Values)
 				t.Dispose();
-			logger.Dump();
-			File.WriteAllBytes(dataDir + "/karuta.data", DataSerializer.serializeData(registry));
+			LOGGER.Dump();
+			_registry.Save($@"{DATA_DIR}/karuta.data");
 			Console.WriteLine("GoodBye");
 		}
 
@@ -206,9 +205,12 @@ namespace LuminousVector.Karuta
 		}
 
 		//Say a message without name label
-		public static void Write(Object message)
+		public static void Write(object message, bool newLine = true)
 		{
-			Console.WriteLine(message);
+			if (newLine)
+				Console.WriteLine(message);
+			else
+				Console.Write(message);
 		}
 
 		//Get an text input from Karuta's console
@@ -243,49 +245,25 @@ namespace LuminousVector.Karuta
 		}
 
 		//Create a ChildThread
-		public static Thread CreateThread(string name, ThreadStart thread)
+		public static Thread CreateThread(string name, Action thread)
 		{
-			Thread newThread = new Thread(AddExeceptionWrapper(thread, name));
+			Thread newThread = new Thread(() =>
+			{
+				try
+				{
+					thread?.Invoke();
+				}
+				catch (Exception e)
+				{
+					Write($"Something went wrong in {name}");
+					Write(e.Message);
+					Write(e.StackTrace);
+				}
+			});
 			newThread.Name = $"Karuta.{name}";
 			_threads.Add(newThread.Name, newThread);
 			newThread.Start();
 			return newThread;
-		}
-
-		//Wraps the thread start in a try-catch
-		private static ThreadStart AddExeceptionWrapper(ThreadStart threadstart, string name)
-		{
-			return () =>
-			{
-				try
-				{
-					threadstart?.Invoke();
-				}
-				catch (Exception e)
-				{
-					Write($"Something went wrong in {name}");
-					Write(e.Message);
-					Write(e.StackTrace);
-				}
-			};
-		}
-
-		//Wrarps the timercallback in a try-catch
-		private static TimerCallback AddExeceptionWrapper(Action<object> timer, string name)
-		{
-			return i =>
-			{
-				try
-				{
-					timer?.Invoke(i);
-				}
-				catch (Exception e)
-				{
-					Write($"Something went wrong in {name}");
-					Write(e.Message);
-					Write(e.StackTrace);
-				}
-			};
 		}
 
 		//Force Join a Thread
@@ -313,7 +291,19 @@ namespace LuminousVector.Karuta
 		{
 			if (_timers.ContainsKey(name))
 				throw new DuplicateTimerExeception(name);
-			Timer timer = new Timer(AddExeceptionWrapper(callback,name), null, delay, interval);
+			Timer timer = new Timer(i =>
+			{
+				try
+				{
+					callback?.Invoke(i);
+				}
+				catch (Exception e)
+				{
+					Write($"Something went wrong in {name}");
+					Write(e.Message);
+					Write(e.StackTrace);
+				}
+			}, null, delay, interval);
 			_timers.Add(name, timer);
 			return timer;
 		}
@@ -329,23 +319,7 @@ namespace LuminousVector.Karuta
 		}
 
 		//Invoke a command
-		public static void InvokeCommand(string command, List<string> args)
-		{
-			if(!commands.ContainsKey(command))
-			{
-				throw new NoSuchCommandException(command);
-			}else
-			{
-				try
-				{
-					commands[command].Parse(args);
-				}catch(Exception e)
-				{
-					Write($"An error occured while executing the command: {e.Message}");
-					Write(e.StackTrace);
-				}
-			}
-		}
+		public static void InvokeCommand(string command, List<string> args) => _interpretor.Invoke(command, args);
 
 	}
 }

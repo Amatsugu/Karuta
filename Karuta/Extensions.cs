@@ -33,7 +33,7 @@ namespace LuminousVector.Utils.Extensions
 				throw new Exception("Empty List!");
 			if (list.Count == 1)
 				return list[0];
-			return list[random.Next(0, list.Count)];
+			return list[RANDOM.Next(0, list.Count)];
 		}
 
 		//String to base 60

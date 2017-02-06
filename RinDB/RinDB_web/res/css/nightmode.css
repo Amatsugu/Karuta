@@ -106,3 +106,81 @@ a.imageCard
 {
 	background-color: #444;
 }
+
+.searching
+{
+	color:#fff;
+}
+
+a:hover
+{
+	color: #fff;
+}
+
+/*login from*/
+
+#windowArea #loginWindow
+{
+	background-color: #333;
+	box-shadow: 0px 4px 8px rgba(0,0,0,.4);
+}
+
+#loginForm input
+{
+	color: #fff;
+	background-color: #222;
+	border: 1px solid #000;
+}
+
+#loginForm input:hover
+{
+	border: 1px solid #ff0064;
+}
+
+#loginForm input[type="submit" i]
+{
+	background-color: #222;
+	border: 1px solid #000;
+}
+
+#loginForm input[type="submit" i]:hover
+{
+	color: #ff0064;
+	background-color: #333;
+	border: 1px solid #ff0064;
+}
+
+#loginForm label
+{
+	color: #ff0064;
+}
+
+/*Widgets */
+
+.widgetDisplay .widget
+{
+	background-color: #333;
+	border: 1px solid #000;
+}
+
+.widget .name
+{
+	
+}
+
+.widget .value
+{
+	background: #222;
+}
+
+/*user profile*/
+#User #Profile
+{
+	background-color: #222;
+	border: 1px solid #333;
+}
+
+#User #Profile img
+{
+	background-color: #222;
+}

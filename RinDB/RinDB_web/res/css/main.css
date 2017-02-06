@@ -71,7 +71,7 @@ body
 	border: 1px solid #333;
 	margin: 5px;
 	z-index: 1;
-	opacity: .25;
+	opacity: 1;
 	border-radius: 50%;
 	transition: opacity .5s;
 }
@@ -88,7 +88,7 @@ body
 {
 	display: flex;
 	z-index: 0;
-	opacity: 0;
+	opacity: .5;
 	transition: opacity .5s;
 	flex-direction: column;
 	flex-wrap: nowrap;
@@ -252,6 +252,13 @@ body
 a
 {
 	text-decoration: none;
+	color: #ff0064;
+	transition: color .5s;
+}
+
+a:hover
+{
+	color: #333;
 }
 
 
@@ -270,4 +277,11 @@ a
 	align-items: center;
 	background-color: rgba(0,0,0,.2);
 	z-index: 3;
+}
+
+.flexH
+{
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
 }

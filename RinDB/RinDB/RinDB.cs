@@ -13,8 +13,8 @@ namespace LuminousVector.RinDB
 {
 	public static class RinDB
 	{
-		public static string VIEW_LOCATION { get; set; } = "RinDB_web/";
-		public static string BASE_DIR { get; } = registry.GetValue<string>("baseDir");
+		public static string VIEW_LOCATION { get; set; } = "RinDB_Web/";
+		public static string BASE_DIR { get; } = REGISTY.GetString("baseDir");
 		public static string THUMB_DIR { get; } = $"{BASE_DIR}/RinDB/thumbs";
 
 
@@ -34,7 +34,8 @@ namespace LuminousVector.RinDB
 			_user = user;
 			_pass = pass;
 			_db = db;
-
+			ThumbGenerator.Start();
+			DBUpdateQueue.Start();
 		}
 
 
@@ -68,8 +69,7 @@ namespace LuminousVector.RinDB
 						{
 							fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(reader.GetString(0))}",
 							name = Uri.UnescapeDataString(reader.GetString(1)),
-							id = Uri.EscapeDataString(id),
-							tags = GetTags(id).ToArray()
+							id = Uri.EscapeDataString(id)
 						};
 					}
 				}
@@ -110,6 +110,11 @@ namespace LuminousVector.RinDB
 		/// <returns>ImageModel unchanged</returns>
 		public static ImageModel AddImage(ImageModel model)
 		{
+			if (ImageExists(model))
+			{
+				model.fileUri = $@"{BASE_DIR}/{Uri.UnescapeDataString(model.fileUri)}";
+				return model;
+			}
 			using (NpgsqlConnection con = new NpgsqlConnection(CONNECTION_STRING))
 			{
 				con.Open();
@@ -339,9 +344,9 @@ namespace LuminousVector.RinDB
 							return null;
 						while (reader.Read())
 						{
-							tag = new TagModel(reader.GetString(1), reader.GetString(2), reader.GetString(3))
+							tag = new TagModel(reader.GetString(0), reader.GetString(1), reader.GetString(2))
 							{
-								parentID = reader.GetString(4)
+								parentID = reader.GetString(3)
 							};
 						}
 					}
@@ -383,7 +388,7 @@ namespace LuminousVector.RinDB
 						cmd.ExecuteNonQuery();
 					}catch(Exception e)
 					{
-						Karuta.Karuta.Write(e.Message);
+						Write(e.Message);
 					}
 				}
 			}
@@ -414,6 +419,21 @@ namespace LuminousVector.RinDB
 				using (NpgsqlCommand cmd = con.CreateCommand())
 				{
 					cmd.CommandText = $"SELECT EXISTS (SELECT id FROM tags WHERE id='{tag.ToBase60()}');";
+					return (bool)cmd.ExecuteScalar();
+				}
+			}
+		}
+
+		public static bool ImageExists(ImageModel image) => ImageExists(image.name);
+
+		public static bool ImageExists(string image)
+		{
+			using (NpgsqlConnection con = new NpgsqlConnection(CONNECTION_STRING))
+			{
+				con.Open();
+				using (NpgsqlCommand cmd = con.CreateCommand())
+				{
+					cmd.CommandText = $"SELECT EXISTS (SELECT id FROM images WHERE id='{image.ToBase60()}');";
 					return (bool)cmd.ExecuteScalar();
 				}
 			}

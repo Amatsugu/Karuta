@@ -105,7 +105,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					break;
 				}
 				string cName = (from a in command.ToLower().Split(' ') where !string.IsNullOrWhiteSpace(a) select a).First();
-				Karuta.logger.Log($"Command recieved: \"{cName}\" from \"{(user == 0 ? "EventBot" : $"{ channel.GetUser(user)?.Name}")}\" in channel \"{channel.Name}\" on server \"{channel.Server.Name}\"", nameof(DiscordCommandInterpreter<T>));
+				Karuta.LOGGER.Log($"Command recieved: \"{cName}\" from \"{(user == 0 ? "EventBot" : $"{ channel.GetUser(user)?.Name}")}\" in channel \"{channel.Name}\" on server \"{channel.Server.Name}\"", nameof(DiscordCommandInterpreter<T>));
 				if (_commands.ContainsKey(cName))
 				{
 					try
@@ -122,7 +122,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 									else
 									{
 										await channel.SendMessage("You are not authorized to use this command");
-										Karuta.logger.LogWarning($"Underprivilaged user \"{channel.GetUser(user)?.Name}\" attempted to use command \"{cName}\"", nameof(DiscordCommandInterpreter<T>));
+										Karuta.LOGGER.LogWarning($"Underprivilaged user \"{channel.GetUser(user)?.Name}\" attempted to use command \"{cName}\"", nameof(DiscordCommandInterpreter<T>));
 									}
 								}
 								else
@@ -144,8 +144,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					catch (Exception ex)
 					{
 						await channel.SendMessage($"An error occured while executing the command: {ex.Message}");
-						Karuta.logger.LogError($"An error occured while executing the command: {ex.Message}", nameof(DiscordCommandInterpreter<T>));
-						Karuta.logger.LogError(ex.StackTrace, nameof(DiscordCommandInterpreter<T>));
+						Karuta.LOGGER.LogError($"An error occured while executing the command: {ex.Message}", nameof(DiscordCommandInterpreter<T>));
+						Karuta.LOGGER.LogError(ex.StackTrace, nameof(DiscordCommandInterpreter<T>));
 					}
 				}
 				else

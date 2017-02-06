@@ -16,11 +16,13 @@ namespace LuminousVector.RinDB.Responses
 			this.ContentType = contentType ?? "text/HTML";
 
 			string output = "";
-			foreach(ImageModel I in images)
+			if (images != null)
 			{
-				output += $"<a href=\"/image/{I.id}\" style=\"display:none;\" class=\"imageCard\"><div class=\"image\"><img src=\"{I.thumbUri}\"></div><div class=\"name\">{I.name}</div></a>";
+				foreach (ImageModel I in images)
+				{
+					output += $"<a href=\"/image/{I.id}\" style=\"display:none;\" class=\"imageCard\"><div class=\"image\"><img src=\"{I.thumbUri}\"></div><div class=\"name\">{I.name}</div></a>";
+				}
 			}
-
 			this.Contents = stream =>
 			{
 				using (var writer = new BinaryWriter(stream))

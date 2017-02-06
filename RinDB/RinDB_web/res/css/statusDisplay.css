@@ -1,0 +1,64 @@
+#statusDisplay
+{
+	display: block;
+	padding: 20px;
+}
+
+.section
+{
+	display: block;
+	
+}
+
+.section .name
+{
+	width: 100%;
+	font-size: 30px;
+	margin-top: 5px;
+	padding: 10px;
+}
+
+.section .widgetDisplay
+{
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: flex-start;
+}
+
+.widgetDisplay .widget
+{
+	display: block;
+	width: 256px;
+	height: 128px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	overflow: hidden;
+	margin: 10px;
+}
+
+.widget .name
+{
+	padding: 0px 0px 0px 10px;
+	margin: 0px;
+	display: block;
+	font-size: 20px;
+	line-height: 30px;
+	height: 30px;
+	overflow: hidden;
+}
+
+.widget .value
+{
+	padding: 0px;
+	margin: 0px;
+	font-size: 50px;
+	line-height: 98px;
+	height: 98px;
+	width: 256px;
+	background: #ddd;
+	font-weight:lighter;
+	text-align: center;
+	overflow: hidden;
+	font-family: 'Hack', sans-serif;
+}

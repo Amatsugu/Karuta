@@ -58,7 +58,7 @@ namespace LuminousVector.Karuta.Commands
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return keyword.GetHashCode();
 		}
 	}
 }

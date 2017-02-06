@@ -14,7 +14,7 @@ namespace LuminousVector.Karuta.Commands
 			_default = Help;
 			init = () =>
 			{
-				foreach (Command c in Karuta.commands.Values)
+				foreach (CommandIdentity c in Karuta.commandIDs)
 				{
 					//Karuta.Write(c.name);
 					RegisterKeyword(c.name, () =>
@@ -38,15 +38,15 @@ namespace LuminousVector.Karuta.Commands
 		{
 			if (c != null)
 			{
-				if (Karuta.commands.ContainsKey(c))
+				CommandIdentity cmd = (from CommandIdentity cID in Karuta.commandIDs where cID.name == c select cID).First();
+				if (cmd != null)
 				{
-					Command c = Karuta.commands[this.c];
-					Karuta.Write("\t" + c.name + "\t" + c.helpMessage);
+					Karuta.Write("\t" + cmd.name + "\t" + cmd.helpMessage);
 					Karuta.Write("\tOptions:");
-					foreach (Option o in c.options)
+					foreach (Option o in cmd.options)
 						Karuta.Write("\t\t -" + o.key + "\t" + o.usage);
 					Karuta.Write("\tKeywords:");
-					foreach (Keyword k in c.keywords)
+					foreach (Keyword k in cmd.keywords)
 						Karuta.Write("\t\t " + k.keyword + "\t" + k.usage);
 				}
 				else
@@ -58,7 +58,7 @@ namespace LuminousVector.Karuta.Commands
 			else
 			{
 				Karuta.Write("The available commands are:");
-				foreach (Command c in Karuta.commands.Values)
+				foreach (CommandIdentity c in Karuta.commandIDs)
 				{
 					Karuta.Write("\t" + c.name + "\t" + c.helpMessage);
 					//if (c.usageMessage != null)

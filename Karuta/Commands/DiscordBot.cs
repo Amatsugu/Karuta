@@ -29,21 +29,21 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		{
 			//Thread.CurrentThread.Name = "DiscordBot";
 			_default = Init;
-			_token = Karuta.registry.GetValue<string>("discordToken");
-			bool? auto = Karuta.registry.GetValue<bool>("discordAutostart");
+			_token = Karuta.REGISTY.GetString("discordToken");
+			bool? auto = Karuta.REGISTY.GetBool("discordAutostart");
 			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
 			RegisterKeyword("stop", Stop, "stops the bot");
 			RegisterKeyword("autostart", () =>
 			{
 				_autoStart = !_autoStart;
-				Karuta.registry.SetValue("discordAutostart", _autoStart);
+				Karuta.REGISTY.SetValue("discordAutostart", _autoStart);
 				Karuta.Write($"Autostart {((_autoStart) ? "enabled" : "disabled")}");
 			}, "enable/disable autostart");
 
 			RegisterOption('t', s =>
 			{
 				_token = s;
-				Karuta.registry.SetValue("discordToken", _token);
+				Karuta.REGISTY.SetValue("discordToken", _token);
 				Karuta.Write("Token Saved");
 			}, "set the token");
 
@@ -79,15 +79,15 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 
 		public void ImgurSetup()
 		{
-			string imgID = Karuta.registry.GetValue<string>("imgur_id");
-			string imgSec = Karuta.registry.GetValue<string>("imgur_secret");
+			string imgID = Karuta.REGISTY.GetString("imgur_id");
+			string imgSec = Karuta.REGISTY.GetString("imgur_secret");
 			if (string.IsNullOrWhiteSpace(imgID) || string.IsNullOrWhiteSpace(imgSec))
 			{
 				Karuta.Write("Please enter Imgur API information:");
 				imgID = Karuta.GetInput("Imgur API ID");
 				imgSec = Karuta.GetInput("Imgur API Sec");
 			}
-			Karuta.logger.Log("Connecting to imgur...", _appName);
+			Karuta.LOGGER.Log("Connecting to imgur...", _appName);
 			try
 			{
 				_imgurClient = new ImgurClient(imgID, imgSec);
@@ -100,14 +100,14 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				_imgurClient = null;
 			}
 
-			Karuta.registry.SetValue("imgur_id", imgID);
-			Karuta.registry.SetValue("imgur_secret", imgSec);
+			Karuta.REGISTY.SetValue("imgur_id", imgID);
+			Karuta.REGISTY.SetValue("imgur_secret", imgSec);
 		}
 
 		public void SaveData()
 		{
-			/*string output = "";
-			foreach(DiscordCommand C in interpreter.commands.Values)
+			string output = "";
+			foreach(DiscordCommand C in interpreter.GetCommands())
 			{
 				if (C.GetType() == typeof(DiscordImageCommand))
 				{
@@ -118,14 +118,14 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 						output += "`" + cmd.ToString();
 
 				}
-			}*/
-			Karuta.registry.SetValue("discordImageCommands", (from DiscordCommand c in interpreter.commands.Values where c.GetType() == typeof(DiscordImageCommand) select c));
+			}
+			//Karuta.REGISTY.SetValue("discordImageCommands", (from DiscordCommand c in interpreter.GetCommands() where c.GetType() == typeof(DiscordImageCommand) select c));
 		}
 
 		void LoadData()
 		{
 			//TODO: Remove migration
-			string oldData = Karuta.registry.GetValue<string>("discordImageCommands");
+			string oldData = Karuta.REGISTY.GetString("discordImageCommands");
 			if (string.IsNullOrWhiteSpace(oldData))
 				return;
 			string[] cmds = oldData.Split('`');
@@ -145,34 +145,36 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				images.RemoveAt(0);
 				interpreter.RegisterCommand((hMessage != null) ? new DiscordImageCommand(cmdName, hMessage) { images = images} : new DiscordImageCommand(cmdName) { images = images});
 			}
-			SaveData();
-			interpreter.commands.Clear();
+			/*SaveData();
+			interpreter.Clear();
 			RegisterSystemCommands();
-			IEnumerable<DiscordCommand> data = Karuta.registry.GetValue<IEnumerable<DiscordCommand>>("discordImageCommands");
+			IEnumerable<DiscordCommand> data = Karuta.REGISTY.GetValue<IEnumerable<DiscordCommand>>("discordImageCommands");
+			if (data == null)
+				return;
 			foreach(DiscordCommand c in data)
 			{
 				interpreter.RegisterCommand(c);
-			}
+			}*/
 			
 
 		}
 
 		async void Init()
 		{
-			Karuta.logger.Log("Starting Discord Bot..", _appName);
+			Karuta.LOGGER.Log("Starting Discord Bot..", _appName);
 			try
 			{
 				ImgurSetup();
 			}
 			catch (Exception e)
 			{
-				Karuta.logger.LogError($"Unable to initiate Imgur Connection: {e.Message}", _appName);
+				Karuta.LOGGER.LogError($"Unable to initiate Imgur Connection: {e.Message}", _appName);
 			}
 			client = new DiscordClient();
 			if(string.IsNullOrWhiteSpace(_token))
 			{
 				_token = Karuta.GetInput("Enter discord token");
-				Karuta.registry.SetValue("discordToken", _token);
+				Karuta.REGISTY.SetValue("discordToken", _token);
 			}
 
 			client.MessageReceived += MessageRecieved;
@@ -184,8 +186,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				//SendToAllConsoles("Bot Online");
 			}catch(Exception e)
 			{
-				Karuta.logger.LogWarning($"Unable to initiate connection to discord: {e.Message}", _appName);
-				Karuta.logger.LogError(e.StackTrace, _appName, true);
+				Karuta.LOGGER.LogWarning($"Unable to initiate connection to discord: {e.Message}", _appName);
+				Karuta.LOGGER.LogError(e.StackTrace, _appName, true);
 				Karuta.Write("Unable to connect to discord...");
 			}
 		}
@@ -229,7 +231,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			}
 			Thread.Sleep(2 * 1000);*/
 			Karuta.Write("Shutting down...");
-			Karuta.logger.Log("Shutting down bot...", _appName);
+			Karuta.LOGGER.Log("Shutting down bot...", _appName);
 			client?.Disconnect();
 			client = null;
 			SaveData();

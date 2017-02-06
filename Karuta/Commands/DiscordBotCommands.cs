@@ -46,17 +46,12 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 		{
 			if (!string.IsNullOrWhiteSpace(_help) && !string.IsNullOrWhiteSpace(_name))
 			{
-				if (_bot.interpreter.commands.ContainsKey(_name))
+				if (_bot.interpreter.SetHelpMessage(_name, _help))
 				{
-					if (_bot.interpreter.commands[_name].GetType() == typeof(DiscordImageCommand))
-					{
-						((DiscordImageCommand)_bot.interpreter.commands[_name]).SetHelpMessage(_help);
-						await _channel.SendMessage("Description set");
-					}
-					else
-						await _channel.SendMessage("This is not an image command");
-
+					await _channel.SendMessage("Description set");
 				}
+				else
+					await _channel.SendMessage("This is not an image command");
 			}
 			else
 				await _channel.SendMessage($"A name and description must be provided, use !help {name} for more info");
@@ -113,11 +108,12 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				imageLinks = await _bot.ResolveImgurUrl(url);
 			}
 			//Add Command
-			if (_bot.interpreter.commands.ContainsKey(_name))
+			if (_bot.interpreter.CommandExists(_name))
 			{
-				if (_bot.interpreter.commands[_name].GetType() == typeof(DiscordImageCommand))
+				DiscordCommand c = _bot.interpreter.GetCommand(_name);
+				if (c?.GetType() == typeof(DiscordImageCommand))
 				{
-					DiscordImageCommand cmd = (DiscordImageCommand)_bot.interpreter.commands[_name];
+					DiscordImageCommand cmd = (DiscordImageCommand)c;
 					int dupeCount = 0;
 					int addCount = 0;
 					if (!string.IsNullOrWhiteSpace(_help))
@@ -148,7 +144,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				DiscordImageCommand img = (_help != default(string)) ? new DiscordImageCommand(_name, _help) { images = imageLinks } :new DiscordImageCommand(_name) { images = imageLinks};
 				_bot.interpreter.RegisterCommand(img);
 				img.init?.Invoke();
-				(from h in _bot.interpreter.commands.Values where h.GetType() == typeof(DiscordHelpCommand) select h as DiscordHelpCommand).First()?.init();
+				_bot.interpreter.GetCommandOfType<DiscordHelpCommand>()?.init();
 				await _channel.SendMessage($"{imageLinks.Count} Image{((imageLinks.Count > 1) ? "s" : "")} Command Added");
 				Karuta.Write(img.ToString());
 			}
@@ -216,16 +212,16 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			{
 				imageLinks = await _bot.ResolveImgurUrl(url);
 			}
-			if (_bot.interpreter.commands.ContainsKey(_name))
+			if (_bot.interpreter.CommandExists(_name))
 			{
 				int removed = 0, skipped = 0;
 				if (_removeEntirely)
-					_bot.interpreter.commands.Remove(_name);
+					_bot.interpreter.RemoveCommand(_name);
 				else
 				{
-					if (_bot.interpreter.commands[_name].GetType() != typeof(DiscordImageCommand))
+					if (_bot.interpreter.GetCommand(_name).GetType() != typeof(DiscordImageCommand))
 						await _channel.SendMessage("This is not an image command");
-					DiscordImageCommand cmd = ((DiscordImageCommand)_bot.interpreter.commands[_name]);
+					DiscordImageCommand cmd = ((DiscordImageCommand)_bot.interpreter.GetCommand(_name));
 					foreach (string i in cmd.images)
 						Karuta.Write(i);
 					foreach (string u in imageLinks)
@@ -238,7 +234,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 					foreach (string i in cmd.images)
 						Karuta.Write(i);
 					if (cmd.images.Count == 0)
-						_bot.interpreter.commands.Remove(_name);
+						_bot.interpreter.RemoveCommand(_name);
 				}
 				await _channel.SendMessage($"{removed} Image{((removed > 1) ? "s" : "")} removed");
 				if (skipped != 0)
@@ -246,7 +242,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			}
 			else
 				await _channel.SendMessage("that image command does not exsist");
-			(from h in _bot.interpreter.commands.Values where h.GetType() == typeof(DiscordHelpCommand) select h as DiscordHelpCommand).First()?.init();
+			_bot.interpreter.GetCommandOfType<HelpCommand>()?.init();
 			_bot.SaveData();
 			Karuta.InvokeCommand("save", new List<string>());
 			_removeEntirely = false;
@@ -271,7 +267,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 
 		public DiscordCommand SetHelpMessage(string helpMessage)
 		{
-			_helpMessage = helpMessage;
+			_identity.SetHelpMessage(helpMessage);
 			return this;
 		}
 
@@ -333,7 +329,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 				output.Add("");
 				int index = 0;
 				string curLine = "";
-				foreach (DiscordImageCommand dc in from c in bot.interpreter.commands.Values orderby c.name where c.GetType() == typeof(DiscordImageCommand) && (c.name.Contains(s) || c.helpMessage.Contains(s)) select c)
+				foreach (DiscordImageCommand dc in from c in bot.interpreter.GetCommands() orderby c.name where c.GetType() == typeof(DiscordImageCommand) && (c.name.Contains(s) || c.helpMessage.Contains(s)) select c)
 				{
 					curLine = $"!{dc.name} {dc.helpMessage} [{dc.images.Count}]\n";
 					if (curLine.Length + output[index].Length >= 1500)
@@ -355,7 +351,7 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			init = () =>
 			{
 				ClearKeywords();
-				foreach(DiscordCommand c in from d in bot.interpreter.commands.Values orderby d.name where d.GetType() != typeof(DiscordImageCommand) select d)
+				foreach(DiscordCommand c in from d in bot.interpreter.GetCommands() orderby d.name where d.GetType() != typeof(DiscordImageCommand) select d)
 				{
 					RegisterKeyword(c.name, async () =>
 					{
@@ -386,8 +382,8 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 			List<DiscordImageCommand> imgCmd = new List<DiscordImageCommand>();
 			List<DiscordCommand> cmd = new List<DiscordCommand>();
 
-			imgCmd.AddRange(from c in _bot.interpreter.commands.Values orderby c.name where c.GetType() == typeof(DiscordImageCommand) select c as DiscordImageCommand);
-			cmd.AddRange(from c in _bot.interpreter.commands.Values orderby c.name where c.GetType() != typeof(DiscordImageCommand) select c);
+			imgCmd.AddRange(from c in _bot.interpreter.GetCommands() orderby c.name where c.GetType() == typeof(DiscordImageCommand) select c as DiscordImageCommand);
+			cmd.AddRange(from c in _bot.interpreter.GetCommands() orderby c.name where c.GetType() != typeof(DiscordImageCommand) select c);
 
 			int index = 0;
 			List<string> output = new List<string>();
@@ -464,9 +460,9 @@ namespace LuminousVector.Karuta.Commands.DiscordBot
 
 		void Purge()
 		{
-			Karuta.registry.SetValue("discordImageCommands", "");
-			foreach (DiscordImageCommand c in from c in _bot.interpreter.commands.Values where c.GetType() == typeof(DiscordImageCommand) select c as DiscordImageCommand)
-				_bot.interpreter.commands.Remove(c.name);
+			Karuta.REGISTY.SetValue("discordImageCommands", "");
+			foreach (DiscordImageCommand c in from c in _bot.interpreter.GetCommands() where c.GetType() == typeof(DiscordImageCommand) select c as DiscordImageCommand)
+				_bot.interpreter.RemoveCommand(c.name);
 			Karuta.InvokeCommand("save", new List<string>());
 			_channel.SendMessage("All image command data has been purged");
 		}

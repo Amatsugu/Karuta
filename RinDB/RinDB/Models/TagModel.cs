@@ -1,4 +1,5 @@
 using System;
+using LuminousVector.Utils.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,11 @@ namespace LuminousVector.RinDB.Models
 
 	public class TagModel
 	{
-		public TagModel(string name, string type = "tag", string description = null)
+		public TagModel(string name, string type = "tag", string description = "")
 		{
 			this.name = Uri.UnescapeDataString(name);
-			this.description = Uri.UnescapeDataString(description);
+			if(!string.IsNullOrWhiteSpace(description))
+				this.description = Uri.UnescapeDataString(description);
 			this.type = Uri.UnescapeDataString(type);
 		}
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,26 +20,33 @@ namespace LuminousVector.RinDB.Async
 		public static int QUEUE_LENGTH { get { return _genQueue.Count; } }
 		public static int GEN_COUNT { get { return _genCount; } }
 		public static int ERROR_COUNT { get { return _failed.Count; } }
+		public static bool IS_RUNNING { get { return _genQueue.Count > 0; } }
 		public static readonly string DEFAULT_THUMB = $"{RinDB.VIEW_LOCATION}res/img/DefaultThumb.png";
 		
 		private static int _genCount = 0;
-		private static Queue<ImageModel> _genQueue = new Queue<ImageModel>();
+		private static LinkedList<ImageModel> _genQueue = new LinkedList<ImageModel>();
 		private static List<ImageModel> _failed = new List<ImageModel>();
 
 		private static bool _isGenerating;
 
 		internal static void QueueThumb(ImageModel image)
 		{
-			_genQueue.Enqueue(image);
+			if (image == null)
+				return;
+			if (!File.Exists(image.fileUri))
+				return;
+			if (File.Exists($"{RinDB.THUMB_DIR}/{image.id}{Path.GetExtension(image.fileUri)}"))
+				return;
+			_genQueue.AddLast(image);
 		}
 
 		internal static void QueueThumb(IEnumerable<ImageModel> images)
 		{
-			foreach(ImageModel i in images)
-				_genQueue.Enqueue(i);
+			foreach (ImageModel i in images)
+				QueueThumb(i);
 		}
 
-		static ThumbGenerator()
+		internal static void Start()
 		{
 			StartTimer("RinDB.ThumbGenerator", e =>
 			{
@@ -46,9 +54,12 @@ namespace LuminousVector.RinDB.Async
 					return;
 				_isGenerating = true;
 				while (_genQueue.Count > 0)
-					GenerateThumb(_genQueue.Dequeue());
+				{
+					GenerateThumb(_genQueue.First());
+					_genQueue.RemoveFirst();
+				}
 				_isGenerating = false;
-			}, 0, 5000);
+			}, 0, 500);
 		}
 
 		internal static void Close()
@@ -59,14 +70,7 @@ namespace LuminousVector.RinDB.Async
 		
 		private static void GenerateThumb(ImageModel img)
 		{
-			if (img == null)
-				return;
-			if (!File.Exists(img.fileUri))
-				return;
-			string ext = Path.GetExtension(img.fileUri);
-			string thumbUri = $"{RinDB.THUMB_DIR}/{img.id}{ext}";
-			if (File.Exists(thumbUri))
-				return;
+			string thumbUri = $"{RinDB.THUMB_DIR}/{img.id}{Path.GetExtension(img.fileUri)}";
 			var start = DateTime.Now;
 			try
 			{

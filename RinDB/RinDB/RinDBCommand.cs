@@ -17,7 +17,7 @@ using LuminousVector.Utils.Extensions;
 namespace LuminousVector.RinDB
 {
 	[KarutaCommand]
-	class RinDBCommand : Command
+	class RinDBCommand : Command, IDisposable
 	{
 		private bool _autoStart = false;
 		private string _dbUser, _dbPass, _dbName;
@@ -28,13 +28,13 @@ namespace LuminousVector.RinDB
 		{
 			_default = Default;
 
-			bool? auto = registry.GetValue<bool>("RinDB.autoStart");
+			bool? auto = REGISTY.GetBool("RinDB.autoStart");
 			_autoStart = (auto == null) ? false : (auto == true) ? true : false;
 			RegisterKeyword("stop", Stop, "stops the bot");
 			RegisterKeyword("autostart", () =>
 			{
 				_autoStart = !_autoStart;
-				registry.SetValue("RinDB.autoStart", _autoStart);
+				REGISTY.SetValue("RinDB.autoStart", _autoStart);
 				Write($"Autostart {((_autoStart) ? "enabled" : "disabled")}");
 			}, "enable/disable autostart");
 
@@ -43,18 +43,18 @@ namespace LuminousVector.RinDB
 			RegisterKeyword("build", Build, "Add the files in a specified folder to the database");
 			RegisterKeyword("genThumbs", GenerateThumbs, "Generate thumbnails");
 
-			RegisterOption('u', u => { _dbUser = u; registry.SetValue("RinDB.user", u); }, "Sets the database user");
-			RegisterOption('p', p => { _dbPass = p; registry.SetValue("RinDB.pass", p); }, "Sets the database password");
-			RegisterOption('d', d => { _dbName = d; registry.SetValue("RinDB.name", d); }, "Sets the database name");
+			RegisterOption('u', u => { _dbUser = u; REGISTY.SetValue("RinDB.user", u); }, "Sets the database user");
+			RegisterOption('p', p => { _dbPass = p; REGISTY.SetValue("RinDB.pass", p); }, "Sets the database password");
+			RegisterOption('d', d => { _dbName = d; REGISTY.SetValue("RinDB.name", d); }, "Sets the database name");
 			RegisterOption('l', l => _buildDir = l, "Specify the directory to add to the database");
 			RegisterOption('n', n => _buildNsfw = n.ToLower(), "Specify is the current build is nsfw");
 			RegisterOption('t', t => _buildTag = t, "Specify a tag");
 			RegisterOption('i', i => _tagInfo = i, "Specfiy tag info");
 			RegisterOption('y', y => _tagType = y.ToLower(), "Specfiy tage type; tag | character | artist | work | meta");
 
-			_dbUser = registry.GetValue<string>("RinDB.user");
-			_dbPass = registry.GetValue<string>("RinDB.pass");
-			_dbName = registry.GetValue<string>("RinDB.name");
+			_dbUser = REGISTY.GetString("RinDB.user");
+			_dbPass = REGISTY.GetString("RinDB.pass");
+			_dbName = REGISTY.GetString("RinDB.name");
 
 			init = () =>
 			{
@@ -94,10 +94,10 @@ namespace LuminousVector.RinDB
 					using (NpgsqlCommand cmd = con.CreateCommand())
 					{
 						cmd.CommandText = "DELETE FROM images; DELETE FROM tagmap; DELETE FROM tags; SELECT setval('images_index_seq', 1);";
+						cmd.ExecuteNonQuery();
 						//string[] files = Directory.GetFiles(RinDB.THUMB_DIR);
 						//foreach (string f in files)
 						//	File.Delete(f);
-						cmd.ExecuteNonQuery();
 						//RinDB.AddTagToAll(tag.id);
 						//return;
 						RegisterTags();
@@ -127,7 +127,7 @@ namespace LuminousVector.RinDB
 						buildList.Add("twintails", new string[] { "Twin Tails" });
 						buildList.Add("Megumin", new string[] { "Megumin", "KonoSuba" });
 						buildList.Add("SukumizuIRL", new string[] { "Sukumizu", "IRL" });
-						DoBuild(buildList, cmd);
+						DoBuild(buildList);
 					}
 				}
 				Write($"Rebuild Complete in {(DateTime.Now - start).Seconds}s");
@@ -135,12 +135,12 @@ namespace LuminousVector.RinDB
 			//GenerateThumbs();
 		}
 
-		void DoBuild(Dictionary<string, string[]> buildList, NpgsqlCommand cmd)
+		void DoBuild(Dictionary<string, string[]> buildList)
 		{
 			foreach (string item in buildList.Keys)
 			{
-				Write($"Building: {item}");
-				string[] dir = (from d in Directory.GetFiles($@"{RinDB.BASE_DIR}/{item}", "*", SearchOption.AllDirectories) orderby d descending select d).ToArray();
+				Write($"Building: {item}...", false);
+				string[] dir = Directory.GetFiles($@"{RinDB.BASE_DIR}/{item}", "*", SearchOption.AllDirectories);
 				foreach (string f in dir)
 				{
 					string file = f.Replace("\\", "/");
@@ -150,18 +150,22 @@ namespace LuminousVector.RinDB
 					name = name.Remove(0, epoch.ToString().Length + 3);
 					name = Uri.EscapeDataString(name);
 					string id = file.ToBase60();
-					cmd.CommandText = $"INSERT INTO images (id, fileuri, timeadded, name, isnsfw) VALUES('{id}', '{Uri.EscapeDataString(file)}', '{epoch}', '{name}', '{file.Contains("NSFW")}');";
+
+					DBUpdateQueue.QueueCommand($"INSERT INTO images (id, fileuri, timeadded, name, isnsfw) VALUES('{id}', '{Uri.EscapeDataString(file)}', '{epoch}', '{name}', '{file.Contains("NSFW")}');");
+					//cmd.CommandText = $"INSERT INTO images (id, fileuri, timeadded, name, isnsfw) VALUES('{id}', '{Uri.EscapeDataString(file)}', '{epoch}', '{name}', '{file.Contains("NSFW")}');";
 					if(buildList[item] != null)
 					{
 						foreach (string tag in buildList[item])
 						{
 							string tagID = tag.ToBase60();
-							cmd.CommandText += $"INSERT INTO tagmap VALUES('{tagID}{id}','{id}', '{tagID}');";
+							//cmd.CommandText += $"INSERT INTO tagmap VALUES('{tagID}{id}','{id}', '{tagID}');";
+							DBUpdateQueue.QueueCommand($"INSERT INTO tagmap VALUES('{tagID}{id}','{id}', '{tagID}');");
 						}
 					}
-					cmd.ExecuteNonQuery();
-					//ThumbGenerator.QueueThumb(new ImageModel() { id = id, fileUri = $@"{RinDB.BASE_DIR}/{file}" });
+					//cmd.ExecuteNonQuery();
+					ThumbGenerator.QueueThumb(new ImageModel() { id = id, fileUri = $@"{RinDB.BASE_DIR}/{file}" });
 				}
+				Write(" Done!");
 			}
 		}
 
@@ -216,16 +220,9 @@ namespace LuminousVector.RinDB
 				bool nsfw = (_buildNsfw == "true") ? true : false;
 				if (!Directory.Exists($"{RinDB.BASE_DIR}/{_buildDir}"))
 					return;
-				using (NpgsqlConnection con = new NpgsqlConnection($"Host={RinDB.HOST};Username={_dbUser};Password={_dbPass};Database={_dbName}"))
-				{
-					con.Open();
-					using (NpgsqlCommand cmd = con.CreateCommand())
-					{
-						Dictionary<string, string[]> buildList = new Dictionary<string, string[]>();
-						buildList.Add(_buildDir, _buildTag.Split(','));
-						DoBuild(buildList, cmd);
-					}
-				}
+				Dictionary<string, string[]> buildList = new Dictionary<string, string[]>();
+				buildList.Add(_buildDir, _buildTag.Split(','));
+				DoBuild(buildList);
 				Write($"Build Complete: {_buildDir}");
 				Write($"Finished in {(DateTime.Now - start).Seconds}s");
 				_buildDir = _buildNsfw = _buildTag = "";
@@ -244,9 +241,15 @@ namespace LuminousVector.RinDB
 
 		public override void Stop()
 		{
-			NpgsqlConnection.ClearAllPools();
-			host.Stop();
-			host.Dispose();
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			ThumbGenerator.Close();
+			DBUpdateQueue.Close();
+			host?.Stop();
+			host?.Dispose();
 		}
 	}
 }

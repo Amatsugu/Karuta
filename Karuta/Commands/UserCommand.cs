@@ -14,7 +14,7 @@ namespace LuminousVector.Karuta.Commands
 			RegisterOption('s', s =>
 			{
 				Karuta.Say("Setting username to:" + s);
-				Karuta.user = s;
+				Karuta.USER = s;
 			});
 		}
 	}

@@ -52,7 +52,7 @@ namespace LuminousVector.RinDB.Modules
 				}
 				else
 				{
-					return View["image", img];
+					return View["image", new { img = img, user = UserStateModel.DEFAULT }];
 				}
 			};
 		}

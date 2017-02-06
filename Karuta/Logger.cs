@@ -30,13 +30,13 @@ namespace LuminousVector.Karuta
 		void ShowLogs()
 		{
 			file = null;
-			if (Karuta.logger.logs.Count == 0)
+			if (Karuta.LOGGER.logs.Count == 0)
 			{
 				Karuta.Write("There are currently no logs...");
 				return;
 			}
 			Karuta.Write("---LOG START---");
-			logs = Karuta.logger.logs.ToList();
+			logs = Karuta.LOGGER.logs.ToList();
 
 			//if (!string.IsNullOrWhiteSpace(src))
 			//	logs = (from l in logs where l.source.ToLower() == src select l).ToList();
@@ -46,7 +46,7 @@ namespace LuminousVector.Karuta
 				Karuta.Write("No results found");
 			else
 			{
-				foreach (string s in from l in Karuta.logger.logs select l.ToString())
+				foreach (string s in from l in Karuta.LOGGER.logs select l.ToString())
 					Karuta.Write(s);
 			}
 			Karuta.Write("---LOG END---");
@@ -58,10 +58,10 @@ namespace LuminousVector.Karuta
 		{
 			if (file != null)
 			{
-				Karuta.logger.Dump(file);
+				Karuta.LOGGER.Dump(file);
 			}
 			else
-				Karuta.logger.Dump();
+				Karuta.LOGGER.Dump();
 			file = null;
 		}
 	}
@@ -82,8 +82,8 @@ namespace LuminousVector.Karuta
 
 		public void SetupLogDir()
 		{
-			if (!Directory.Exists(Karuta.dataDir + "/Logs/"))
-				Directory.CreateDirectory(Karuta.dataDir + "/Logs/");
+			if (!Directory.Exists(Karuta.DATA_DIR + "/Logs/"))
+				Directory.CreateDirectory(Karuta.DATA_DIR + "/Logs/");
 		}
 
 		public Logger Log(string message, string src, bool verbose = false)
@@ -154,7 +154,7 @@ namespace LuminousVector.Karuta
 			string file = $"{startTime.ToShortDateString()} {startTime.ToShortTimeString()} -- {endTime.ToShortDateString()} {endTime.ToShortTimeString()} log.txt";
 			file = Regex.Replace(file, "/", "-");
 			file = Regex.Replace(file, ":", ".");
-			return Dump(Karuta.dataDir + "/Logs/" + file);
+			return Dump(Karuta.DATA_DIR + "/Logs/" + file);
 		}
 
 		public Logger Dump(string file)

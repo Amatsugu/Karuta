@@ -1,10 +1,82 @@
 
 #windowArea #loginWindow
 {
+	position: fixed;
 	display: block;
 	height: 500px;
 	width: 500px;
 	opacity: 1;
 	background-color: #fff;
 	box-shadow: 0px 4px 8px rgba(0,0,0,.4);
+}
+
+#windowArea #closeZone
+{
+	display: block;
+	height: 100%;
+	width: 100%;
+}
+
+#loginForm
+{
+	height: inherit;
+	width: inherit;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+
+#loginForm form
+{
+	display:block;
+	width: inherit;
+	text-align: center;
+}
+
+#loginForm input
+{
+	height: 35px;
+	margin: 10px;
+	width: 300px;
+	padding: 5px;
+	font-size: 18px;
+	border: 1px solid #ddd;
+	transition: border .5s, background-color .5s, color .5s;
+}
+
+#loginForm input:hover
+{
+	border: 1px solid #ff0064;
+}
+
+#loginForm input[type="submit" i]
+{
+	width: 100px;
+	background-color: #fff;
+	border: 1px solid #eee;
+	transition: border .5s, background-color .5s, color .5s;
+}
+
+#loginForm input[type="submit" i]:hover
+{
+	color: #ff0064;
+	background-color: #fff;
+	border: 1px solid #ff0064;
+}
+
+#loginForm label
+{
+	display: block;
+	padding: 10px;
+	font-size: 30px;
+	line-height: 40px;
+	height: 40px;
+	margin-bottom: 10px;
+	font-weight: bold;
+	color: #ff0064;
+}
+
+#loginForm form a
+{
+	padding: 0px 10px 0px 10px;
 }

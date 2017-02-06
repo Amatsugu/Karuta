@@ -5,17 +5,16 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Karuta", "Karuta\Karuta.csproj", "{4547D032-5FC9-46AE-BE17-AEAEAB8B3DC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KarutaTests", "UnitTestProject1\KarutaTests.csproj", "{93F610B8-B4E6-4B91-8623-D7793F5E4AE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "UnitTestProject1\Tests.csproj", "{93F610B8-B4E6-4B91-8623-D7793F5E4AE2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RinDB", "RinDB\RinDB.csproj", "{BA6D16DA-A761-47EE-B6E3-E099FD66E358}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RinDB.Models", "RinDB.Models\RinDB.Models.shproj", "{9F82B316-CED4-439D-8FBB-1778B00F7438}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HueLighting", "HueLighting\HueLighting.csproj", "{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4547D032-5FC9-46AE-BE17-AEAEAB8B3DC7} = {4547D032-5FC9-46AE-BE17-AEAEAB8B3DC7}
+	EndProjectSection
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		RinDB.Models\RinDB.Models.projitems*{4547d032-5fc9-46ae-be17-aeaeab8b3dc7}*SharedItemsImports = 4
-		RinDB.Models\RinDB.Models.projitems*{9f82b316-ced4-439d-8fbb-1778b00f7438}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
@@ -102,6 +101,30 @@ Global
 		{BA6D16DA-A761-47EE-B6E3-E099FD66E358}.Release|x64.Build.0 = Release|x64
 		{BA6D16DA-A761-47EE-B6E3-E099FD66E358}.Release|x86.ActiveCfg = Release|Any CPU
 		{BA6D16DA-A761-47EE-B6E3-E099FD66E358}.Release|x86.Build.0 = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|x64.ActiveCfg = Debug|x64
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|x64.Build.0 = Debug|x64
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Debug|x86.Build.0 = Debug|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|ARM.Build.0 = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|iPhone.Build.0 = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|x64.ActiveCfg = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|x64.Build.0 = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|x86.ActiveCfg = Release|Any CPU
+		{F15C5353-FCD9-4CCA-B8C9-09642FBAEF53}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

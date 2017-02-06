@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LuminousVector.Karuta.Util
 {
-	class Color
+	public class Color
 	{
 		public int h;
 		public int s;

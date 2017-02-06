@@ -8,10 +8,12 @@ namespace LuminousVector.Serialization
 	{
 		private static RuntimeTypeModel _serializer;
 
+		//TODO: Fix Serialization 
 		private static void Init()
 		{
 			_serializer = TypeModel.Create();
 			_serializer.Add(typeof(Registry), true);
+			_serializer.Add(typeof(IRegistryEntry), true);
 			_serializer.AllowParseableTypes = true;
 			_serializer.AutoAddMissingTypes = true;
 		}

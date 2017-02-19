@@ -1,5 +1,5 @@
 # Karuta
-A personal assistant that will allow me to apply and test my knowledge of machine learning. Currently it serves as a platform for random ideas or projects I have.
+A platform upon which I build random automation programs.
 
 ###Other APIs Used
 As of 02-18-2017 Karuta uses the following API's (and their dependecies) to some capacity:

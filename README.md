@@ -1,4 +1,4 @@
-![Karuta](https://raw.githubusercontent.com/TheDarkVoid/Karuta/master/Karuta/res/Karuta.ico "Karuta")
+<img src="https://raw.githubusercontent.com/TheDarkVoid/Karuta/master/Karuta/res/Karuta.ico" height="128" width="128">
 # Karuta
 A platform upon which I build random automation programs.
 

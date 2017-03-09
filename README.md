@@ -1,3 +1,4 @@
+![Karuta](https://raw.githubusercontent.com/TheDarkVoid/Karuta/master/Karuta/res/Karuta.ico "Karuta")
 # Karuta
 A platform upon which I build random automation programs.
 

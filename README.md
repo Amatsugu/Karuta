@@ -1,8 +1,9 @@
 <img src="https://raw.githubusercontent.com/TheDarkVoid/Karuta/master/Karuta/res/Karuta.ico" height="128" width="128">
-# Karuta
+<h1>Karuta</h1>
 A platform upon which I build random automation programs.
 
-###Other APIs Used
+<h3>Other APIs Used</h3>
+
 As of 02-18-2017 Karuta uses the following API's (and their dependecies) to some capacity:
 - [Imgur.API](https://github.com/DamienDennehy/Imgur.API)
 - [Discord.Net](https://github.com/RogueException/Discord.Net)
